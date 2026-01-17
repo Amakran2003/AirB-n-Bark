@@ -39,7 +39,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,z
     depends_on:
       - api
       - web
