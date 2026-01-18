@@ -1,13 +1,10 @@
+import { Home } from './pages/Home.tsx';
+// import { ListingDetails } from './pages/ListingDetails.tsx';
+
 function App() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-white drop-shadow-lg">
-          AirBnBark
-        </h1>
-      </div>
-    </div>
-  )
+    // Affiche la page Home par défaut
+    // Change en <ListingDetails /> pour voir la page de détails
+    return <Home />;
 }
 
-export default App
+export default App;
