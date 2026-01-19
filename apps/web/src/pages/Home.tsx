@@ -25,7 +25,7 @@ export const Home = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Liste des favoris (swipe droite)
-    const [favorites, setFavorites] = useState<string[]>([]);
+    const [_favorites, setFavorites] = useState<string[]>([]);
 
     // Annonce sélectionnée pour afficher les détails
     const [selectedListing, setSelectedListing] = useState<string | null>(null);

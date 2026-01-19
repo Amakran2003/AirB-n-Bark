@@ -292,15 +292,17 @@ body {
 
 /* ==================== CARDS ==================== */
 .card {
-    background: var(--color-bg-primary);
+    background: var(--color-bg-secondary);
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-border-light);
     padding: var(--spacing-md);
 }
 
 .card-shadow {
-    border: none;
     box-shadow: var(--shadow-md);
+}
+
+.review-card {
+    padding: var(--spacing-md) 0;
 }
 
 /* ==================== DIVIDERS ==================== */
@@ -655,8 +657,8 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-md);
-    padding-top: 70px;
-    padding-bottom: 70px; /* Espace pour le hint + navbar */
+    padding-top:6vh;
+    padding-bottom: 8vh; /* Espace pour le hint + navbar */
     overflow: hidden;
 }
 

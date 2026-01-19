@@ -106,7 +106,6 @@ export interface ListingCardData {
     rating: number;
     hostName: string;
     hostAvatar: string;
-    maxDogs: number;
     antiCat: AntiCatOption;
 }
 
@@ -143,7 +142,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 5.0,
         hostName: 'Melissa',
         hostAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-        maxDogs: 1,
         antiCat: { available: true, riskScore: 15, extraPrice: 5 },
     },
     {
@@ -157,8 +155,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.8,
         hostName: 'Pierre',
         hostAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-        maxDogs: 1,
-             antiCat: { available: false, riskScore: 45, extraPrice: 0 },
+        antiCat: { available: false, riskScore: 45, extraPrice: 0 },
     },
     {
         id: '3',
@@ -171,7 +168,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.5,
         hostName: 'Sophie',
         hostAvatar: 'https://randomuser.me/api/portraits/women/65.jpg',
-        maxDogs: 1,
         antiCat: { available: true, riskScore: 80, extraPrice: 8 },
     },
     {
@@ -185,7 +181,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.9,
         hostName: 'Marie',
         hostAvatar: 'https://randomuser.me/api/portraits/women/28.jpg',
-        maxDogs: 3,
         antiCat: { available: true, riskScore: 5, extraPrice: 3 },
     },
     {
@@ -199,7 +194,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.7,
         hostName: 'Lucas',
         hostAvatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-        maxDogs: 2,
               antiCat: { available: false, riskScore: 20, extraPrice: 0 },
     },
     {
@@ -213,7 +207,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.9,
         hostName: 'Emma',
         hostAvatar: 'https://randomuser.me/api/portraits/women/12.jpg',
-        maxDogs: 1,
               antiCat: { available: true, riskScore: 0, extraPrice: 2 },
     },
     {
@@ -227,7 +220,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 5.0,
         hostName: 'Antoine',
         hostAvatar: 'https://randomuser.me/api/portraits/men/18.jpg',
-        maxDogs: 2,
         antiCat: { available: true, riskScore: 10, extraPrice: 5 },
     },
     {
@@ -241,7 +233,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.3,
         hostName: 'Claire',
         hostAvatar: 'https://randomuser.me/api/portraits/women/33.jpg',
-        maxDogs: 1,
         antiCat: { available: false, riskScore: 60, extraPrice: 0 },
     },
     {
@@ -255,7 +246,6 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.8,
         hostName: 'Thomas',
         hostAvatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-        maxDogs: 2,
              antiCat: { available: true, riskScore: 5, extraPrice: 4 },
     },
     {
@@ -269,8 +259,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         rating: 4.6,
         hostName: 'Julie',
         hostAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-        maxDogs: 1,
-             antiCat: { available: true, riskScore: 35, extraPrice: 6 },
+        antiCat: { available: true, riskScore: 35, extraPrice: 6 },
     },
 ];
 

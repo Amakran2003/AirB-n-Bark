@@ -18,6 +18,13 @@ import {
   Leaf,
   Moon,
   Sun,
+  PawPrint,
+  Clock,
+  Syringe,
+  Baby,
+  AlertTriangle,
+  MessageCircle,
+  Award,
 } from 'lucide-react';
 import type { ListingFullData } from '../data/listings';
 
@@ -50,6 +57,8 @@ const HighlightIcon = ({ type }: { type: string }) => {
     search: <Search className="w-8 h-8 text-black" strokeWidth={1.5} />,
     star: <Star className="w-8 h-8 text-black" strokeWidth={1.5} />,
     check: <Check className="w-8 h-8 text-black" strokeWidth={1.5} />,
+    paw: <PawPrint className="w-8 h-8 text-black" strokeWidth={1.5} />,
+    shield: <Shield className="w-8 h-8 text-black" strokeWidth={1.5} />,
   };
   return icons[type] || null;
 };
@@ -130,7 +139,11 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
       if (isSwipingRef.current && swipeX > 100) {
         setIsExiting(true);
         setSwipeX(window.innerWidth);
-        setTimeout(() => onBack?.() || window.history.back(), 250);
+        setTimeout(() => {
+          if (onBack) {
+            onBack();
+          }
+        }, 250);
       } else {
         setSwipeX(0);
       }
@@ -151,7 +164,11 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
   // Navigation images
   const nextImage = () => setCurrentImage((prev) => (prev + 1) % listing.images.length);
   const prevImage = () => setCurrentImage((prev) => (prev - 1 + listing.images.length) % listing.images.length);
-  const handleBack = () => onBack?.() || window.history.back();
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
 
   // Style commun pour le transform
   const swipeStyle = {
@@ -203,12 +220,14 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <span className="price-amount">€{listing.price}</span>
-            <p className="text-caption mt-1">For 2 nights · 20-22 Jan</p>
-            <div className="flex items-center gap-1 text-success mt-1">
-              <Check className="w-3 h-3 text-green-600" strokeWidth={2} />
-              <span className="text-caption text-success">Free cancellation</span>
-            </div>
+            <span className="price-amount">{listing.pricing.currency}{listing.pricing.amount * listing.pricing.nights}</span>
+            <p className="text-caption mt-1">Pour {listing.pricing.nights} nuits · {listing.pricing.dateRange}</p>
+            {listing.pricing.hasFreeCancellation && (
+              <div className="flex items-center gap-1 text-success mt-1">
+                <Check className="w-3 h-3 text-green-600" strokeWidth={2} />
+                <span className="text-caption text-success">Annulation gratuite</span>
+              </div>
+            )}
           </div>
           <button className="btn-primary">Réserve</button>
         </div>
@@ -255,6 +274,15 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
         <div style={{ height: `${IMAGE_HEIGHT_VH - 6}vh` }} />
 
         <div className="relative bg-primary rounded-t-4xl pt-6 px-4 pb-32 min-h-screen" style={{ pointerEvents: 'auto' }}>
+          {/* Badge type */}
+          <div className="flex justify-center mb-3">
+            <span className="badge">
+              {listing.type === 'niche' && 'Niche entière'}
+              {listing.type === 'nicholoc' && 'Nicholoc'}
+              {listing.type === 'nichortoir' && 'Nichortoir'}
+            </span>
+          </div>
+
           {/* Titre */}
           <h1 className="text-h1 mb-2 text-center">{listing.title}</h1>
           <p className="text-body-sm text-secondary mb-1 text-center">{listing.subtitle}</p>
@@ -272,13 +300,41 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
             </div>
           </div>
 
+          {/* Option Anti-Chat */}
+          {listing.antiCat.available && (
+            <div className="mt-4 p-4 bg-secondary rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Cat className="w-5 h-5 text-black" />
+                  <span className="text-h4">Option Anti-Chat</span>
+                </div>
+                <span className="badge badge-success">+{listing.antiCat.extraPrice}€</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-tertiary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full"
+                    style={{ 
+                      width: `${listing.antiCat.riskScore}%`,
+                      backgroundColor: listing.antiCat.riskScore < 30 ? 'var(--color-success)' : listing.antiCat.riskScore < 60 ? 'var(--color-warning)' : 'var(--color-error)'
+                    }}
+                  />
+                </div>
+                <span className="text-caption">{listing.antiCat.riskScore}% risque félin</span>
+              </div>
+            </div>
+          )}
+
           <div className="divider" />
 
           {/* Hôte */}
           <div className="flex items-center gap-4">
             <img src={listing.host.avatar} alt={listing.host.name} className="w-12 h-12 rounded-full object-cover" />
             <div>
-              <p className="text-h4">Hosted by {listing.host.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-h4">Hosted by {listing.host.name}</p>
+                {listing.host.isNewHost && <span className="badge">Nouveau</span>}
+              </div>
               <p className="text-body-sm text-secondary">{listing.host.isSuperHost ? 'Superhost' : 'Host'}</p>
             </div>
           </div>
@@ -308,6 +364,25 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
           </button>
 
           <div className="divider" />
+
+          {/* Points forts */}
+          {listing.highlights.length > 0 && (
+            <>
+              <h2 className="text-h2 mb-4">Points forts</h2>
+              <div className="list">
+                {listing.highlights.map((highlight, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <HighlightIcon type={highlight.icon} />
+                    <div>
+                      <h3 className="text-h4 mb-1">{highlight.title}</h3>
+                      <p className="text-body-sm text-secondary">{highlight.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="divider" />
+            </>
+          )}
 
           {/* Chambres */}
           <h2 className="text-h2 mb-4">Where you'll sleep</h2>
@@ -356,11 +431,68 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-black" strokeWidth={1.5} />
-                <p className="text-body">{listing.locationDetails.address}</p>
+                <div>
+                  <p className="text-body">{listing.locationDetails.address}</p>
+                  <p className="text-caption">{listing.locationDetails.city}, {listing.locationDetails.country}</p>
+                </div>
               </div>
               <ExternalLink className="w-4 h-4 text-secondary" />
             </div>
           </a>
+
+          <div className="divider" />
+
+          {/* Règles de la niche */}
+          <h2 className="text-h2 mb-4">Règles de la niche</h2>
+          <div className="list">
+            <div className="list-item">
+              <div className="list-item-icon">
+                <Clock className="w-5 h-5 text-black" />
+              </div>
+              <div className="list-item-content">Aboiements autorisés jusqu'à {listing.rules.maxBarkHour}</div>
+            </div>
+            <div className="list-item">
+              <div className="list-item-icon">
+                <Syringe className="w-5 h-5 text-black" />
+              </div>
+              <div className="list-item-content">
+                {listing.rules.mustBeVaccinated ? 'Vaccination obligatoire' : 'Vaccination non requise'}
+              </div>
+            </div>
+            <div className="list-item">
+              <div className="list-item-icon">
+                <Shield className="w-5 h-5 text-black" />
+              </div>
+              <div className="list-item-content">
+                {listing.rules.mustBeNeutered ? 'Stérilisation obligatoire' : 'Stérilisation non requise'}
+              </div>
+            </div>
+            <div className="list-item">
+              <div className="list-item-icon">
+                <Baby className="w-5 h-5 text-black" />
+              </div>
+              <div className="list-item-content">
+                {listing.rules.allowsPuppies 
+                  ? `Chiots acceptés (min. ${listing.rules.minAge} mois)` 
+                  : 'Chiots non acceptés'}
+              </div>
+            </div>
+          </div>
+
+          <div className="divider" />
+
+          {/* Politique d'annulation */}
+          <h2 className="text-h2 mb-4">Politique d'annulation</h2>
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="w-6 h-6 text-black flex-shrink-0" />
+            <div>
+              <p className="text-body">
+                {listing.cancellationPolicy === 'flexible' && 'Annulation gratuite jusqu\'a 24h avant l\'arrivée'}
+                {listing.cancellationPolicy === 'moderate' && 'Annulation gratuite jusqu\'a 5 jours avant l\'arrivée'}
+                {listing.cancellationPolicy === 'strict' && 'Remboursement de 50% jusqu\'a 7 jours avant l\'arrivée'}
+              </p>
+            </div>
+          </div>
 
           <div className="divider" />
 
@@ -402,14 +534,33 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
             <div className="flex flex-col items-center text-center mb-4">
               <img src={listing.host.avatar} alt={listing.host.name} className="w-20 h-20 rounded-full object-cover mb-3" />
               <h3 className="text-h3">{listing.host.name}</h3>
+              {listing.host.isSuperHost && (
+                <div className="flex items-center gap-1 mt-1">
+                  <Award className="w-4 h-4 text-black" />
+                  <span className="text-caption">Superhost</span>
+                </div>
+              )}
               <div className="flex items-center gap-2 mt-2">
                 <Star className="w-5 h-5 text-black fill-black" />
                 <span className="text-body-sm">
-                  {listing.rating} Rating · {listing.reviewsCount} woufviews
+                  {listing.host.rating} Rating · {listing.host.reviewCount} avis
                 </span>
               </div>
             </div>
-            <button className="btn-secondary w-full">Message host</button>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="text-center">
+                <p className="text-h3">{listing.host.responseRate}%</p>
+                <p className="text-caption">Taux de réponse</p>
+              </div>
+              <div className="text-center">
+                <p className="text-h3">{listing.host.yearsHosting} ans</p>
+                <p className="text-caption">D'expérience</p>
+              </div>
+            </div>
+            <button className="btn-secondary w-full flex items-center justify-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Contacter l'hôte
+            </button>
           </div>
         </div>
       </div>
