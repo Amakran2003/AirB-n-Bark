@@ -69,13 +69,23 @@ const HighlightIcon = ({ type }: { type: string }) => {
 interface ListingDetailsProps {
   listing: ListingFullData;
   onBack?: () => void;
+  onReserve?: () => void;
 }
 
-export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
+export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsProps) => {
   const [currentImage, setCurrentImage] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+
+  // Handler pour le bouton Reserve
+  const handleReserve = () => {
+    if (onReserve) {
+      onReserve();
+    } else {
+      console.log('Réservation pour:', listing.title);
+    }
+  };
 
   // Swipe retour
   const [swipeX, setSwipeX] = useState(0);
@@ -180,7 +190,7 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
     <>
       {/* Fond sombre (swipe retour) */}
       <div
-        className="fixed inset-0 bg-gray-800"
+        className="fixed inset-0"
         style={{ opacity: swipeX > 0 ? Math.min(swipeX / 200, 0.8) : 0, zIndex: -1 }}
       />
 
@@ -229,7 +239,7 @@ export const ListingDetails = ({ listing, onBack }: ListingDetailsProps) => {
               </div>
             )}
           </div>
-          <button className="btn-primary">Réserve</button>
+          <button className="btn-primary" onClick={handleReserve}>Réserve</button>
         </div>
       </div>
 

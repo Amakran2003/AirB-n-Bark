@@ -1,9 +1,9 @@
-import { Home, MessageCircle, Heart, User } from 'lucide-react';
+import { Home, MessageCircle, User } from 'lucide-react';
 
 /**
  * ==================== BOTTOM NAVBAR ====================
  * Barre de navigation fixée en bas de l'écran
- * 4 onglets : Home, Messages, Favoris, Profil
+ * 3 onglets : Home, Messages, Profil
  */
 
 interface NavItemProps {
@@ -22,8 +22,8 @@ const NavItem = ({ icon, isActive = false, onClick }: NavItemProps) => (
 );
 
 interface BottomNavbarProps {
-    activeTab?: 'home' | 'messages' | 'favorites' | 'profile';
-    onTabChange?: (tab: 'home' | 'messages' | 'favorites' | 'profile') => void;
+    activeTab?: 'home' | 'messages' | 'profile';
+    onTabChange?: (tab: 'home' | 'messages' | 'profile') => void;
 }
 
 export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarProps) => {
@@ -39,11 +39,7 @@ export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarPr
                 isActive={activeTab === 'messages'}
                 onClick={() => onTabChange?.('messages')}
             />
-            <NavItem
-                icon={<Heart className="w-6 h-6" strokeWidth={activeTab === 'favorites' ? 2.5 : 1.5} />}
-                isActive={activeTab === 'favorites'}
-                onClick={() => onTabChange?.('favorites')}
-            />
+
             <NavItem
                 icon={<User className="w-6 h-6" strokeWidth={activeTab === 'profile' ? 2.5 : 1.5} />}
                 isActive={activeTab === 'profile'}
