@@ -4,6 +4,7 @@ import { BottomNavbar } from '../components/BottomNavbar';
 import { SwipeCard } from '../components/SwipeCard';
 import { BookingRecap } from '../components/BookingRecap';
 import { ListingDetails } from './ListingDetails';
+import { Profile } from './Profile';
 import { MOCK_LISTINGS, getListingById, ListingCardData } from '../data/listings';
 
 /**
@@ -154,65 +155,73 @@ export const Home = () => {
         );
     }
 
+    const isProfileView = activeTab === 'profile';
+
     return (
         <div className="h-screen flex flex-col bg-primary">
-            {/* ==================== HEADER ==================== */}
-            {/* Cacher le header pendant la transition */}
-            {!isDetailTransitioning && (
-                <header className="header-home">
-                    {/* Bouton Filtre - utilise btn-secondary existant */}
-                    <button className="btn-secondary">Filtre</button>
+            {isProfileView ? (
+                <Profile onClose={() => setActiveTab('home')} />
+            ) : (
+                <>
+                    {/* ==================== HEADER ==================== */}
+                    {/* Cacher le header pendant la transition */}
+                    {!isDetailTransitioning && (
+                        <header className="header-home">
+                            {/* Bouton Filtre - utilise btn-secondary existant */}
+                            <button className="btn-secondary">Filtre</button>
 
-                    {/* Icône Bot - sans bordure, taille augmentée */}
-                    <button className="btn-icon">
-                        <Bot className="w-8 h-8 text-black" strokeWidth={1.5} />
-                    </button>
-                </header>
-            )}
+                            {/* Icône Bot - sans bordure, taille augmentée */}
+                            <button className="btn-icon">
+                                <Bot className="w-8 h-8 text-black" strokeWidth={1.5} />
+                            </button>
+                        </header>
+                    )}
 
-            {/* ==================== ZONE DE SWIPE ==================== */}
-            <div className={`swipe-container ${isDetailTransitioning ? 'swipe-transitioning' : ''}`}>
-                {remainingCards.length > 0 ? (
-                    // Afficher les 2 premières cartes (pour l'effet de pile)
-                    remainingCards
-                        .slice(0, 2)
-                        .reverse()
-                        .map((listing, index) => (
-                            <SwipeCard
-                                key={listing.id}
-                                listing={listing}
-                                isTop={index === remainingCards.slice(0, 2).length - 1}
-                                onSwipeLeft={handleSwipeLeft}
-                                onSwipeRight={handleSwipeRight}
-                                onSwipeUp={() => handleSwipeUp(listing)}
-                                onUndo={handleUndo}
-                                canUndo={currentIndex > 0}
-                            />
-                        ))
-                ) : (
-                    // Plus de cartes disponibles
-                    <div className="swipe-empty">
-                        <div className="swipe-empty-icon">🐕</div>
-                        <h3 className="text-h2">Plus d'annonces !</h3>
-                        <p className="text-body text-secondary mt-2">
-                            Tu as parcouru toutes les annonces disponibles.
-                        </p>
-                        <button
-                            className="btn-primary mt-6"
-                            onClick={() => setCurrentIndex(0)}
-                        >
-                            Recommencer
-                        </button>
+                    {/* ==================== ZONE DE SWIPE ==================== */}
+                    <div className={`swipe-container ${isDetailTransitioning ? 'swipe-transitioning' : ''}`}>
+                        {remainingCards.length > 0 ? (
+                            // Afficher les 2 premières cartes (pour l'effet de pile)
+                            remainingCards
+                                .slice(0, 2)
+                                .reverse()
+                                .map((listing, index) => (
+                                    <SwipeCard
+                                        key={listing.id}
+                                        listing={listing}
+                                        isTop={index === remainingCards.slice(0, 2).length - 1}
+                                        onSwipeLeft={handleSwipeLeft}
+                                        onSwipeRight={handleSwipeRight}
+                                        onSwipeUp={() => handleSwipeUp(listing)}
+                                        onUndo={handleUndo}
+                                        canUndo={currentIndex > 0}
+                                    />
+                                ))
+                        ) : (
+                            // Plus de cartes disponibles
+                            <div className="swipe-empty">
+                                <div className="swipe-empty-icon">🐕</div>
+                                <h3 className="text-h2">Plus d'annonces !</h3>
+                                <p className="text-body text-secondary mt-2">
+                                    Tu as parcouru toutes les annonces disponibles.
+                                </p>
+                                <button
+                                    className="btn-primary mt-6"
+                                    onClick={() => setCurrentIndex(0)}
+                                >
+                                    Recommencer
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
 
-            {/* ==================== GLISSER POUR VOIR ==================== */}
-            {remainingCards.length > 0 && !isDetailTransitioning && (
-                <div className="swipe-up-hint">
-                    <ChevronUp className="w-5 h-5" />
-                    <span>Glisser pour voir</span>
-                </div>
+                    {/* ==================== GLISSER POUR VOIR ==================== */}
+                    {remainingCards.length > 0 && !isDetailTransitioning && (
+                        <div className="swipe-up-hint">
+                            <ChevronUp className="w-5 h-5" />
+                            <span>Glisser pour voir</span>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* ==================== BOTTOM NAVBAR ==================== */}
