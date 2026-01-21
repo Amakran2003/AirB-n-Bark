@@ -41,11 +41,11 @@ export const SwipeCard = ({
     // Est-ce qu'on est en train de drag
     const [isDragging, setIsDragging] = useState(false);
     // Indicateur de direction (like/nope/up)
-    const [swipeDirection, setSwipeDirection] = useState<
-        'left' | 'right' | 'up' | null
-    >(null);
+    const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | null>(null);
     // Est-ce qu'on est en train de swipe vers le haut (pour cacher les boutons)
     const [isSwipingUp, setIsSwipingUp] = useState(false);
+    // Masquer le texte pendant l'animation de zoom
+    const [hideContent, setHideContent] = useState(false);
 
     // Références pour le calcul du drag
     const startPos = useRef({ x: 0, y: 0 });
@@ -75,7 +75,7 @@ export const SwipeCard = ({
 
         // Mise à jour position et rotation
         setPosition({ x: deltaX, y: deltaY });
-        
+
         // Si on swipe vers le haut, pas de rotation mais un scale
         if (deltaY < -30) {
             setRotation(0);
@@ -86,7 +86,7 @@ export const SwipeCard = ({
         } else {
             setScale(1);
             setRotation(deltaX * 0.1); // Rotation proportionnelle au déplacement
-            
+
             // Mise à jour de l'indicateur de direction
             if (deltaX > 50) {
                 setSwipeDirection('right');
@@ -150,21 +150,22 @@ export const SwipeCard = ({
      */
     const animateSwipeUp = () => {
         setIsSwipingUp(true);
+        setHideContent(true); // Masquer le texte
         // D'abord centrer la carte
         setPosition({ x: 0, y: 0 });
         setRotation(0);
         setScale(1.05);
-        
+
         // Puis zoom fullscreen
         setTimeout(() => {
             setScale(1.5);
             setPosition({ x: 0, y: 0 });
-        }, 150);
-        
+        }, 37);
+
         // Callback après l'animation
         setTimeout(() => {
             onSwipeUp();
-        }, 300);
+        }, 75);
     };
 
     /**
@@ -224,7 +225,7 @@ export const SwipeCard = ({
             style={{
                 transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${scale})`,
                 transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-                zIndex: isSwipingUp || swipeDirection === 'up' ? 200 : (isTop ? 10 : 1),
+                zIndex: isSwipingUp || swipeDirection === 'up' ? 200 : isTop ? 10 : 1,
                 cursor: isTop ? 'grab' : 'default',
             }}
             onClick={handleCardClick}
@@ -237,12 +238,22 @@ export const SwipeCard = ({
             onTouchEnd={handleTouchEnd}
         >
             {/* ==================== IMAGE DE FOND ==================== */}
-            <div
-                className="swipe-card-image"
-                style={{ backgroundImage: `url(${listing.image})` }}
-            >
+            <div className="swipe-card-image">
+                <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading={isTop ? 'eager' : 'lazy'}
+                    decoding="async"
+                />
                 {/* Overlay gradient pour le texte */}
-                <div className="swipe-card-overlay" />
+                <div 
+                    className="swipe-card-overlay" 
+                    style={{
+                        opacity: hideContent ? 0 : 1,
+                        transition: 'opacity 0.15s ease-out',
+                    }}
+                />
 
                 {/* ==================== INDICATEURS DE SWIPE ==================== */}
                 {/* Badge LIKE (swipe droite) */}
@@ -279,13 +290,16 @@ export const SwipeCard = ({
                 </div>
 
                 {/* ==================== INFOS DE L'ANNONCE ==================== */}
-                <div className="swipe-card-content">
+                <div 
+                    className="swipe-card-content"
+                    style={{
+                        opacity: hideContent ? 0 : 1,
+                        transition: 'opacity 0.15s ease-out',
+                    }}
+                >
                     {/* Note et étoile */}
                     <div className="swipe-card-rating">
-                        <Star
-                            className="w-4 h-4 text-black"
-                            fill="currentColor"
-                        />
+                        <Star className="w-4 h-4 text-black" fill="currentColor" />
                         <span>{listing.rating.toFixed(1)}</span>
                     </div>
 
@@ -301,9 +315,7 @@ export const SwipeCard = ({
                     {/* Prix et Host */}
                     <div className="swipe-card-footer">
                         <div className="swipe-card-price">
-                            <span className="font-semibold">
-                                {listing.price}€
-                            </span>
+                            <span className="font-semibold">{listing.price}€</span>
                             <span className="text-white/70"> / nuit</span>
                         </div>
 
@@ -313,6 +325,8 @@ export const SwipeCard = ({
                                 src={listing.hostAvatar}
                                 alt={listing.hostName}
                                 className="w-10 h-10 rounded-full border-2 border-white"
+                                loading="lazy"
+                                decoding="async"
                             />
                         </div>
                     </div>

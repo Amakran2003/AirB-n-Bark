@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7f7f7"/>
+      <stop offset="100%" style="stop-color:#e5e5e5"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+  
+  <!-- Dog house icon -->
+  <g transform="translate(300, 180)">
+    <!-- House body -->
+    <rect x="20" y="80" width="160" height="120" rx="8" fill="#dddddd"/>
+    <!-- Roof -->
+    <path d="M0 90 L100 20 L200 90 Z" fill="#b0b0b0"/>
+    <!-- Door hole -->
+    <ellipse cx="100" cy="160" rx="40" ry="50" fill="#717171"/>
+    <!-- Dog silhouette in door -->
+    <g transform="translate(70, 120)">
+      <!-- Dog head -->
+      <circle cx="30" cy="25" r="18" fill="#222222"/>
+      <!-- Ears -->
+      <ellipse cx="15" cy="12" rx="8" ry="12" fill="#222222"/>
+      <ellipse cx="45" cy="12" rx="8" ry="12" fill="#222222"/>
+      <!-- Snout -->
+      <ellipse cx="30" cy="32" rx="10" ry="8" fill="#333333"/>
+      <!-- Eyes -->
+      <circle cx="24" cy="22" r="3" fill="white"/>
+      <circle cx="36" cy="22" r="3" fill="white"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <text x="400" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" fill="#717171">
+    AirB'n'Bark
+  </text>
+  <text x="400" y="410" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#b0b0b0">
+    Image placeholder
+  </text>
+</svg>

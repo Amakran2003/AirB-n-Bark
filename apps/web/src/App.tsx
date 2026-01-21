@@ -1,6 +1,8 @@
 import { Home } from './pages/Home.tsx';
 import { AuthProvider } from './contexts/AuthContext';
+import { FilterProvider } from './contexts/FilterContext';
 import { AuthModal } from './components/AuthModal.tsx';
+import { FilterModal } from './components/FilterModal.tsx';
 // import { ListingDetails } from './pages/ListingDetails.tsx';
 
 function App() {
@@ -8,8 +10,11 @@ function App() {
     // Change en <ListingDetails /> pour voir la page de détails
     return (
         <AuthProvider>
-            <Home />
-            <AuthModal />
+            <FilterProvider>
+                <Home />
+                <AuthModal />
+                <FilterModal />
+            </FilterProvider>
         </AuthProvider>
     );
 }

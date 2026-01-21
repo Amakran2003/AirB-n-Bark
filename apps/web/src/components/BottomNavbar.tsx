@@ -35,13 +35,20 @@ export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarPr
                 onClick={() => onTabChange?.('home')}
             />
             <NavItem
-                icon={<MessageCircle className="w-6 h-6" strokeWidth={activeTab === 'messages' ? 2.5 : 1.5} />}
+                icon={
+                    <MessageCircle
+                        className="w-6 h-6"
+                        strokeWidth={activeTab === 'messages' ? 2.5 : 1.5}
+                    />
+                }
                 isActive={activeTab === 'messages'}
                 onClick={() => onTabChange?.('messages')}
             />
 
             <NavItem
-                icon={<User className="w-6 h-6" strokeWidth={activeTab === 'profile' ? 2.5 : 1.5} />}
+                icon={
+                    <User className="w-6 h-6" strokeWidth={activeTab === 'profile' ? 2.5 : 1.5} />
+                }
                 isActive={activeTab === 'profile'}
                 onClick={() => onTabChange?.('profile')}
             />

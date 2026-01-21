@@ -48,31 +48,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
         // TODO: Connecter à l'API
         // Pour l'instant on simule un login réussi
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         setUser({
             id: '1',
             email,
             pseudo: email.split('@')[0],
         });
-        
+
         return true;
     }, []);
 
     // Simulation register - sera connecté à l'API plus tard
-    const register = useCallback(async (pseudo: string, email: string, _password: string): Promise<boolean> => {
-        // TODO: Connecter à l'API
-        // Pour l'instant on simule une inscription réussie
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setUser({
-            id: '1',
-            email,
-            pseudo,
-        });
-        
-        return true;
-    }, []);
+    const register = useCallback(
+        async (pseudo: string, email: string, _password: string): Promise<boolean> => {
+            // TODO: Connecter à l'API
+            // Pour l'instant on simule une inscription réussie
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            setUser({
+                id: '1',
+                email,
+                pseudo,
+            });
+
+            return true;
+        },
+        []
+    );
 
     const logout = useCallback(() => {
         setUser(null);
