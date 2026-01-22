@@ -1,13 +1,17 @@
 /**
  * ==================== DONNÉES DES ANNONCES ====================
- * Fichier centralisé pour toutes les données des listings AirB'n'Bark
+ * Fichier centralisé pour toutes les données des listings AirbnBark
  * Concept: "Airbnb pour chiens" + Tinder swipe
- * 
+ *
  * Types de logement:
  * - "Niche entière" = logement complet pour chien
  * - "Nicholoc" = chambre dans une coloc canine
  * - "Nichortoir" = lit dans un dortoir de chiens
  */
+
+// Image placeholder locale pour un chargement rapide
+const PLACEHOLDER_IMG = '/placeholder-dog.svg';
+const PLACEHOLDER_AVATAR = '/placeholder-dog.svg';
 
 /**
  * ==================== INTERFACES ====================
@@ -15,7 +19,6 @@
 
 // Types de logement disponibles
 export type ListingType = 'niche' | 'nicholoc' | 'nichortoir';
-
 
 // Informations de l'hôte
 export interface ListingHost {
@@ -48,7 +51,17 @@ export interface ListingRoom {
 // Équipement avec icône
 export interface ListingAmenity {
     name: string;
-    icon: 'flame' | 'droplets' | 'scroll' | 'home' | 'cat' | 'bone' | 'shield' | 'leaf' | 'moon' | 'sun';
+    icon:
+        | 'flame'
+        | 'droplets'
+        | 'scroll'
+        | 'home'
+        | 'cat'
+        | 'bone'
+        | 'shield'
+        | 'leaf'
+        | 'moon'
+        | 'sun';
 }
 
 // Point fort de l'annonce
@@ -85,6 +98,12 @@ export interface AntiCatOption {
     extraPrice: number; // Prix supplémentaire pour l'option
 }
 
+// Plage de dates disponibles pour réservation
+export interface DateRange {
+    start: string; // Format ISO: "2026-01-20"
+    end: string; // Format ISO: "2026-03-15"
+}
+
 // Règles de la niche
 export interface ListingRules {
     maxBarkHour: string; // "22h00"
@@ -107,6 +126,8 @@ export interface ListingCardData {
     hostName: string;
     hostAvatar: string;
     antiCat: AntiCatOption;
+    maxDogs: number; // Nombre max de chiens acceptés
+    availableDateRanges: DateRange[]; // Plages de dates où l'annonce est disponible
 }
 
 // Données complètes pour la page détail
@@ -137,12 +158,17 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Luxury Niche 10min du Parc · Plaid chauffant',
         subtitle: 'Niche entière à Paris, France',
         location: 'Paris, France',
-        image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 45,
         rating: 5.0,
         hostName: 'Melissa',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 15, extraPrice: 5 },
+        maxDogs: 2,
+        availableDateRanges: [
+            { start: '2026-01-20', end: '2026-02-28' },
+            { start: '2026-03-15', end: '2026-06-30' },
+        ],
     },
     {
         id: '2',
@@ -150,12 +176,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Nicholoc cosy · Coloc 3 toutous max',
         subtitle: 'Chambre en coloc canine à Lyon, France',
         location: 'Lyon, France',
-        image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 28,
         rating: 4.8,
         hostName: 'Pierre',
-        hostAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: false, riskScore: 45, extraPrice: 0 },
+        maxDogs: 1,
+        availableDateRanges: [
+            { start: '2026-01-25', end: '2026-04-15' },
+        ],
     },
     {
         id: '3',
@@ -163,12 +193,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Nichortoir Budget · Dortoir 6 chiens',
         subtitle: 'Lit en dortoir canin à Marseille, France',
         location: 'Marseille, France',
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 15,
         rating: 4.5,
         hostName: 'Sophie',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 80, extraPrice: 8 },
+        maxDogs: 1,
+        availableDateRanges: [
+            { start: '2026-01-20', end: '2026-12-31' },
+        ],
     },
     {
         id: '4',
@@ -176,12 +210,17 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Dog Villa · Jardin clôturé 200m²',
         subtitle: 'Niche entière à Bordeaux, France',
         location: 'Bordeaux, France',
-        image: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 65,
         rating: 4.9,
         hostName: 'Marie',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/28.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 5, extraPrice: 3 },
+        maxDogs: 4,
+        availableDateRanges: [
+            { start: '2026-02-01', end: '2026-05-31' },
+            { start: '2026-07-01', end: '2026-08-31' },
+        ],
     },
     {
         id: '5',
@@ -189,12 +228,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Beach Niche · Plage dog-friendly à 50m',
         subtitle: 'Niche entière à Biarritz, France',
         location: 'Biarritz, France',
-        image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 55,
         rating: 4.7,
         hostName: 'Lucas',
-        hostAvatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-              antiCat: { available: false, riskScore: 20, extraPrice: 0 },
+        hostAvatar: PLACEHOLDER_AVATAR,
+        antiCat: { available: false, riskScore: 20, extraPrice: 0 },
+        maxDogs: 2,
+        availableDateRanges: [
+            { start: '2026-05-01', end: '2026-09-30' },
+        ],
     },
     {
         id: '6',
@@ -202,12 +245,17 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Nicholoc Montagne · Rando incluse',
         subtitle: 'Chambre en coloc canine à Chamonix, France',
         location: 'Chamonix, France',
-        image: 'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 35,
         rating: 4.9,
         hostName: 'Emma',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/12.jpg',
-              antiCat: { available: true, riskScore: 0, extraPrice: 2 },
+        hostAvatar: PLACEHOLDER_AVATAR,
+        antiCat: { available: true, riskScore: 0, extraPrice: 2 },
+        maxDogs: 1,
+        availableDateRanges: [
+            { start: '2026-01-20', end: '2026-03-31' },
+            { start: '2026-06-15', end: '2026-09-15' },
+        ],
     },
     {
         id: '7',
@@ -215,12 +263,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Penthouse Niche · Rooftop privé',
         subtitle: 'Niche entière à Nice, France',
         location: 'Nice, France',
-        image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 85,
         rating: 5.0,
         hostName: 'Antoine',
-        hostAvatar: 'https://randomuser.me/api/portraits/men/18.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 10, extraPrice: 5 },
+        maxDogs: 3,
+        availableDateRanges: [
+            { start: '2026-02-15', end: '2026-07-15' },
+        ],
     },
     {
         id: '8',
@@ -228,12 +280,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Nichortoir Social · Coin jeux collectif',
         subtitle: 'Lit en dortoir canin à Toulouse, France',
         location: 'Toulouse, France',
-        image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 12,
         rating: 4.3,
         hostName: 'Claire',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: false, riskScore: 60, extraPrice: 0 },
+        maxDogs: 1,
+        availableDateRanges: [
+            { start: '2026-01-20', end: '2026-12-31' },
+        ],
     },
     {
         id: '9',
@@ -241,12 +297,16 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Eco-Niche · 100% nature & bio',
         subtitle: 'Niche entière à Annecy, France',
         location: 'Annecy, France',
-        image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 50,
         rating: 4.8,
         hostName: 'Thomas',
-        hostAvatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-             antiCat: { available: true, riskScore: 5, extraPrice: 4 },
+        hostAvatar: PLACEHOLDER_AVATAR,
+        antiCat: { available: true, riskScore: 5, extraPrice: 4 },
+        maxDogs: 2,
+        availableDateRanges: [
+            { start: '2026-03-01', end: '2026-11-30' },
+        ],
     },
     {
         id: '10',
@@ -254,12 +314,17 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         title: 'Nicholoc Urbaine · Parc à 2 min',
         subtitle: 'Chambre en coloc canine à Nantes, France',
         location: 'Nantes, France',
-        image: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&h=1200&fit=crop',
+        image: PLACEHOLDER_IMG,
         price: 30,
         rating: 4.6,
         hostName: 'Julie',
-        hostAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
+        hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 35, extraPrice: 6 },
+        maxDogs: 2,
+        availableDateRanges: [
+            { start: '2026-01-25', end: '2026-06-30' },
+            { start: '2026-09-01', end: '2026-12-20' },
+        ],
     },
 ];
 
@@ -271,17 +336,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '1': {
         ...MOCK_LISTINGS[0],
         capacity: '1 chien · 1 niche · 1 couchage · 1 coin gamelle',
-        images: [
-            'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Cette niche AirB'n'Bark cosy est située dans un quartier calme, à 10 minutes du parc le plus proche pour des promenades sans stress. L'espace est à l'intérieur d'une résidence sécurisée avec une cour tranquille (parfaite pour une session sniff rapide). Ton toutou profitera d'un coin couverture chauffante, d'une station d'eau fraîche, et d'une zone chill \"sans écureuils\". Option Protection Anti-Chat disponible pour les chiens qui préfèrent une vibe 100% sans félin.",
+            "Cette niche AirbnBark cosy est située dans un quartier calme, à 10 minutes du parc le plus proche pour des promenades sans stress. L'espace est à l'intérieur d'une résidence sécurisée avec une cour tranquille (parfaite pour une session sniff rapide). Ton toutou profitera d'un coin couverture chauffante, d'une station d'eau fraîche, et d'une zone chill \"sans écureuils\". Option Protection Anti-Chat disponible pour les chiens qui préfèrent une vibe 100% sans félin.",
         host: {
             name: 'Melissa',
-            avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: true,
             isSuperHost: false,
             rating: 5.0,
@@ -300,12 +360,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Niche Room (Chambre)',
                 description: '1 panier premium, 1 coin couverture chauffante',
-                image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
             {
                 name: 'Chill Zone (Salon)',
                 description: '1 tapis moelleux, 1 panier à jouets (écureuil inclus)',
-                image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -323,7 +383,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             },
             {
                 title: 'Melissa est une nouvelle hôte',
-                description: 'Nouvelle sur AirB\'n\'Bark mais déjà 4 woufviews 5 étoiles !',
+                description: "Nouvelle sur AirbnBark mais déjà 4 woufviews 5 étoiles !",
                 icon: 'star',
             },
         ],
@@ -331,20 +391,22 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Milo (Golden Retriever)',
-                authorAvatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 2 jours',
-                content: 'Woof woof wooof ! Le plaid chauffant était incroyable. J\'ai reniflé chaque coin, approuvé à 100%. Le sniff QR au check-in était rapide. Je recommande !',
-                platformDate: 'Il y a 4 mois sur AirB\'n\'Bark',
+                content:
+                    "Woof woof wooof ! Le plaid chauffant était incroyable. J'ai reniflé chaque coin, approuvé à 100%. Le sniff QR au check-in était rapide. Je recommande !",
+                platformDate: "Il y a 4 mois sur AirbnBark",
             },
             {
                 id: 'rev2',
                 authorName: 'Luna (Border Collie)',
-                authorAvatar: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 1 semaine',
-                content: 'Enfin une niche où on respecte mon espace ! Pas de chat en vue grâce à l\'option Anti-Chat. Le parc est vraiment à 10 min, j\'ai chronométré (en trottinant).',
-                platformDate: 'Il y a 3 mois sur AirB\'n\'Bark',
+                content:
+                    "Enfin une niche où on respecte mon espace ! Pas de chat en vue grâce à l'option Anti-Chat. Le parc est vraiment à 10 min, j'ai chronométré (en trottinant).",
+                platformDate: "Il y a 3 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -367,16 +429,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '2': {
         ...MOCK_LISTINGS[1],
         capacity: '1 chien · 1 chambre en coloc · 1 couchage · gamelle partagée',
-        images: [
-            'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1544568100-847a948585b9?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
             "Nicholoc parfaite pour les toutous sociables ! Tu partageras l'espace avec 2 autres chiens max (tous vérifiés et vaccinés). Ambiance détendue, coin sieste individuel, et aire de jeux commune. Idéal pour les chiens qui aiment se faire des potes. Le dog-sitter Pierre est aux petits soins !",
         host: {
             name: 'Pierre',
-            avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: true,
             rating: 4.8,
@@ -395,7 +453,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Chambre privée',
                 description: '1 panier individuel, couverture personnelle',
-                image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -408,7 +466,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
         highlights: [
             {
                 title: 'Pierre est un Superhost',
-                description: '89 woufviews, 3 ans d\'expérience. Les toutous l\'adorent !',
+                description: "89 woufviews, 3 ans d'expérience. Les toutous l'adorent !",
                 icon: 'star',
             },
             {
@@ -421,11 +479,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Rex (Berger Allemand)',
-                authorAvatar: 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 3 jours',
-                content: 'J\'ai rencontré mon nouveau best friend ici ! Un Labrador super sympa. Pierre nous a emmenés au parc ensemble. Top coloc !',
-                platformDate: 'Il y a 2 mois sur AirB\'n\'Bark',
+                content:
+                    "J'ai rencontré mon nouveau best friend ici ! Un Labrador super sympa. Pierre nous a emmenés au parc ensemble. Top coloc !",
+                platformDate: "Il y a 2 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -448,15 +507,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '3': {
         ...MOCK_LISTINGS[2],
         capacity: '1 chien · 1 lit en dortoir · gamelle collective',
-        images: [
-            'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Nichortoir économique pour toutous aventuriers ! Dortoir de 6 chiens max, ambiance auberge de jeunesse canine. Parfait pour un séjour court ou les budgets serrés. Attention : zone à risque chat élevé (option Anti-Chat fortement recommandée). Gamelle collective, mais portions généreuses !",
+            'Nichortoir économique pour toutous aventuriers ! Dortoir de 6 chiens max, ambiance auberge de jeunesse canine. Parfait pour un séjour court ou les budgets serrés. Attention : zone à risque chat élevé (option Anti-Chat fortement recommandée). Gamelle collective, mais portions généreuses !',
         host: {
             name: 'Sophie',
-            avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: false,
             rating: 4.5,
@@ -475,7 +531,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Dortoir principal',
                 description: '6 paniers alignés, ambiance sociale',
-                image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -495,11 +551,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Buddy (Beagle)',
-                authorAvatar: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 4,
                 date: 'Il y a 1 semaine',
-                content: 'Correct pour le prix ! J\'ai fait des potes, mais j\'ai aperçu un chat par la fenêtre... Prenez l\'option Anti-Chat, sérieux.',
-                platformDate: 'Il y a 1 mois sur AirB\'n\'Bark',
+                content:
+                    "Correct pour le prix ! J'ai fait des potes, mais j'ai aperçu un chat par la fenêtre... Prenez l'option Anti-Chat, sérieux.",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -522,16 +579,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '4': {
         ...MOCK_LISTINGS[3],
         capacity: '3 chiens · 2 niches · 3 couchages · 2 coins gamelle',
-        images: [
-            'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
             "Dog Villa de luxe avec jardin clôturé de 200m² ! Parfait pour les grands gabarits ou les meutes jusqu'à 3 toutous. Courir, creuser, rouler dans l'herbe : tout est permis ! Zone quasi sans chat (score risque 5/100). Marie, la dog-sitter, prépare des repas maison avec des ingrédients bio.",
         host: {
             name: 'Marie',
-            avatar: 'https://randomuser.me/api/portraits/women/28.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: true,
             rating: 4.9,
@@ -550,12 +603,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Niche principale',
                 description: '2 paniers XL, coin couverture',
-                image: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
             {
                 name: 'Niche secondaire',
                 description: '1 panier L, vue jardin',
-                image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -568,7 +621,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
         highlights: [
             {
                 title: 'Marie est une Superhost',
-                description: '127 woufviews, 5 ans d\'expérience. Cuisine maison pour toutous !',
+                description: "127 woufviews, 5 ans d'expérience. Cuisine maison pour toutous !",
                 icon: 'star',
             },
             {
@@ -581,20 +634,22 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Max (Labrador)',
-                authorAvatar: 'https://images.unsplash.com/photo-1591769225440-811ad7d6eab3?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 5 jours',
-                content: 'LE JARDIN !!! J\'ai couru pendant 3h non-stop. Et la bouffe maison de Marie, un régal. Je reviens avec toute ma meute.',
-                platformDate: 'Il y a 2 semaines sur AirB\'n\'Bark',
+                content:
+                    "LE JARDIN !!! J'ai couru pendant 3h non-stop. Et la bouffe maison de Marie, un régal. Je reviens avec toute ma meute.",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
             {
                 id: 'rev2',
                 authorName: 'Bella (Husky)',
-                authorAvatar: 'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 2 semaines',
-                content: 'J\'ai même pu creuser des trous sans me faire gronder ! Marie est la meilleure. Et zéro chat à l\'horizon, nickel.',
-                platformDate: 'Il y a 1 mois sur AirB\'n\'Bark',
+                content:
+                    "J'ai même pu creuser des trous sans me faire gronder ! Marie est la meilleure. Et zéro chat à l'horizon, nickel.",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -617,15 +672,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '5': {
         ...MOCK_LISTINGS[4],
         capacity: '2 chiens · 1 niche · 2 couchages · 1 coin gamelle',
-        images: [
-            'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Beach Niche à 50m de la plage dog-friendly de Biarritz ! Ton toutou pourra courir sur le sable, se baigner, et chasser les vagues. Douche extérieure pour rincer les pattes sableuses. Attention : les chats du quartier sont rares mais pas inexistants.",
+            'Beach Niche à 50m de la plage dog-friendly de Biarritz ! Ton toutou pourra courir sur le sable, se baigner, et chasser les vagues. Douche extérieure pour rincer les pattes sableuses. Attention : les chats du quartier sont rares mais pas inexistants.',
         host: {
             name: 'Lucas',
-            avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: false,
             rating: 4.7,
@@ -644,7 +696,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Niche plage',
                 description: '2 paniers avec vue océan',
-                image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -664,11 +716,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Oscar (Boxer)',
-                authorAvatar: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 1 semaine',
-                content: 'J\'AI CHASSÉ DES VAGUES !!! Meilleure expérience de ma vie de chien. La douche après c\'est pas ouf mais bon...',
-                platformDate: 'Il y a 3 semaines sur AirB\'n\'Bark',
+                content:
+                    "J'AI CHASSÉ DES VAGUES !!! Meilleure expérience de ma vie de chien. La douche après c'est pas ouf mais bon...",
+                platformDate: "Il y a 3 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -691,15 +744,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '6': {
         ...MOCK_LISTINGS[5],
         capacity: '1 chien · 1 chambre en coloc · 1 couchage · gamelle partagée',
-        images: [
-            'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
             "Nicholoc en montagne avec rando incluse ! Emma t'emmène chaque matin pour une balade de 2h dans les sentiers de Chamonix. Parfait pour les chiens sportifs. Zone 100% sans chat (score 0/100). L'air pur des Alpes, rien de mieux pour les poumons canins !",
         host: {
             name: 'Emma',
-            avatar: 'https://randomuser.me/api/portraits/women/12.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: true,
             rating: 4.9,
@@ -718,7 +768,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Chambre alpine',
                 description: '1 panier douillet, vue Mont-Blanc',
-                image: 'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -743,11 +793,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Storm (Husky)',
-                authorAvatar: 'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 4 jours',
-                content: 'LA NEIGE !!! J\'ai couru, sauté, roulé... Et Emma marche super vite, j\'adore. Pas un seul chat, le paradis.',
-                platformDate: 'Il y a 2 semaines sur AirB\'n\'Bark',
+                content:
+                    "LA NEIGE !!! J'ai couru, sauté, roulé... Et Emma marche super vite, j'adore. Pas un seul chat, le paradis.",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -770,15 +821,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '7': {
         ...MOCK_LISTINGS[6],
         capacity: '2 chiens · 1 niche luxe · 2 couchages · 2 coins gamelle',
-        images: [
-            'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
             "Penthouse Niche avec rooftop privé ! Vue panoramique sur la Côte d'Azur. Espace luxueux pour petits et moyens chiens. Room service gamelle disponible 24h/24. Option Anti-Chat premium avec patrouille anti-félin toutes les heures.",
         host: {
             name: 'Antoine',
-            avatar: 'https://randomuser.me/api/portraits/men/18.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: true,
             rating: 5.0,
@@ -797,12 +845,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Suite Penthouse',
                 description: '2 paniers premium, climatisation, vue mer',
-                image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
             {
                 name: 'Rooftop privé',
                 description: 'Terrasse 50m², transats pour chiens',
-                image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -828,11 +876,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Coco (Caniche)',
-                authorAvatar: 'https://images.unsplash.com/photo-1575425186775-b8de9a427e67?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 2 jours',
-                content: 'Je me suis sentie comme une vraie princesse. Le rooftop, le room service... Et la patrouille anti-chat, quelle classe !',
-                platformDate: 'Il y a 1 semaine sur AirB\'n\'Bark',
+                content:
+                    'Je me suis sentie comme une vraie princesse. Le rooftop, le room service... Et la patrouille anti-chat, quelle classe !',
+                platformDate: "Il y a 1 semaine sur AirbnBark",
             },
         ],
         pricing: {
@@ -855,15 +904,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '8': {
         ...MOCK_LISTINGS[7],
         capacity: '1 chien · 1 lit en dortoir · coin jeux collectif',
-        images: [
-            'https://images.unsplash.com/photo-1544568100-847a948585b9?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Nichortoir social avec coin jeux collectif ! Parfait pour les chiens ultra-sociables qui veulent se faire plein de potes. Dortoir de 8 lits, ambiance festive garantie. Attention : risque chat modéré, option Anti-Chat non disponible (Claire a un chat qui passe parfois...).",
+            'Nichortoir social avec coin jeux collectif ! Parfait pour les chiens ultra-sociables qui veulent se faire plein de potes. Dortoir de 8 lits, ambiance festive garantie. Attention : risque chat modéré, option Anti-Chat non disponible (Claire a un chat qui passe parfois...).',
         host: {
             name: 'Claire',
-            avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: false,
             rating: 4.3,
@@ -882,12 +928,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Dortoir social',
                 description: '8 paniers, ambiance colonie de vacances',
-                image: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
             {
                 name: 'Aire de jeux',
                 description: 'Jouets à volonté, tunnel, balles',
-                image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -907,11 +953,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Rocky (Bulldog)',
-                authorAvatar: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 4,
                 date: 'Il y a 5 jours',
-                content: 'Beaucoup de bruit, beaucoup de fun ! J\'ai rencontré 7 nouveaux potes. Par contre le chat de Claire est passé, j\'ai pas aimé.',
-                platformDate: 'Il y a 3 semaines sur AirB\'n\'Bark',
+                content:
+                    "Beaucoup de bruit, beaucoup de fun ! J'ai rencontré 7 nouveaux potes. Par contre le chat de Claire est passé, j'ai pas aimé.",
+                platformDate: "Il y a 3 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -934,15 +981,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '9': {
         ...MOCK_LISTINGS[8],
         capacity: '2 chiens · 1 éco-niche · 2 couchages · gamelle bio',
-        images: [
-            'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
             "Éco-Niche 100% nature et bio ! Croquettes bio, jouets en matériaux recyclés, jardin sans pesticides. Thomas est un dog-sitter éco-responsable qui prône le bien-être animal ET environnemental. Zone quasiment sans chat (lac = pas d'habitat félin).",
         host: {
             name: 'Thomas',
-            avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: true,
             rating: 4.8,
@@ -961,7 +1005,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Éco-niche principale',
                 description: '2 paniers en fibres naturelles, couvertures bio',
-                image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -979,7 +1023,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             },
             {
                 title: 'Vue lac',
-                description: 'Balades au bord du lac d\'Annecy incluses.',
+                description: "Balades au bord du lac d'Annecy incluses.",
                 icon: 'check',
             },
         ],
@@ -987,11 +1031,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Nala (Golden Retriever)',
-                authorAvatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 1 semaine',
-                content: 'Les croquettes bio étaient délicieuses ! Et le lac... J\'ai nagé pendant des heures. Thomas est super attentionné.',
-                platformDate: 'Il y a 1 mois sur AirB\'n\'Bark',
+                content:
+                    "Les croquettes bio étaient délicieuses ! Et le lac... J'ai nagé pendant des heures. Thomas est super attentionné.",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -1014,15 +1059,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
     '10': {
         ...MOCK_LISTINGS[9],
         capacity: '1 chien · 1 chambre en coloc · 1 couchage · gamelle partagée',
-        images: [
-            'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop',
-        ],
+        images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Nicholoc urbaine à 2 minutes du plus grand parc de Nantes ! Parfait pour les chiens citadins. Julie sort les résidents 3 fois par jour. Coloc de 2 chiens max, ambiance chill. Option Anti-Chat disponible car le quartier a quelques félins errants.",
+            'Nicholoc urbaine à 2 minutes du plus grand parc de Nantes ! Parfait pour les chiens citadins. Julie sort les résidents 3 fois par jour. Coloc de 2 chiens max, ambiance chill. Option Anti-Chat disponible car le quartier a quelques félins errants.',
         host: {
             name: 'Julie',
-            avatar: 'https://randomuser.me/api/portraits/women/45.jpg',
+            avatar: PLACEHOLDER_AVATAR,
             isNewHost: false,
             isSuperHost: false,
             rating: 4.6,
@@ -1041,7 +1083,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 name: 'Chambre urbaine',
                 description: '1 panier confort, ambiance city',
-                image: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&h=300&fit=crop',
+                image: PLACEHOLDER_IMG,
             },
         ],
         amenities: [
@@ -1061,11 +1103,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             {
                 id: 'rev1',
                 authorName: 'Charlie (Corgi)',
-                authorAvatar: 'https://images.unsplash.com/photo-1612536057832-2ff7ead58194?w=100&h=100&fit=crop',
+                authorAvatar: PLACEHOLDER_IMG,
                 rating: 5,
                 date: 'Il y a 3 jours',
-                content: 'Avec mes petites pattes, le parc à 2 min c\'est parfait ! Julie est super ponctuelle pour les sorties. J\'ai pris l\'option Anti-Chat, au cas où.',
-                platformDate: 'Il y a 2 semaines sur AirB\'n\'Bark',
+                content:
+                    "Avec mes petites pattes, le parc à 2 min c'est parfait ! Julie est super ponctuelle pour les sorties. J'ai pris l'option Anti-Chat, au cas où.",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
         ],
         pricing: {

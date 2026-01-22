@@ -5,6 +5,13 @@
    Fichier de styles réutilisables pour toute l'application
    ============================================================ */
 
+/* ==================== SAFE AREA FIX iOS PWA ==================== */
+html, body {
+    background-color: #3B82F6; /* Bleu du splash - changé dynamiquement après */
+    min-height: 100%;
+    min-height: 100dvh;
+}
+
 /* ==================== VARIABLES CSS ==================== */
 :root {
     /* Couleurs primaires */
@@ -93,8 +100,6 @@ body {
     color: var(--color-text-primary);
     line-height: 1.4;
 }
-
-
 
 /* Corps de texte */
 .text-body {
@@ -191,6 +196,23 @@ body {
 
 .btn-primary:active {
     background-color: var(--color-primary-dark);
+}
+
+/* Bouton désactivé - Même style que primary mais grisé */
+.btn-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: #E0E0E0;
+    color: #9E9E9E;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: not-allowed;
 }
 
 /* Bouton secondaire - Actions secondaires (Show more, Cancel, etc.) */
@@ -595,6 +617,7 @@ body {
 
 .bottom-nav-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: var(--spacing-sm);
@@ -603,6 +626,7 @@ body {
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
+    gap: 2px;
 }
 
 .bottom-nav-item:active {
@@ -657,7 +681,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-md);
-    padding-top:6vh;
+    padding-top: 6vh;
     padding-bottom: 8vh; /* Espace pour le hint + navbar */
     overflow: hidden;
 }
@@ -834,7 +858,8 @@ body {
 }
 
 @keyframes bounce-up {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateX(-50%) translateY(0);
     }
     50% {
@@ -846,7 +871,9 @@ body {
 .swipe-container.swipe-transitioning {
     opacity: 0;
     transform: scale(1.1);
-    transition: opacity 0.3s, transform 0.3s;
+    transition:
+        opacity 0.3s,
+        transform 0.3s;
 }
 
 /* ==================== BOUTONS D'ACTION ==================== */
@@ -872,7 +899,9 @@ body {
     border-radius: 50%;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -885,12 +914,10 @@ body {
     color: #ef4444;
 }
 
-
 .swipe-btn-like {
     background: white;
     color: #22c55e;
 }
-
 
 .swipe-btn-undo {
     background: white;
@@ -898,7 +925,6 @@ body {
     width: 60px;
     height: 60px;
 }
-
 
 /* ==================== ÉTAT VIDE ==================== */
 .swipe-empty {
@@ -947,4 +973,3 @@ body {
 .btn-primary:active {
     opacity: 0.9;
 }
-

@@ -14,7 +14,7 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: "AirB'n'Bark",
+        name: "AirbnBark",
         short_name: 'AirBnBark',
         description: 'Pet-sitting made easy - Find the perfect home for your furry friend',
         theme_color: '#4f46e5',
