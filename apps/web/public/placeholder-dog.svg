@@ -34,7 +34,7 @@
   
   <!-- Text -->
   <text x="400" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" fill="#717171">
-    AirB'n'Bark
+    AirbnBark
   </text>
   <text x="400" y="410" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#b0b0b0">
     Image placeholder

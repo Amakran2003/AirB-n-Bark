@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Bot, ChevronUp, SlidersHorizontal } from 'lucide-react';
+import { Bot, SlidersHorizontal } from 'lucide-react';
 import { BottomNavbar } from '../components/BottomNavbar';
 import { SwipeCard } from '../components/SwipeCard';
 import { BookingRecap } from '../components/BookingRecap';
@@ -7,6 +7,7 @@ import { ChatBot } from '../components/ChatBot';
 import { ListingDetails } from './ListingDetails';
 import { getListingById, ListingCardData } from '../data/listings';
 import { useFilters } from '../contexts/FilterContext';
+import type { TutorialStepId } from '../components/TutorialOverlay';
 
 /**
  * ==================== PAGE HOME ====================
@@ -18,12 +19,14 @@ import { useFilters } from '../contexts/FilterContext';
  * - Bottom navigation
  */
 
-export const Home = () => {
+interface HomeProps {
+    tutorialStep?: TutorialStepId | null;
+    onTabChange?: (tab: 'home' | 'trips' | 'messages' | 'profile') => void;
+}
+
+export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
     // Filtres et listings filtrés
     const { openFilterModal, activeFiltersCount, filteredListings } = useFilters();
-
-    // Onglet actif de la navbar
-    const [activeTab, setActiveTab] = useState<'home' | 'messages' | 'profile'>('home');
 
     // Index de la carte actuelle (celle du dessus)
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -201,6 +204,7 @@ export const Home = () => {
                                 onSwipeUp={() => handleSwipeUp(listing)}
                                 onUndo={handleUndo}
                                 canUndo={currentIndex > 0}
+                                tutorialStep={index === remainingCards.slice(0, 2).length - 1 ? tutorialStep : null}
                             />
                         ))
                 ) : (
@@ -218,18 +222,10 @@ export const Home = () => {
                 )}
             </div>
 
-            {/* ==================== GLISSER POUR VOIR ==================== */}
-            {remainingCards.length > 0 && !isDetailTransitioning && (
-                <div className="swipe-up-hint">
-                    <ChevronUp className="w-5 h-5" />
-                    <span>Glisser pour voir</span>
-                </div>
-            )}
-
             {/* ==================== BOTTOM NAVBAR ==================== */}
             {/* Cacher la navbar pendant la transition */}
             {!isDetailTransitioning && (
-                <BottomNavbar activeTab={activeTab} onTabChange={setActiveTab} />
+                <BottomNavbar activeTab="home" onTabChange={onTabChange} />
             )}
 
             {/* ==================== CHATBOT ==================== */}

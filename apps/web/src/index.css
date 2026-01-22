@@ -5,6 +5,13 @@
    Fichier de styles réutilisables pour toute l'application
    ============================================================ */
 
+/* ==================== SAFE AREA FIX iOS PWA ==================== */
+html, body {
+    background-color: #3B82F6; /* Bleu du splash - changé dynamiquement après */
+    min-height: 100%;
+    min-height: 100dvh;
+}
+
 /* ==================== VARIABLES CSS ==================== */
 :root {
     /* Couleurs primaires */
@@ -189,6 +196,23 @@ body {
 
 .btn-primary:active {
     background-color: var(--color-primary-dark);
+}
+
+/* Bouton désactivé - Même style que primary mais grisé */
+.btn-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: #E0E0E0;
+    color: #9E9E9E;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: not-allowed;
 }
 
 /* Bouton secondaire - Actions secondaires (Show more, Cancel, etc.) */
@@ -593,6 +617,7 @@ body {
 
 .bottom-nav-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: var(--spacing-sm);
@@ -601,6 +626,7 @@ body {
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
+    gap: 2px;
 }
 
 .bottom-nav-item:active {

@@ -1,8 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronLeft, Calendar, Dog, Users, Clock, Check, Minus, Plus, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFilters } from '../contexts/FilterContext';
+import { useBookings, type Booking } from '../contexts/BookingContext';
 import { DatePicker } from './DatePicker';
+import { Payment } from '../pages/Payment';
+import { BookingConfirmation } from '../pages/BookingConfirmation';
 import type { ListingCardData } from '../data/listings';
 import { MOCK_LISTINGS_FULL } from '../data/listings';
 
@@ -12,6 +15,7 @@ import { MOCK_LISTINGS_FULL } from '../data/listings';
  * - Affiche les infos de l'annonce
  * - Sélection des dates (modifiables)
  * - Bouton Next → Auth si pas connecté
+ * - Swipe retour comme sur ListingDetails
  */
 
 interface BookingRecapProps {
@@ -23,6 +27,7 @@ interface BookingRecapProps {
 export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) => {
     const { isAuthenticated, openAuthModal } = useAuth();
     const { filters } = useFilters();
+    const { createBooking } = useBookings();
 
     // Récupérer les données complètes pour hasFreeCancellation
     const fullListing = MOCK_LISTINGS_FULL[listing.id];
@@ -36,6 +41,13 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
     // Nombre de voyageurs (chiens) - initialisé depuis les filtres
     const [dogsCount, setDogsCount] = useState(filters.dogsCount || 1);
     const maxDogs = listing.maxDogs || 1;
+
+    // Afficher la page de paiement
+    const [showPayment, setShowPayment] = useState(false);
+    
+    // Afficher la page de confirmation
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
 
     // Validation des dates - vérifier si elles sont dans les plages disponibles
     const datesValidation = useMemo(() => {
@@ -75,7 +87,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
         if (dogsCount > maxDogs) {
             return {
                 isValid: false,
-                error: `Cette niche accepte maximum ${maxDogs} ${maxDogs > 1 ? 'chiens' : 'chien'}`,
+                error: `Woof ! Cette niche accepte max ${maxDogs} ${maxDogs > 1 ? 'toutous' : 'toutou'} 🐕`,
             };
         }
         return { isValid: true, error: null };
@@ -83,6 +95,70 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
 
     // Est-ce que la réservation est valide ?
     const isBookingValid = checkIn && checkOut && datesValidation.isValid && dogsValidation.isValid;
+
+    // Swipe retour
+    const [swipeX, setSwipeX] = useState(0);
+    const [isExiting, setIsExiting] = useState(false);
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+    const isSwipingRef = useRef(false);
+
+    // Gestion swipe retour
+    useEffect(() => {
+        const handleTouchStart = (e: TouchEvent) => {
+            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            isSwipingRef.current = false;
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!touchStartRef.current) return;
+
+            const deltaX = e.touches[0].clientX - touchStartRef.current.x;
+            const deltaY = e.touches[0].clientY - touchStartRef.current.y;
+
+            if (!isSwipingRef.current) {
+                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 20) {
+                    isSwipingRef.current = true;
+                } else if (Math.abs(deltaY) > 10) {
+                    touchStartRef.current = null;
+                    return;
+                }
+            }
+
+            if (isSwipingRef.current && deltaX > 0) {
+                setSwipeX(deltaX * 0.8);
+            }
+        };
+
+        const handleTouchEnd = () => {
+            if (isSwipingRef.current && swipeX > 100) {
+                setIsExiting(true);
+                setSwipeX(window.innerWidth);
+                setTimeout(() => {
+                    onBack();
+                }, 250);
+            } else {
+                setSwipeX(0);
+            }
+            touchStartRef.current = null;
+            isSwipingRef.current = false;
+        };
+
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchend', handleTouchEnd);
+        return () => {
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [swipeX, onBack]);
+
+    // Style pour le swipe
+    const swipeStyle = {
+        transform: `translateX(${swipeX}px)`,
+        transition: isSwipingRef.current ? 'none' : 'transform 0.25s ease-out',
+        opacity: isExiting ? 1 - swipeX / window.innerWidth : 1,
+    };
 
     // Calculer le nombre de nuits
     const nights = useMemo(() => {
@@ -104,12 +180,44 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
         });
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (!isAuthenticated) {
             openAuthModal();
         } else {
-            onConfirm();
+            // Ouvrir la page de paiement
+            setShowPayment(true);
         }
+    };
+
+    // Callback après paiement réussi
+    const handlePaymentSuccess = async () => {
+        // Créer la réservation
+        if (checkIn && checkOut) {
+            const booking = await createBooking({
+                listingId: listing.id,
+                startDate: checkIn,
+                endDate: checkOut,
+                dogsCount,
+                totalPrice: total,
+                hasFreeCancellation,
+            });
+            setConfirmedBooking(booking);
+            setShowPayment(false);
+            setShowConfirmation(true);
+        }
+    };
+    
+    // Callback pour aller aux voyages depuis la confirmation
+    const handleGoToTrips = () => {
+        setShowConfirmation(false);
+        // Naviguer vers les voyages - on utilise onConfirm pour fermer et l'app gère la navigation
+        onConfirm();
+    };
+    
+    // Callback pour retourner à l'accueil depuis la confirmation
+    const handleGoHome = () => {
+        setShowConfirmation(false);
+        onBack();
     };
 
     const handleDateSelect = (newCheckIn: string | null, newCheckOut: string | null) => {
@@ -125,7 +233,8 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
         <>
             {/* Main container - captures all touch events */}
             <div 
-                className="fixed inset-0 z-150 bg-white flex flex-col touch-none"
+                className="fixed inset-0 z-150 bg-white flex flex-col"
+                style={swipeStyle}
             >
                 {/* Header */}
                 <div
@@ -135,7 +244,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                     <button className="btn-icon" onClick={onBack}>
                         <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <span className="text-body-md">Confirmer la réservation</span>
+                    <span className="text-body-md">Confirmer ton séjour</span>
                     <div className="w-10" />
                 </div>
 
@@ -164,7 +273,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
 
                     {/* Dates */}
                     <div className="py-6 border-b border-[#ebebeb]">
-                        <h2 className="text-h3 mb-4">Votre séjour</h2>
+                        <h2 className="text-h3 mb-4">Ton séjour 🐕</h2>
 
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
@@ -190,9 +299,9 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                                 <div className="flex items-center gap-3">
                                     <Dog className="w-5 h-5 icon-secondary" />
                                     <div>
-                                        <p className="text-body-md">Voyageurs</p>
+                                        <p className="text-body-md">Toi + tes potes</p>
                                         <p className="text-caption text-secondary">
-                                            {dogsCount} {dogsCount > 1 ? 'chiens' : 'chien'} (max {maxDogs})
+                                            {dogsCount} {dogsCount > 1 ? 'toutous' : 'toutou'} (max {maxDogs})
                                         </p>
                                     </div>
                                 </div>
@@ -292,10 +401,10 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                 {/* Footer - Inside the main container */}
                 <div
                     className="shrink-0 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
-
+                    style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
                     <button
-                        className={`btn-full btn-lg rounded-xl ${isBookingValid ? 'btn-primary' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                        className={'btn-primary btn-full' }
                         onClick={
                             !checkIn || !checkOut 
                                 ? () => setIsDatePickerOpen(true)
@@ -322,6 +431,34 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                 checkOut={checkOut}
                 onDateSelect={handleDateSelect}
             />
+
+            {/* Page Payment */}
+            {showPayment && checkIn && checkOut && (
+                <Payment
+                    listing={listing}
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    dogsCount={dogsCount}
+                    totalPrice={totalPrice}
+                    serviceFee={serviceFee}
+                    onBack={() => setShowPayment(false)}
+                    onSuccess={handlePaymentSuccess}
+                />
+            )}
+            
+            {/* Page Confirmation */}
+            {showConfirmation && confirmedBooking && checkIn && checkOut && (
+                <BookingConfirmation
+                    listing={listing}
+                    bookingNumber={confirmedBooking.bookingNumber}
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    dogsCount={dogsCount}
+                    totalPrice={total}
+                    onGoToTrips={handleGoToTrips}
+                    onGoHome={handleGoHome}
+                />
+            )}
         </>
     );
 };

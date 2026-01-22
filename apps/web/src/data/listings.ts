@@ -1,6 +1,6 @@
 /**
  * ==================== DONNÉES DES ANNONCES ====================
- * Fichier centralisé pour toutes les données des listings AirB'n'Bark
+ * Fichier centralisé pour toutes les données des listings AirbnBark
  * Concept: "Airbnb pour chiens" + Tinder swipe
  *
  * Types de logement:
@@ -338,7 +338,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
         capacity: '1 chien · 1 niche · 1 couchage · 1 coin gamelle',
         images: [PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG, PLACEHOLDER_IMG],
         description:
-            "Cette niche AirB'n'Bark cosy est située dans un quartier calme, à 10 minutes du parc le plus proche pour des promenades sans stress. L'espace est à l'intérieur d'une résidence sécurisée avec une cour tranquille (parfaite pour une session sniff rapide). Ton toutou profitera d'un coin couverture chauffante, d'une station d'eau fraîche, et d'une zone chill \"sans écureuils\". Option Protection Anti-Chat disponible pour les chiens qui préfèrent une vibe 100% sans félin.",
+            "Cette niche AirbnBark cosy est située dans un quartier calme, à 10 minutes du parc le plus proche pour des promenades sans stress. L'espace est à l'intérieur d'une résidence sécurisée avec une cour tranquille (parfaite pour une session sniff rapide). Ton toutou profitera d'un coin couverture chauffante, d'une station d'eau fraîche, et d'une zone chill \"sans écureuils\". Option Protection Anti-Chat disponible pour les chiens qui préfèrent une vibe 100% sans félin.",
         host: {
             name: 'Melissa',
             avatar: PLACEHOLDER_AVATAR,
@@ -383,7 +383,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             },
             {
                 title: 'Melissa est une nouvelle hôte',
-                description: "Nouvelle sur AirB'n'Bark mais déjà 4 woufviews 5 étoiles !",
+                description: "Nouvelle sur AirbnBark mais déjà 4 woufviews 5 étoiles !",
                 icon: 'star',
             },
         ],
@@ -396,7 +396,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 jours',
                 content:
                     "Woof woof wooof ! Le plaid chauffant était incroyable. J'ai reniflé chaque coin, approuvé à 100%. Le sniff QR au check-in était rapide. Je recommande !",
-                platformDate: "Il y a 4 mois sur AirB'n'Bark",
+                platformDate: "Il y a 4 mois sur AirbnBark",
             },
             {
                 id: 'rev2',
@@ -406,7 +406,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Enfin une niche où on respecte mon espace ! Pas de chat en vue grâce à l'option Anti-Chat. Le parc est vraiment à 10 min, j'ai chronométré (en trottinant).",
-                platformDate: "Il y a 3 mois sur AirB'n'Bark",
+                platformDate: "Il y a 3 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -484,7 +484,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 3 jours',
                 content:
                     "J'ai rencontré mon nouveau best friend ici ! Un Labrador super sympa. Pierre nous a emmenés au parc ensemble. Top coloc !",
-                platformDate: "Il y a 2 mois sur AirB'n'Bark",
+                platformDate: "Il y a 2 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -556,7 +556,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Correct pour le prix ! J'ai fait des potes, mais j'ai aperçu un chat par la fenêtre... Prenez l'option Anti-Chat, sérieux.",
-                platformDate: "Il y a 1 mois sur AirB'n'Bark",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -639,7 +639,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 5 jours',
                 content:
                     "LE JARDIN !!! J'ai couru pendant 3h non-stop. Et la bouffe maison de Marie, un régal. Je reviens avec toute ma meute.",
-                platformDate: "Il y a 2 semaines sur AirB'n'Bark",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
             {
                 id: 'rev2',
@@ -649,7 +649,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 semaines',
                 content:
                     "J'ai même pu creuser des trous sans me faire gronder ! Marie est la meilleure. Et zéro chat à l'horizon, nickel.",
-                platformDate: "Il y a 1 mois sur AirB'n'Bark",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -721,7 +721,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "J'AI CHASSÉ DES VAGUES !!! Meilleure expérience de ma vie de chien. La douche après c'est pas ouf mais bon...",
-                platformDate: "Il y a 3 semaines sur AirB'n'Bark",
+                platformDate: "Il y a 3 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -798,7 +798,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 4 jours',
                 content:
                     "LA NEIGE !!! J'ai couru, sauté, roulé... Et Emma marche super vite, j'adore. Pas un seul chat, le paradis.",
-                platformDate: "Il y a 2 semaines sur AirB'n'Bark",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -881,7 +881,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 jours',
                 content:
                     'Je me suis sentie comme une vraie princesse. Le rooftop, le room service... Et la patrouille anti-chat, quelle classe !',
-                platformDate: "Il y a 1 semaine sur AirB'n'Bark",
+                platformDate: "Il y a 1 semaine sur AirbnBark",
             },
         ],
         pricing: {
@@ -958,7 +958,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 5 jours',
                 content:
                     "Beaucoup de bruit, beaucoup de fun ! J'ai rencontré 7 nouveaux potes. Par contre le chat de Claire est passé, j'ai pas aimé.",
-                platformDate: "Il y a 3 semaines sur AirB'n'Bark",
+                platformDate: "Il y a 3 semaines sur AirbnBark",
             },
         ],
         pricing: {
@@ -1036,7 +1036,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Les croquettes bio étaient délicieuses ! Et le lac... J'ai nagé pendant des heures. Thomas est super attentionné.",
-                platformDate: "Il y a 1 mois sur AirB'n'Bark",
+                platformDate: "Il y a 1 mois sur AirbnBark",
             },
         ],
         pricing: {
@@ -1108,7 +1108,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 3 jours',
                 content:
                     "Avec mes petites pattes, le parc à 2 min c'est parfait ! Julie est super ponctuelle pour les sorties. J'ai pris l'option Anti-Chat, au cas où.",
-                platformDate: "Il y a 2 semaines sur AirB'n'Bark",
+                platformDate: "Il y a 2 semaines sur AirbnBark",
             },
         ],
         pricing: {

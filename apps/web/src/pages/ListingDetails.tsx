@@ -232,8 +232,8 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
 
             {/* Footer réservation */}
             <div
-                className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 pb-5 border-t border-gray-200"
-                style={swipeStyle}
+                className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
+                style={{ ...swipeStyle, paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
             >
                 <div className="flex items-center justify-between">
                     <div>
@@ -620,7 +620,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     <div className="divider" />
 
                     {/* Hôte détaillé */}
-                    <h2 className="text-h2 mb-5">Meet your host</h2>
+                    <h2 className="text-h2 mb-5">Ton hôte 🐾</h2>
                     <div className="card mb-5">
                         <div className="flex flex-col items-center text-center mb-4">
                             <img
@@ -656,7 +656,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                         </div>
                         <button className="btn-secondary w-full flex items-center justify-center gap-2">
                             <MessageCircle className="w-5 h-5" />
-                            Contacter l'hôte
+                            Envoyer un woof 🐶
                         </button>
                     </div>
                 </div>

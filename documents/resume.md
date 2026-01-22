@@ -296,3 +296,105 @@ Cette solution a été appliquée à tous les modals avec input : AuthModal et C
 
 **Solution** : Ajout d'une condition pour toujours permettre de définir le check-in s'il n'existe pas 
 
+---
+
+## Avancement – Session 22 Janvier 2026 : Confirmation de réservation et Messagerie
+
+### 1) Page de confirmation de réservation
+
+Après le paiement réussi, j'ai créé une page de confirmation complète avec :
+
+**Animation "Merci"**
+- Cercle vert animé avec checkmark qui apparaît progressivement
+- Confettis colorés qui tombent pendant 3 secondes
+- Message fun adapté aux chiens : "Woof ! Ta résa est confirmée !"
+
+**Numéro de réservation unique**
+- Format : BARK-XXXXXX (6 caractères alphanumériques)
+- Génération automatique lors de la création de la réservation
+- Bouton pour copier le numéro dans le presse-papier
+
+**Détails du séjour**
+- Récapitulatif des dates, nombre de toutous, total payé
+- Carte de l'annonce avec image et localisation
+
+**Contact avec l'hôte**
+- Photo de l'hôte et badge "super sympa 🐾"
+- Bouton "Envoyer un woof" pour contacter l'hôte
+
+**Instructions d'accès**
+- Section dépliable avec horaires d'arrivée/départ
+- Code d'accès à la niche
+- Informations WiFi (réseau + mot de passe)
+- Info parking
+- Note personnelle de l'hôte (message fun)
+
+**Navigation après confirmation**
+- Boutons "Accueil" et "Mes voyages" en bas
+- Design responsive adapté aux petits écrans
+
+### 2) Page Messages
+
+J'ai créé une page de messagerie complète inspirée du design du ChatBot :
+
+**Liste des conversations**
+- Générée automatiquement à partir des réservations confirmées
+- Photo de l'hôte avec badge de messages non lus
+- Aperçu du dernier message et timestamp
+- Thumbnail de la niche réservée
+
+**Vue conversation détaillée**
+- Header avec photo et nom de l'hôte
+- Carte récapitulative de la réservation
+- Bulles de messages style iMessage (bleu pour l'utilisateur, gris pour l'hôte)
+- Icône chien pour l'avatar de l'utilisateur 🐕
+- Animation de chargement (3 points qui rebondissent)
+
+**Préparation pour n8n**
+- Variable d'environnement VITE_N8N_MESSAGES_WEBHOOK_URL
+- Structure de données prête pour l'intégration temps réel
+- En attendant : réponses automatiques simulées de l'hôte
+
+**Réponses automatiques de l'hôte (mode démo)**
+- Questions sur l'arrivée → infos sur les horaires
+- Questions WiFi → identifiants de connexion
+- Questions gamelle/croquettes → message rassurant
+- Salutations → réponse amicale "Wouf wouf !"
+
+### 3) Ton de l'application : On parle aux chiens !
+
+J'ai modifié tous les textes de l'application pour parler directement aux toutous (concept humoristique du projet) :
+
+**Avant → Après**
+- "Merci pour votre réservation" → "Woof ! Ta résa est confirmée !"
+- "Votre toutou va adorer" → "Tu vas kiffer cet endroit, promis !"
+- "Voyageurs" → "Toi + tes potes"
+- "chiens" → "toutous"
+- "Total payé" → "Total (en croquettes)" avec émoji 🦴
+- "Votre hôte" → "Ton hôte (super sympa 🐾)"
+- "Contacter l'hôte" → "Envoyer un woof"
+- "Aucune réservation à venir" → "Aucun voyage prévu"
+- "Des frais d'annulation s'appliquent" → "Aïe, des frais s'appliquent 🐾"
+
+**Fichiers modifiés**
+- BookingConfirmation.tsx
+- BookingRecap.tsx
+- Trips.tsx
+- Payment.tsx
+- ListingDetails.tsx
+- ChatBot.tsx (réponses du bot)
+
+### 4) Contexte de réservation enrichi
+
+J'ai ajouté le champ `bookingNumber` au type Booking dans BookingContext :
+- Généré automatiquement à la création (format BARK-XXXXXX)
+- Stocké dans localStorage avec les autres données
+- Affiché dans la confirmation et accessible dans les voyages
+
+### 5) Intégration dans la navigation
+
+La page Messages est maintenant accessible via l'onglet "Messages" de la BottomNavbar :
+- Import et routing dans App.tsx
+- Onglet actif mis en surbrillance
+- Navigation fluide entre Home, Trips et Messages
+

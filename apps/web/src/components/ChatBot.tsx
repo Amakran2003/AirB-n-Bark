@@ -286,7 +286,8 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
 
                 {/* Input */}
                 <div 
-                    className={`shrink-0 p-4 border-t border-gray-200 bg-white ${isKeyboardOpen ? '' : 'pb-9'}`}
+                    className="shrink-0 p-4 border-t border-gray-200 bg-white"
+                    style={{ paddingBottom: isKeyboardOpen ? '16px' : 'calc(24px + env(safe-area-inset-bottom))' }}
                 >
                     <div className="flex items-center gap-3">
                         <input
@@ -332,29 +333,29 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
 function getDemoResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.includes('réservation') || lowerMessage.includes('reservation')) {
-        return 'Pour voir tes réservations, va dans l\'onglet "Réservations" en bas de l\'écran. Tu peux aussi me demander d\'annuler une réservation spécifique ! 📅';
+    if (lowerMessage.includes('réservation') || lowerMessage.includes('reservation') || lowerMessage.includes('voyage')) {
+        return 'Pour voir tes voyages, va dans l\'onglet "Voyages" en bas de l\'écran. Tu peux aussi me demander d\'annuler un séjour ! 📅🐕';
     }
 
     if (lowerMessage.includes('annuler')) {
-        return 'Pour annuler une réservation, j\'ai besoin de l\'identifiant ou de la date de ta réservation. Peux-tu me donner plus de détails ? 🐕';
+        return 'Pour annuler un séjour, j\'ai besoin de l\'identifiant ou de la date. Dis-moi en plus ! 🐶';
     }
 
-    if (lowerMessage.includes('prix') || lowerMessage.includes('tarif')) {
-        return 'Les prix varient selon les niches. Tu peux filtrer par prix avec le bouton "Filtre" en haut à gauche. Les prix affichés sont par nuit ! 💰';
+    if (lowerMessage.includes('prix') || lowerMessage.includes('tarif') || lowerMessage.includes('croquette')) {
+        return 'Les prix varient selon les niches. Tu peux filtrer par prix avec le bouton "Filtre" en haut à gauche. Les prix affichés sont par nuit (en croquettes 🦴) !';
     }
 
     if (lowerMessage.includes('anti-chat') || lowerMessage.includes('chat')) {
-        return 'L\'option Anti-Chat garantit que la niche n\'a jamais accueilli de chats. Parfait pour les toutous sensibles ! Tu peux activer ce filtre dans les options. 🐱🚫';
+        return 'L\'option Anti-Chat garantit que la niche n\'a jamais accueilli de ces félins suspects 😼🚫. Parfait pour toi si t\'es sensible ! Active ce filtre dans les options.';
     }
 
-    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('hello')) {
-        return 'Wouf wouf ! 🐕 Ravi de te voir ! Comment puis-je t\'aider aujourd\'hui ?';
+    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('hello') || lowerMessage.includes('woof')) {
+        return 'Wouf wouf ! 🐕 Salut toi ! Qu\'est-ce que je peux faire pour toi aujourd\'hui ?';
     }
 
     if (lowerMessage.includes('merci')) {
-        return 'Avec plaisir ! N\'hésite pas si tu as d\'autres questions. Wouf ! 🐕';
+        return 'De rien mon pote à 4 pattes ! N\'hésite pas si t\'as d\'autres questions. Wouf ! 🐕';
     }
 
-    return 'Je suis encore en apprentissage ! 🐕 Pour l\'instant, je peux t\'aider avec tes réservations, les filtres, et répondre à tes questions sur AirB\'n\'Bark. Que veux-tu savoir ?';
+    return 'Je suis encore un jeune chiot en apprentissage ! 🐶 Pour l\'instant, je peux t\'aider avec tes voyages, les filtres, et répondre à tes questions sur AirB\'n\'Bark. Que veux-tu savoir ?';
 }

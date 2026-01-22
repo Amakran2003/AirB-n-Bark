@@ -28,8 +28,6 @@ export const AuthModal = () => {
     useEffect(() => {
         if (!isAuthModalOpen) return;
 
-        const initialHeight = window.visualViewport?.height || window.innerHeight;
-
         const updateHeight = () => {
             if (window.visualViewport) {
                 const vh = window.visualViewport.height;

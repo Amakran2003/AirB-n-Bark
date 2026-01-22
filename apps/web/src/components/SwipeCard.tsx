@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Heart, X, Star, MapPin, ChevronUp, RotateCcw } from 'lucide-react';
 import { ListingCardData } from '../data/listings';
+import type { TutorialStepId } from './TutorialOverlay';
 
 /**
  * ==================== PROPS DU COMPOSANT ====================
@@ -13,6 +14,7 @@ interface SwipeCardProps {
     onUndo?: () => void; // Retour à la carte précédente
     isTop: boolean; // Est-ce la carte du dessus (interactive)
     canUndo?: boolean; // Peut-on revenir en arrière
+    tutorialStep?: TutorialStepId | null; // Étape du tutoriel pour l'animation
 }
 
 /**
@@ -31,6 +33,7 @@ export const SwipeCard = ({
     onUndo,
     isTop,
     canUndo = false,
+    tutorialStep = null,
 }: SwipeCardProps) => {
     // Position actuelle de la carte pendant le drag
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -46,6 +49,9 @@ export const SwipeCard = ({
     const [isSwipingUp, setIsSwipingUp] = useState(false);
     // Masquer le texte pendant l'animation de zoom
     const [hideContent, setHideContent] = useState(false);
+    
+    // Animation du tutoriel
+    const [tutorialAnimValue, setTutorialAnimValue] = useState(0);
 
     // Références pour le calcul du drag
     const startPos = useRef({ x: 0, y: 0 });
@@ -54,6 +60,43 @@ export const SwipeCard = ({
     // Seuils de swipe (en pixels) pour déclencher l'action
     const SWIPE_THRESHOLD_X = 100;
     const SWIPE_THRESHOLD_Y = -80; // Négatif car vers le haut
+
+    /**
+     * Animation du tutoriel selon l'étape
+     */
+    useEffect(() => {
+        if (!tutorialStep || !isTop) {
+            setTutorialAnimValue(0);
+            return;
+        }
+
+        // Animation oscillante pour le tutoriel
+        const interval = setInterval(() => {
+            setTutorialAnimValue((prev) => (prev === 0 ? 1 : 0));
+        }, 600);
+
+        return () => clearInterval(interval);
+    }, [tutorialStep, isTop]);
+
+    // Calculer les valeurs d'animation selon le tutorialStep
+    const getTutorialTransform = () => {
+        if (!tutorialStep || !isTop) return { x: 0, y: 0, rotate: 0 };
+        
+        const animFactor = tutorialAnimValue;
+        
+        switch (tutorialStep) {
+            case 'swipe-right':
+                return { x: animFactor * 40, y: 0, rotate: animFactor * 8 };
+            case 'swipe-left':
+                return { x: animFactor * -40, y: 0, rotate: animFactor * -8 };
+            case 'swipe-up':
+                return { x: 0, y: animFactor * -30, rotate: 0 };
+            default:
+                return { x: 0, y: 0, rotate: 0 };
+        }
+    };
+
+    const tutorialTransform = getTutorialTransform();
 
     /**
      * Début du drag (tactile ou souris)
@@ -218,13 +261,18 @@ export const SwipeCard = ({
         handleDragEnd();
     };
 
+    // Calculer la transformation finale (drag + tutoriel)
+    const finalX = position.x + tutorialTransform.x;
+    const finalY = position.y + tutorialTransform.y;
+    const finalRotation = rotation + tutorialTransform.rotate;
+
     return (
         <div
             ref={cardRef}
             className="swipe-card"
             style={{
-                transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${scale})`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                transform: `translate(${finalX}px, ${finalY}px) rotate(${finalRotation}deg) scale(${scale})`,
+                transition: isDragging ? 'none' : 'transform 0.4s ease-out',
                 zIndex: isSwipingUp || swipeDirection === 'up' ? 200 : isTop ? 10 : 1,
                 cursor: isTop ? 'grab' : 'default',
             }}
