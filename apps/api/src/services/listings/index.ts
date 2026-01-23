@@ -1,5 +1,7 @@
-import { Router } from 'express';
-import { listingsRoutes } from './routes/listings.routes.js';
+/**
+ * ==================== LISTINGS MICROSERVICE INDEX ====================
+ * Export principal du microservice listings
+ */
 
-export const listingsRouter = Router();
-listingsRouter.use('/', listingsRoutes);
+export { default as listingsRoutes } from './listings.routes.js';
+export * from './listings.validation.js';
