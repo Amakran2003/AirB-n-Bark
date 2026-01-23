@@ -1,28 +1,160 @@
-import express from 'express';
-import { authRouter } from './services/auth/index.js';
-import { bookingRouter } from './services/booking/index.js';
-import { listingsRouter } from './services/listings/index.js';
-import { reviewsRouter } from './services/reviews/index.js';
-import { errorHandler } from './shared/middlewares/errorHandler.js';
-import { notFound } from './shared/middlewares/notFound.js';
+/**
+ * ==================== EXPRESS APP ====================
+ * Configuration principale de l'application Express
+ * Sécurité, middlewares, routes
+ */
 
-const app = express();
+import express, { Application, Request, Response } from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import { config } from './config/env.js';
+import { 
+    globalRateLimiter, 
+    requestLogger, 
+    errorHandler, 
+    notFoundHandler,
+    sanitizeBody,
+} from './middlewares/security.js';
+import { listingsRoutes } from './services/listings/index.js';
+import { bookingRoutes } from './services/booking/index.js';
 
-app.use(express.json());
+// ==================== APP INITIALIZATION ====================
 
-// Health check
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+const app: Application = express();
+
+// ==================== SECURITY MIDDLEWARES ====================
+
+// Helmet - sécurité des headers HTTP
+app.use(helmet({
+    contentSecurityPolicy: config.isProd ? undefined : false,
+    crossOriginEmbedderPolicy: false,
+}));
+
+// CORS - Cross-Origin Resource Sharing
+app.use(cors({
+    origin: (origin, callback) => {
+        // Autoriser les requêtes sans origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (config.corsOrigins.includes(origin) || config.isDev) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit'],
+}));
+
+// Rate limiting global
+app.use(globalRateLimiter);
+
+// ==================== PARSING MIDDLEWARES ====================
+
+// Body parsers avec limites de taille
+app.use(express.json({ 
+    limit: '10mb',
+    strict: true,
+}));
+
+app.use(express.urlencoded({ 
+    extended: true, 
+    limit: '10mb',
+}));
+
+// Sanitization globale du body
+app.use(sanitizeBody);
+
+// ==================== LOGGING ====================
+
+app.use(requestLogger);
+
+// ==================== HEALTH CHECK ====================
+
+app.get('/health', (_req: Request, res: Response) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: config.nodeEnv,
+    });
 });
 
-// Routes
-app.use('/api/auth', authRouter);
-app.use('/api/bookings', bookingRouter);
-app.use('/api/listings', listingsRouter);
-app.use('/api/reviews', reviewsRouter);
+app.get('/api/health', (_req: Request, res: Response) => {
+    res.json({
+        status: 'ok',
+        version: '1.0.0',
+        service: 'airbonbark-api',
+    });
+});
 
-// Error handling
-app.use(notFound);
+// ==================== API ROUTES ====================
+
+// Listings microservice
+app.use('/api/listings', listingsRoutes);
+
+// Bookings microservice
+app.use('/api/bookings', bookingRoutes);
+
+// ==================== API DOCUMENTATION ====================
+
+app.get('/api', (_req: Request, res: Response) => {
+    res.json({
+        name: 'AirB-n-Bark API',
+        version: '1.0.0',
+        description: 'API pour la plateforme de réservation de niches pour chiens',
+        endpoints: {
+            health: '/health',
+            listings: {
+                public: {
+                    'GET /api/listings': 'Liste des listings avec filtres',
+                    'GET /api/listings/:id': 'Détails d\'un listing',
+                    'GET /api/listings/:id/reviews': 'Avis d\'un listing',
+                    'GET /api/listings/:id/availability': 'Disponibilité',
+                    'GET /api/listings/:id/similar': 'Listings similaires',
+                    'POST /api/listings/:id/share': 'Partager un listing',
+                },
+                host: {
+                    'GET /api/listings/host/my-listings': 'Mes listings (auth)',
+                    'POST /api/listings/host/create': 'Créer un listing (auth)',
+                    'PUT /api/listings/host/:id': 'Modifier un listing (auth)',
+                    'DELETE /api/listings/host/:id': 'Supprimer un listing (auth)',
+                    'PATCH /api/listings/host/:id/toggle': 'Activer/Désactiver (auth)',
+                    'PUT /api/listings/host/:id/availability': 'Gérer disponibilité (auth)',
+                    'GET /api/listings/host/:id/stats': 'Statistiques (auth)',
+                },
+            },
+            bookings: {
+                guest: {
+                    'GET /api/bookings': 'Mes réservations (auth)',
+                    'POST /api/bookings': 'Créer une réservation (auth)',
+                    'GET /api/bookings/:id': 'Détails réservation (auth)',
+                    'POST /api/bookings/:id/cancel': 'Annuler réservation (auth)',
+                    'POST /api/bookings/quote': 'Calculer un devis',
+                    'GET /api/bookings/availability': 'Vérifier disponibilité',
+                },
+                host: {
+                    'GET /api/bookings/host': 'Réservations reçues (auth)',
+                    'GET /api/bookings/host/stats': 'Statistiques (auth)',
+                    'POST /api/bookings/host/:id/confirm': 'Confirmer (auth)',
+                    'POST /api/bookings/host/:id/reject': 'Rejeter (auth)',
+                },
+            },
+        },
+        documentation: '/api/docs',
+    });
+});
+
+// ==================== ERROR HANDLING ====================
+
+// 404 handler
+app.use(notFoundHandler);
+
+// Global error handler (doit être le dernier middleware)
 app.use(errorHandler);
 
-export { app };
+// ==================== EXPORT ====================
+
+export default app;
