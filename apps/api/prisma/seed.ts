@@ -5,7 +5,9 @@
  */
 
 import { PrismaClient, ListingType, CancellationPolicy } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
+
+const hash = (password: string, rounds: number) => bcrypt.hash(password, rounds);
 
 const prisma = new PrismaClient();
 

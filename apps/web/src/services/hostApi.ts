@@ -4,7 +4,7 @@
  * Gère la création, modification et suppression des listings
  */
 
-import { api, getAuthToken } from './api';
+import { getAuthToken } from './api';
 import type { ListingFullData, ListingAmenity, ListingHighlight, ListingRules, DateRange } from '../data/listings';
 
 // ==================== TYPES API ====================
@@ -134,7 +134,7 @@ export function mapFormDataToApiPayload(
             specialNotes: string;
         };
     },
-    hostName: string
+    _hostName: string
 ): CreateListingPayload {
     // Générer la capacité string
     const capacityParts = [];

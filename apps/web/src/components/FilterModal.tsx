@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Calendar, Home, Cat, Star, Dog, Minus, Plus, MapPin, Search, Loader2 } from 'lucide-react';
 import { useFilters, FilterState } from '../contexts/FilterContext';
 import { DatePicker } from './DatePicker';
@@ -64,7 +64,7 @@ export const FilterModal = () => {
     const [citySearch, setCitySearch] = useState('');
     const [citySuggestions, setCitySuggestions] = useState<AddressSuggestion[]>([]);
     const [isSearchingCity, setIsSearchingCity] = useState(false);
-    const citySearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const citySearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [localFilters, setLocalFilters] = useState<FilterState>(filters);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 

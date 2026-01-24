@@ -10,7 +10,6 @@ import {
     Home,
     Star,
     Loader2,
-    X,
     AlertTriangle
 } from 'lucide-react';
 import { EmptyState } from '../../components/EmptyState';

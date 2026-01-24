@@ -124,6 +124,15 @@ export interface ListingFull extends ListingCard {
         allowsPuppies: boolean;
         minAge: number;
     };
+    instructions?: {
+        checkInTime?: string;
+        checkOutTime?: string;
+        accessCode?: string;
+        wifiName?: string;
+        wifiPassword?: string;
+        parkingInfo?: string;
+        specialNotes?: string;
+    };
 }
 
 // Filtres pour la recherche
@@ -153,6 +162,7 @@ export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
 export interface Booking {
     id: string;
+    bookingNumber?: string;
     listingId: string;
     userId: string;
     hostId: string;
@@ -276,6 +286,7 @@ export interface ApiError {
     message: string;
     code: string;
     status: number;
+    details?: unknown;
 }
 
 export interface PaginationParams {

@@ -173,9 +173,6 @@ const HighlightIcon = ({ icon, className }: { icon: ListingHighlight['icon']; cl
     return <IconComponent className={className} />;
 };
 
-// Génère un ID unique
-const generateId = () => `listing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
 export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     const { user } = useAuth();
     const [currentStep, setCurrentStep] = useState<Step>('intro1');
