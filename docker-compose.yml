@@ -25,8 +25,10 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/airbnbark
       JWT_SECRET: airbonbark-dev-secret-key-2026-x7k9m2p4q8r1s5t3
       NODE_ENV: development
+      REDIS_URL: redis://redis:6379
     depends_on:
       - db
+      - redis
     ports:
       - "3000:3000"
 
@@ -58,8 +60,14 @@ services:
   redis:
     image: redis:8.4.0-alpine
     restart: unless-stopped
-    ports:
-      - "81:81"
+    # No host port mapping so Redis is only reachable from other containers
+    # no data persistance
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       - db
 
