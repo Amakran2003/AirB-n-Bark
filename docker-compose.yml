@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: airbnbark
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # init.sql removed - Prisma handles schema and seeding
     ports:
       - "5433:5432"
 
@@ -22,6 +22,9 @@ services:
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: airbnbark
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/airbnbark
+      JWT_SECRET: airbonbark-dev-secret-key-2026-x7k9m2p4q8r1s5t3
+      NODE_ENV: development
     depends_on:
       - db
     ports:
@@ -33,16 +36,32 @@ services:
     ports:
       - "5173:5173"
 
+  # woobot:
+  #   build: ./apps/woobot
+  #   restart: unless-stopped
+  #   environment:
+  #     PORT: 4000
+  #   ports:
+  #     - "4000:4000"
+
   caddy:
     image: caddy:2
     restart: unless-stopped
     ports:
       - "80:80"
     volumes:
-      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,z
     depends_on:
       - api
       - web
+
+  redis:
+    image: redis:8.4.0-alpine
+    restart: unless-stopped
+    ports:
+      - "81:81"
+    depends_on:
+      - db
 
 volumes:
   pgdata:
