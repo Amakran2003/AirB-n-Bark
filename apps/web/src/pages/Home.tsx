@@ -161,7 +161,7 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
         );
     }
 
-    const isProfileView = activeTab === 'profile';
+    // const isProfileView = activeTab === 'profile';
 
     return (
         <div className="h-screen flex flex-col bg-primary">
