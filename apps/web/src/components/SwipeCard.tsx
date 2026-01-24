@@ -8,22 +8,22 @@ import type { TutorialStepId } from './TutorialOverlay';
  */
 interface SwipeCardProps {
     listing: ListingCardData;
-    onSwipeLeft: () => void; // Pas intéressé
-    onSwipeRight: () => void; // Favori
-    onSwipeUp: () => void; // Ouvrir détails
-    onUndo?: () => void; // Retour à la carte précédente
+    onSwipeLeft: () => void; // Pas interesse
+    onSwipeRight: () => void; // Reserver
+    onSwipeUp: () => void; // Ouvrir details
+    onUndo?: () => void; // Retour a la carte precedente
     isTop: boolean; // Est-ce la carte du dessus (interactive)
-    canUndo?: boolean; // Peut-on revenir en arrière
-    tutorialStep?: TutorialStepId | null; // Étape du tutoriel pour l'animation
+    canUndo?: boolean; // Peut-on revenir en arriere
+    tutorialStep?: TutorialStepId | null; // Etape du tutoriel pour l'animation
 }
 
 /**
  * ==================== COMPOSANT SWIPE CARD ====================
  * Carte swipable style Tinder pour parcourir les annonces
  * - Swipe gauche = passer
- * - Swipe droite = ajouter aux favoris
- * - Swipe haut / clic = ouvrir la page détails
- * - Geste tactile et souris supportés
+ * - Swipe droite = reserver
+ * - Swipe haut / clic = ouvrir la page details
+ * - Geste tactile et souris supportes
  */
 export const SwipeCard = ({
     listing,
@@ -49,7 +49,7 @@ export const SwipeCard = ({
     const [isSwipingUp, setIsSwipingUp] = useState(false);
     // Masquer le texte pendant l'animation de zoom
     const [hideContent, setHideContent] = useState(false);
-    
+
     // Animation du tutoriel
     const [tutorialAnimValue, setTutorialAnimValue] = useState(0);
 
@@ -81,9 +81,9 @@ export const SwipeCard = ({
     // Calculer les valeurs d'animation selon le tutorialStep
     const getTutorialTransform = () => {
         if (!tutorialStep || !isTop) return { x: 0, y: 0, rotate: 0 };
-        
+
         const animFactor = tutorialAnimValue;
-        
+
         switch (tutorialStep) {
             case 'swipe-right':
                 return { x: animFactor * 40, y: 0, rotate: animFactor * 8 };
@@ -295,8 +295,8 @@ export const SwipeCard = ({
                     decoding="async"
                 />
                 {/* Overlay gradient pour le texte */}
-                <div 
-                    className="swipe-card-overlay" 
+                <div
+                    className="swipe-card-overlay"
                     style={{
                         opacity: hideContent ? 0 : 1,
                         transition: 'opacity 0.15s ease-out',
@@ -338,7 +338,7 @@ export const SwipeCard = ({
                 </div>
 
                 {/* ==================== INFOS DE L'ANNONCE ==================== */}
-                <div 
+                <div
                     className="swipe-card-content"
                     style={{
                         opacity: hideContent ? 0 : 1,

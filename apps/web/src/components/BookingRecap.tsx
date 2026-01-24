@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronLeft, Calendar, Dog, Users, Clock, Check, Minus, Plus, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFilters } from '../contexts/FilterContext';
@@ -8,23 +8,30 @@ import { Payment } from '../pages/Payment';
 import { BookingConfirmation } from '../pages/BookingConfirmation';
 import type { ListingCardData } from '../data/listings';
 import { MOCK_LISTINGS_FULL } from '../data/listings';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 /**
  * ==================== BOOKING RECAP ====================
- * Page de récap de réservation avant authentification
+ * Page de recap de reservation avant authentification
  * - Affiche les infos de l'annonce
- * - Sélection des dates (modifiables)
- * - Bouton Next → Auth si pas connecté
+ * - Selection des dates (modifiables)
+ * - Bouton Next → Auth si pas connecte
  * - Swipe retour comme sur ListingDetails
+ *
+ * TODO API:
+ * - GET /api/listings/:id/availability → verifier la disponibilite
+ * - GET /api/listings/:id/price → calculer le prix (avec promos)
+ * - POST /api/bookings/quote → obtenir un devis
  */
 
 interface BookingRecapProps {
     listing: ListingCardData;
     onBack: () => void;
     onConfirm: () => void;
+    onGoToTrips?: () => void;
 }
 
-export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) => {
+export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTripsExternal }: BookingRecapProps) => {
     const { isAuthenticated, openAuthModal } = useAuth();
     const { filters } = useFilters();
     const { createBooking } = useBookings();
@@ -37,14 +44,14 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
     const [checkIn, setCheckIn] = useState<string | null>(filters.checkIn);
     const [checkOut, setCheckOut] = useState<string | null>(filters.checkOut);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-    
+
     // Nombre de voyageurs (chiens) - initialisé depuis les filtres
     const [dogsCount, setDogsCount] = useState(filters.dogsCount || 1);
     const maxDogs = listing.maxDogs || 1;
 
     // Afficher la page de paiement
     const [showPayment, setShowPayment] = useState(false);
-    
+
     // Afficher la page de confirmation
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
@@ -54,28 +61,28 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
         if (!checkIn || !checkOut) {
             return { isValid: false, error: null };
         }
-        
+
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
-        
+
         // Chercher une plage qui contient les dates
         const validRange = listing.availableDateRanges?.find((range) => {
             const rangeStart = new Date(range.start);
             const rangeEnd = new Date(range.end);
             return checkInDate >= rangeStart && checkOutDate <= rangeEnd;
         });
-        
+
         if (validRange) {
             return { isValid: true, error: null };
         }
-        
+
         // Pas de plage valide - formater les plages disponibles pour l'affichage
         const availableRangesText = listing.availableDateRanges?.map((range) => {
             const start = new Date(range.start + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const end = new Date(range.end + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
             return `${start} - ${end}`;
         }).join(', ');
-        
+
         return {
             isValid: false,
             error: `Ces dates ne sont pas disponibles. Plages disponibles : ${availableRangesText || 'Aucune'}`,
@@ -96,69 +103,8 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
     // Est-ce que la réservation est valide ?
     const isBookingValid = checkIn && checkOut && datesValidation.isValid && dogsValidation.isValid;
 
-    // Swipe retour
-    const [swipeX, setSwipeX] = useState(0);
-    const [isExiting, setIsExiting] = useState(false);
-    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-    const isSwipingRef = useRef(false);
-
-    // Gestion swipe retour
-    useEffect(() => {
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            isSwipingRef.current = false;
-        };
-
-        const handleTouchMove = (e: TouchEvent) => {
-            if (!touchStartRef.current) return;
-
-            const deltaX = e.touches[0].clientX - touchStartRef.current.x;
-            const deltaY = e.touches[0].clientY - touchStartRef.current.y;
-
-            if (!isSwipingRef.current) {
-                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 20) {
-                    isSwipingRef.current = true;
-                } else if (Math.abs(deltaY) > 10) {
-                    touchStartRef.current = null;
-                    return;
-                }
-            }
-
-            if (isSwipingRef.current && deltaX > 0) {
-                setSwipeX(deltaX * 0.8);
-            }
-        };
-
-        const handleTouchEnd = () => {
-            if (isSwipingRef.current && swipeX > 100) {
-                setIsExiting(true);
-                setSwipeX(window.innerWidth);
-                setTimeout(() => {
-                    onBack();
-                }, 250);
-            } else {
-                setSwipeX(0);
-            }
-            touchStartRef.current = null;
-            isSwipingRef.current = false;
-        };
-
-        document.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleTouchEnd);
-        return () => {
-            document.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchmove', handleTouchMove);
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, [swipeX, onBack]);
-
-    // Style pour le swipe
-    const swipeStyle = {
-        transform: `translateX(${swipeX}px)`,
-        transition: isSwipingRef.current ? 'none' : 'transform 0.25s ease-out',
-        opacity: isExiting ? 1 - swipeX / window.innerWidth : 1,
-    };
+    // Swipe retour avec le hook
+    const { containerStyle } = useSwipeBack(onBack);
 
     // Calculer le nombre de nuits
     const nights = useMemo(() => {
@@ -193,27 +139,37 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
     const handlePaymentSuccess = async () => {
         // Créer la réservation
         if (checkIn && checkOut) {
-            const booking = await createBooking({
-                listingId: listing.id,
-                startDate: checkIn,
-                endDate: checkOut,
-                dogsCount,
-                totalPrice: total,
-                hasFreeCancellation,
-            });
-            setConfirmedBooking(booking);
-            setShowPayment(false);
-            setShowConfirmation(true);
+            try {
+                const booking = await createBooking({
+                    listingId: listing.id,
+                    startDate: checkIn,
+                    endDate: checkOut,
+                    dogsCount,
+                    totalPrice: total,
+                    hasFreeCancellation,
+                });
+                console.log('Réservation créée:', booking);
+                setConfirmedBooking(booking);
+                setShowPayment(false);
+                setShowConfirmation(true);
+            } catch (error) {
+                console.error('Erreur lors de la création de la réservation:', error);
+                alert(error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.');
+                setShowPayment(false);
+            }
         }
     };
-    
+
     // Callback pour aller aux voyages depuis la confirmation
     const handleGoToTrips = () => {
         setShowConfirmation(false);
-        // Naviguer vers les voyages - on utilise onConfirm pour fermer et l'app gère la navigation
         onConfirm();
+        // Naviguer vers les voyages
+        if (onGoToTripsExternal) {
+            onGoToTripsExternal();
+        }
     };
-    
+
     // Callback pour retourner à l'accueil depuis la confirmation
     const handleGoHome = () => {
         setShowConfirmation(false);
@@ -232,9 +188,9 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
     return (
         <>
             {/* Main container - captures all touch events */}
-            <div 
+            <div
                 className="fixed inset-0 z-150 bg-white flex flex-col"
-                style={swipeStyle}
+                style={containerStyle}
             >
                 {/* Header */}
                 <div
@@ -249,7 +205,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                 </div>
 
                 {/* Content - scrollable area */}
-                <div 
+                <div
                     className="flex-1 overflow-y-auto touch-auto overscroll-contain"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
@@ -406,17 +362,17 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                     <button
                         className={'btn-primary btn-full' }
                         onClick={
-                            !checkIn || !checkOut 
+                            !checkIn || !checkOut
                                 ? () => setIsDatePickerOpen(true)
-                                : isBookingValid 
-                                    ? handleNext 
+                                : isBookingValid
+                                    ? handleNext
                                     : undefined
                         }
                         disabled={!!(checkIn && checkOut && !isBookingValid)}
                     >
-                        {!checkIn || !checkOut 
-                            ? 'Choisir les dates' 
-                            : !isBookingValid 
+                        {!checkIn || !checkOut
+                            ? 'Choisir les dates'
+                            : !isBookingValid
                                 ? 'Réservation impossible'
                                 : 'Next'}
                     </button>
@@ -445,7 +401,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm }: BookingRecapProps) 
                     onSuccess={handlePaymentSuccess}
                 />
             )}
-            
+
             {/* Page Confirmation */}
             {showConfirmation && confirmedBooking && checkIn && checkOut && (
                 <BookingConfirmation

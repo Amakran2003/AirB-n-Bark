@@ -32,7 +32,7 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
             }`}
         >
             {/* Backdrop */}
-            <div 
+            <div
                 className="absolute inset-0 bg-black/50"
                 onClick={handleClose}
             />
@@ -95,7 +95,7 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
 
                 {/* Button */}
                 <button
-                    className="btn-primary btn-full btn-lg rounded-xl mt-6"
+                    className="btn-primary btn-full"
                     onClick={handleClose}
                 >
                     J'ai compris

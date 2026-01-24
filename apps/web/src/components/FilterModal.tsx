@@ -1,8 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Calendar, Home, Cat, Star, Dog, Minus, Plus } from 'lucide-react';
+import { X, Calendar, Home, Cat, Star, Dog, Minus, Plus, MapPin, Search, Loader2 } from 'lucide-react';
 import { useFilters, FilterState } from '../contexts/FilterContext';
 import { DatePicker } from './DatePicker';
 import type { ListingType } from '../data/listings';
+
+// Interface pour les suggestions Nominatim
+interface AddressSuggestion {
+    place_id: number;
+    display_name: string;
+    lat: string;
+    lon: string;
+    address?: {
+        city?: string;
+        town?: string;
+        village?: string;
+        municipality?: string;
+    };
+}
 
 /**
  * ==================== FILTER MODAL ====================
@@ -29,10 +43,28 @@ const PRICE_RANGES = [
     { min: 100, max: null, label: '100€+' },
 ];
 
+// Villes populaires pour le filtre
+const POPULAR_CITIES = [
+    'Paris',
+    'Lyon',
+    'Marseille',
+    'Bordeaux',
+    'Toulouse',
+    'Nice',
+    'Nantes',
+    'Strasbourg',
+    'Montpellier',
+    'Lille',
+];
+
 export const FilterModal = () => {
     const { filters, setFilters, resetFilters, isFilterModalOpen, closeFilterModal } = useFilters();
 
     // État local pour les modifications avant d'appliquer
+    const [citySearch, setCitySearch] = useState('');
+    const [citySuggestions, setCitySuggestions] = useState<AddressSuggestion[]>([]);
+    const [isSearchingCity, setIsSearchingCity] = useState(false);
+    const citySearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [localFilters, setLocalFilters] = useState<FilterState>(filters);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
@@ -66,6 +98,58 @@ export const FilterModal = () => {
             setLocalFilters(filters);
         }
     }, [isFilterModalOpen, filters]);
+
+    // Recherche de villes avec l'API Nominatim (OpenStreetMap - gratuit)
+    useEffect(() => {
+        if (citySearch.length < 2) {
+            setCitySuggestions([]);
+            return;
+        }
+
+        if (citySearchTimeoutRef.current) {
+            clearTimeout(citySearchTimeoutRef.current);
+        }
+
+        citySearchTimeoutRef.current = setTimeout(async () => {
+            setIsSearchingCity(true);
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(citySearch)}&countrycodes=fr&limit=5&addressdetails=1&featuretype=city`,
+                    {
+                        headers: {
+                            'Accept-Language': 'fr'
+                        }
+                    }
+                );
+                const data = await response.json();
+                setCitySuggestions(data);
+            } catch (error) {
+                console.error('Erreur recherche ville:', error);
+                setCitySuggestions([]);
+            } finally {
+                setIsSearchingCity(false);
+            }
+        }, 300);
+
+        return () => {
+            if (citySearchTimeoutRef.current) {
+                clearTimeout(citySearchTimeoutRef.current);
+            }
+        };
+    }, [citySearch]);
+
+    // Sélectionner une ville depuis les suggestions
+    const selectCity = (suggestion: AddressSuggestion) => {
+        const cityName = suggestion.address?.city ||
+                         suggestion.address?.town ||
+                         suggestion.address?.village ||
+                         suggestion.address?.municipality ||
+                         suggestion.display_name.split(',')[0].trim();
+
+        setLocalFilters({ ...localFilters, city: cityName });
+        setCitySearch('');
+        setCitySuggestions([]);
+    };
 
     const handleApply = () => {
         setFilters(localFilters);
@@ -198,6 +282,107 @@ export const FilterModal = () => {
                                 </div>
                             </div>
                         </button>
+                    </section>
+
+                    <div className="divider" />
+
+                    {/* ===== VILLE ===== */}
+                    <section className="mb-8">
+                        <h3 className="text-h3 mb-4">Où ?</h3>
+
+                        {/* Champ de recherche */}
+                        <div className="relative mb-4">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                value={citySearch}
+                                onChange={(e) => setCitySearch(e.target.value)}
+                                placeholder="Rechercher une ville..."
+                                className="w-full pl-12 pr-10 py-3 rounded-xl border border-[#dddddd] text-body focus:border-[#222222] focus:outline-none"
+                            />
+                            {isSearchingCity ? (
+                                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+                            ) : citySearch ? (
+                                <button
+                                    onClick={() => {
+                                        setCitySearch('');
+                                        setCitySuggestions([]);
+                                    }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2"
+                                >
+                                    <X className="w-4 h-4 text-gray-400" />
+                                </button>
+                            ) : null}
+                        </div>
+
+                        {/* Ville sélectionnée */}
+                        {localFilters.city && !citySearch && (
+                            <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 rounded-xl">
+                                <MapPin className="w-4 h-4 text-blue-600" />
+                                <span className="text-body-md font-medium text-blue-600">{localFilters.city}</span>
+                                <button
+                                    onClick={() => {
+                                        setLocalFilters({ ...localFilters, city: null });
+                                        setCitySearch('');
+                                    }}
+                                    className="ml-auto"
+                                >
+                                    <X className="w-4 h-4 text-blue-600" />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Suggestions de l'API */}
+                        {citySuggestions.length > 0 && (
+                            <div className="mb-4 rounded-xl border border-[#dddddd] overflow-hidden">
+                                {citySuggestions.map((suggestion, index) => {
+                                    const cityName = suggestion.address?.city ||
+                                                     suggestion.address?.town ||
+                                                     suggestion.address?.village ||
+                                                     suggestion.address?.municipality ||
+                                                     suggestion.display_name.split(',')[0].trim();
+                                    return (
+                                        <button
+                                            key={suggestion.place_id}
+                                            onClick={() => selectCity(suggestion)}
+                                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors ${
+                                                index < citySuggestions.length - 1 ? 'border-b border-gray-100' : ''
+                                            }`}
+                                        >
+                                            <MapPin className="w-5 h-5 text-gray-400 shrink-0" />
+                                            <div className="min-w-0">
+                                                <p className="text-body-md font-medium truncate">{cityName}</p>
+                                                <p className="text-caption text-secondary truncate">{suggestion.display_name}</p>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Villes populaires (affichées seulement si pas de recherche) */}
+                        {!citySearch && (
+                            <>
+                                <p className="text-caption text-secondary mb-2">Villes populaires</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {POPULAR_CITIES.slice(0, 8).map(city => (
+                                        <button
+                                            key={city}
+                                            onClick={() => {
+                                                setLocalFilters({ ...localFilters, city });
+                                            }}
+                                            className={`px-4 py-2 rounded-full text-body-sm transition-colors ${
+                                                localFilters.city === city
+                                                    ? 'bg-[#222222] text-white'
+                                                    : 'bg-gray-100 text-secondary hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {city}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </section>
 
                     <div className="divider" />
@@ -391,7 +576,7 @@ export const FilterModal = () => {
                     className="p-4 border-t border-[#ebebeb] bg-white"
                     style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
-                    <button className="btn-primary btn-full btn-lg" onClick={handleApply}>
+                    <button className="btn-primary btn-full" onClick={handleApply}>
                         Afficher les résultats
                     </button>
                 </div>

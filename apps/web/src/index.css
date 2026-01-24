@@ -17,6 +17,8 @@ html, body {
     /* Couleurs primaires */
     --color-primary: #0066ff;
     --color-primary-dark: #0052cc;
+    --color-secondary: #222222;
+    --color-secondary-dark: #313131;
 
     /* Couleurs neutres */
     --color-text-primary: #222222;
@@ -954,7 +956,7 @@ body {
 }
 
 /* Bouton primaire */
-.btn-primary {
+/* .btn-primary {
     padding: 14px 28px;
     background-color: var(--color-primary);
     color: white;
@@ -964,11 +966,7 @@ body {
     border-radius: var(--radius-full);
     cursor: pointer;
     transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-    background-color: var(--color-primary-dark);
-}
+} */
 
 .btn-primary:active {
     opacity: 0.9;

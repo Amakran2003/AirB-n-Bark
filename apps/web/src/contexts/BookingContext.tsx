@@ -1,4 +1,23 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { api, getAuthToken } from '../services/api';
+import type { Booking as ApiBooking, CreateBookingRequest } from '../types/api.types';
+
+/**
+ * ==================== BOOKING CONTEXT ====================
+ * Gestion des reservations utilisateur
+ *
+ * Architecture API-Ready:
+ * - USE_API = true  → appels API réels
+ * - USE_API = false → localStorage (par défaut)
+ *
+ * Endpoints API:
+ * - GET /api/bookings → liste des reservations
+ * - POST /api/bookings → creer une reservation
+ * - POST /api/bookings/:id/cancel → annuler
+ */
+
+// Toggle pour activer l'API
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 /**
  * ==================== TYPES ====================
@@ -13,9 +32,16 @@ export interface Booking {
     dogsCount: number;
     totalPrice: number;
     hasFreeCancellation: boolean; // Si l'annonce permet l'annulation gratuite
-    status: 'pending' | 'confirmed' | 'cancelled';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'rejected';
     createdAt: string;
     updatedAt: string;
+    // Dénormalisé pour l'affichage (depuis l'API)
+    listingTitle?: string;
+    listingImage?: string;
+    listingLocation?: string;
+    listingPrice?: number;
+    hostName?: string;
+    hostAvatar?: string;
 }
 
 interface BookingContextType {
@@ -62,6 +88,29 @@ const generateBookingNumber = (): string => {
     return result;
 };
 
+// Helper pour convertir ApiBooking en Booking local
+const mapApiBooking = (apiBooking: ApiBooking): Booking => ({
+    id: apiBooking.id,
+    bookingNumber: apiBooking.bookingNumber || `BARK-${apiBooking.id.slice(0, 6).toUpperCase()}`,
+    listingId: apiBooking.listingId,
+    userId: apiBooking.userId,
+    startDate: apiBooking.startDate,
+    endDate: apiBooking.endDate,
+    dogsCount: apiBooking.guests,
+    totalPrice: apiBooking.totalPrice,
+    hasFreeCancellation: true, // TODO: get from listing
+    status: apiBooking.status === 'completed' ? 'confirmed' : apiBooking.status,
+    createdAt: apiBooking.createdAt,
+    updatedAt: apiBooking.createdAt,
+    // Champs dénormalisés
+    listingTitle: (apiBooking as any).listingTitle,
+    listingImage: (apiBooking as any).listingImage,
+    listingLocation: (apiBooking as any).listingLocation,
+    listingPrice: (apiBooking as any).listingPrice,
+    hostName: (apiBooking as any).hostName,
+    hostAvatar: (apiBooking as any).hostAvatar,
+});
+
 /**
  * ==================== PROVIDER ====================
  */
@@ -73,46 +122,128 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // État pour forcer le rechargement quand l'auth change
+    const [authTrigger, setAuthTrigger] = useState(0);
 
-    // Charger les réservations depuis localStorage au démarrage
+    // Écouter les changements d'authentification
     useEffect(() => {
-        const stored = localStorage.getItem('airbnbark_bookings');
-        if (stored) {
-            try {
-                setBookings(JSON.parse(stored));
-            } catch {
-                console.error('Erreur lors du chargement des réservations');
+        const handleAuthChange = () => {
+            console.log('🔄 Auth changed, reloading bookings...');
+            setAuthTrigger(prev => prev + 1);
+        };
+
+        // Écouter l'événement personnalisé de login/logout
+        window.addEventListener('auth-changed', handleAuthChange);
+        // Écouter aussi les changements de localStorage (pour sync entre onglets)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'airbnbark_token') {
+                handleAuthChange();
             }
-        }
+        });
+
+        return () => {
+            window.removeEventListener('auth-changed', handleAuthChange);
+        };
     }, []);
 
-    // Sauvegarder les réservations dans localStorage
+    // Charger les réservations au démarrage et quand l'auth change
     useEffect(() => {
-        if (bookings.length > 0) {
+        const loadBookings = async () => {
+            const token = getAuthToken();
+            console.log('📚 Loading bookings, token exists:', !!token);
+
+            // Ne pas charger si pas de token (pas connecté)
+            if (USE_API && !token) {
+                setBookings([]);
+                return;
+            }
+
+            if (USE_API) {
+                setIsLoading(true);
+                const response = await api.bookings.getAll();
+                console.log('Bookings API response:', response);
+                if (response.success && response.data?.bookings) {
+                    setBookings(response.data.bookings.map(mapApiBooking));
+                } else if (response.success && Array.isArray(response.data)) {
+                    // Fallback si l'API renvoie un tableau directement
+                    setBookings(response.data.map(mapApiBooking));
+                } else {
+                    setBookings([]);
+                }
+                setIsLoading(false);
+            } else {
+                // Fallback localStorage
+                const stored = localStorage.getItem('airbnbark_bookings');
+                if (stored) {
+                    try {
+                        setBookings(JSON.parse(stored));
+                    } catch {
+                        console.error('Erreur lors du chargement des réservations');
+                    }
+                }
+            }
+        };
+        loadBookings();
+    }, [authTrigger]);
+
+    // Sauvegarder les réservations dans localStorage (mode local uniquement)
+    useEffect(() => {
+        if (!USE_API && bookings.length > 0) {
             localStorage.setItem('airbnbark_bookings', JSON.stringify(bookings));
         }
     }, [bookings]);
 
     // Rafraîchir les réservations
-    // TODO: Connecter à l'API backend
     const refreshBookings = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        // TODO: fetch depuis l'API
+
+        if (USE_API) {
+            const response = await api.bookings.getAll();
+            if (response.success) {
+                setBookings(response.data.bookings.map(mapApiBooking));
+            } else {
+                setError(response.error.message);
+            }
+        }
+
         setIsLoading(false);
     }, []);
 
     // Créer une nouvelle réservation
-    // TODO: Connecter à l'API backend
     const createBooking = useCallback(async (data: CreateBookingData): Promise<Booking> => {
         setIsLoading(true);
         setError(null);
 
+        if (USE_API) {
+            const apiData: CreateBookingRequest = {
+                listingId: data.listingId,
+                startDate: data.startDate,
+                endDate: data.endDate,
+                guestsCount: data.dogsCount,
+            };
+
+            const response = await api.bookings.create(apiData);
+            setIsLoading(false);
+
+            if (response.success) {
+                const booking = mapApiBooking(response.data);
+                setBookings((prev) => [...prev, booking]);
+                // Rafraîchir pour s'assurer de la synchronisation
+                refreshBookings();
+                return booking;
+            } else {
+                setError(response.error.message);
+                throw new Error(response.error.message);
+            }
+        }
+
+        // Mode local
         const newBooking: Booking = {
             id: generateId(),
             bookingNumber: generateBookingNumber(),
             listingId: data.listingId,
-            userId: 'user-1', // TODO: Récupérer depuis AuthContext
+            userId: 'user-1',
             startDate: data.startDate,
             endDate: data.endDate,
             dogsCount: data.dogsCount,
@@ -123,7 +254,6 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
             updatedAt: new Date().toISOString(),
         };
 
-        // TODO: POST vers l'API
         setBookings((prev) => [...prev, newBooking]);
         setIsLoading(false);
         return newBooking;
@@ -155,12 +285,30 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     }, [bookings]);
 
     // Annuler une réservation
-    // TODO: Connecter à l'API backend
     const cancelBooking = useCallback(async (id: string): Promise<boolean> => {
         setIsLoading(true);
         setError(null);
 
-        // TODO: DELETE vers l'API
+        if (USE_API) {
+            const response = await api.bookings.cancel(id);
+            setIsLoading(false);
+
+            if (response.success) {
+                setBookings((prev) =>
+                    prev.map((b) =>
+                        b.id === id
+                            ? { ...b, status: 'cancelled' as const, updatedAt: new Date().toISOString() }
+                            : b
+                    )
+                );
+                return true;
+            } else {
+                setError(response.error.message);
+                return false;
+            }
+        }
+
+        // Mode local
         setBookings((prev) =>
             prev.map((b) =>
                 b.id === id

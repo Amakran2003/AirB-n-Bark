@@ -5,18 +5,27 @@ import { SwipeCard } from '../components/SwipeCard';
 import { BookingRecap } from '../components/BookingRecap';
 import { ChatBot } from '../components/ChatBot';
 import { ListingDetails } from './ListingDetails';
-import { getListingById, ListingCardData } from '../data/listings';
+import { getListingById, ListingCardData, ListingFullData } from '../data/listings';
 import { useFilters } from '../contexts/FilterContext';
+import { api } from '../services/api';
 import type { TutorialStepId } from '../components/TutorialOverlay';
+
+// Toggle API
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 /**
  * ==================== PAGE HOME ====================
  * Page principale avec cartes swipables style Tinder
- * - Header avec bouton Filtre et icône Bot
+ * - Header avec bouton Filtre et icone Bot
  * - Pile de cartes swipables pour parcourir les annonces
- * - Swipe gauche = passer, Swipe droite = réservation (ouvre récap)
+ * - Swipe gauche = passer, Swipe droite = reservation (ouvre recap)
  * - Swipe haut / clic = ouvrir la page description
  * - Bottom navigation
+ *
+ * TODO API:
+ * - GET /api/listings → recuperer les annonces (avec pagination)
+ * - GET /api/listings?filters=... → filtrage cote serveur
+ * - POST /api/listings/:id/skip → enregistrer un swipe gauche (analytics)
  */
 
 interface HomeProps {
@@ -42,6 +51,10 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
 
     // ChatBot ouvert
     const [isChatBotOpen, setIsChatBotOpen] = useState(false);
+
+    // Données complètes du listing sélectionné (chargées via API)
+    const [selectedListingData, setSelectedListingData] = useState<ListingFullData | null>(null);
+    const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
     /**
      * Gestion du swipe gauche (passer)
@@ -111,10 +124,40 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
     }, [filteredListings]);
 
     // Cartes restantes à afficher
-    const remainingCards = filteredListings.slice(currentIndex);
+    const remainingCards = (filteredListings || []).slice(currentIndex);
 
-    // Récupérer les données complètes de l'annonce sélectionnée
-    const selectedListingData = selectedListing ? getListingById(selectedListing) : null;
+    // Charger les détails du listing quand sélectionné
+    useEffect(() => {
+        if (!selectedListing) {
+            setSelectedListingData(null);
+            return;
+        }
+
+        const loadDetails = async () => {
+            if (USE_API) {
+                setIsLoadingDetails(true);
+                const response = await api.listings.getById(selectedListing);
+                if (response.success && response.data) {
+                    // Mapper la réponse API vers le format frontend
+                    setSelectedListingData(response.data as unknown as ListingFullData);
+                }
+                setIsLoadingDetails(false);
+            } else {
+                // Fallback mock data
+                setSelectedListingData(getListingById(selectedListing));
+            }
+        };
+        loadDetails();
+    }, [selectedListing]);
+
+    // Chargement des détails
+    if (selectedListing && isLoadingDetails) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-primary">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent" />
+            </div>
+        );
+    }
 
     // Si le récap de réservation est ouvert
     if (bookingListing) {
@@ -126,6 +169,7 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                     setBookingListing(null);
                 }}
                 onConfirm={handleConfirmBooking}
+                onGoToTrips={() => onTabChange?.('trips')}
             />
         );
     }
@@ -160,8 +204,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
             />
         );
     }
-
-    // const isProfileView = activeTab === 'profile';
 
     return (
         <div className="h-screen flex flex-col bg-primary">

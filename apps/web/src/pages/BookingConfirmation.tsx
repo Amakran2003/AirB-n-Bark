@@ -2,16 +2,32 @@ import { useState, useEffect } from 'react';
 import { Check, MessageCircle, Key, Calendar, Dog, MapPin, Home, Copy, CheckCircle } from 'lucide-react';
 import type { ListingCardData } from '../data/listings';
 import { MOCK_LISTINGS_FULL } from '../data/listings';
+import { api } from '../services/api';
 
 /**
  * ==================== PAGE BOOKING CONFIRMATION ====================
- * Page de confirmation après paiement réussi
- * - Animation "Merci pour votre réservation"
- * - Numéro de réservation unique
- * - Récap de la réservation
- * - Contact propriétaire
- * - Instructions d'accès au logement
+ * Page de confirmation apres paiement reussi
+ * - Animation de confirmation
+ * - Numero de reservation unique
+ * - Recap de la reservation
+ * - Contact proprietaire
+ * - Instructions d'acces au logement
+ *
+ * TODO API:
+ * - GET /api/bookings/:id → recuperer les details de la reservation
+ * - GET /api/listings/:id/access → instructions d'acces (code, wifi, parking)
+ * - POST /api/bookings/:id/contact-host → envoyer un message a l'hote
  */
+
+interface ListingInstructions {
+    checkInTime?: string;
+    checkOutTime?: string;
+    accessCode?: string;
+    wifiName?: string;
+    wifiPassword?: string;
+    parkingInfo?: string;
+    specialNotes?: string;
+}
 
 interface BookingConfirmationProps {
     listing: ListingCardData;
@@ -40,21 +56,37 @@ export const BookingConfirmation = ({
     const [showConfetti, setShowConfetti] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
+    const [listingInstructions, setListingInstructions] = useState<ListingInstructions | null>(null);
 
     // Récupérer les données complètes de l'annonce
     const fullListing = MOCK_LISTINGS_FULL[listing.id];
+
+    // Récupérer les instructions depuis l'API
+    useEffect(() => {
+        const fetchInstructions = async () => {
+            try {
+                const response = await api.listings.getById(listing.id);
+                if (response.success && response.data?.instructions) {
+                    setListingInstructions(response.data.instructions as ListingInstructions);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des instructions:', error);
+            }
+        };
+        fetchInstructions();
+    }, [listing.id]);
 
     // Animation séquencée
     useEffect(() => {
         // Confetti immédiat
         setShowConfetti(true);
-        
+
         // Check après 300ms
         const checkTimer = setTimeout(() => setShowCheck(true), 300);
-        
+
         // Contenu après 800ms
         const contentTimer = setTimeout(() => setShowContent(true), 800);
-        
+
         // Arrêter les confetti après 3s
         const confettiTimer = setTimeout(() => setShowConfetti(false), 3000);
 
@@ -88,16 +120,17 @@ export const BookingConfirmation = ({
         }
     };
 
-    // Instructions d'accès (mock pour l'instant)
-    const accessInstructions = fullListing?.host ? {
-        checkInTime: '15h00',
-        checkOutTime: '11h00',
-        accessCode: '1234#',
-        parkingInfo: 'Espace pour garer ta laisse devant la niche 🅿️',
-        wifiName: 'NicheWifi',
-        wifiPassword: 'woofwoof2024',
-        specialNotes: 'Ta gamelle d\'eau fraîche t\'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴',
-    } : null;
+    // Instructions d'accès - priorité aux instructions de l'API, sinon mock
+    const accessInstructions = {
+        checkInTime: listingInstructions?.checkInTime || '15h00',
+        checkOutTime: listingInstructions?.checkOutTime || '11h00',
+        accessCode: listingInstructions?.accessCode || '1234#',
+        parkingInfo: listingInstructions?.parkingInfo || 'Espace pour garer ta laisse devant la niche 🅿️',
+        wifiName: listingInstructions?.wifiName || 'NicheWifi',
+        wifiPassword: listingInstructions?.wifiPassword || 'woofwoof2024',
+        specialNotes: listingInstructions?.specialNotes || 'Ta gamelle d\'eau fraîche t\'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴',
+        hasCustomInstructions: !!listingInstructions,
+    };
 
     return (
         <div className="fixed inset-0 z-200 bg-white flex flex-col overflow-hidden">
@@ -119,9 +152,9 @@ export const BookingConfirmation = ({
             )}
 
             {/* Content */}
-            <div 
+            <div
                 className="flex-1 overflow-y-auto"
-                style={{ 
+                style={{
                     paddingTop: 'env(safe-area-inset-top)',
                     paddingBottom: 'calc(100px + env(safe-area-inset-bottom))',
                 }}
@@ -129,7 +162,7 @@ export const BookingConfirmation = ({
                 {/* Success animation */}
                 <div className="flex flex-col items-center justify-center py-12 px-6">
                     {/* Animated check circle */}
-                    <div 
+                    <div
                         className={`w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center mb-6 transition-all duration-500 ${
                             showCheck ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
                         }`}
@@ -138,14 +171,14 @@ export const BookingConfirmation = ({
                     </div>
 
                     {/* Thank you message */}
-                    <h1 
+                    <h1
                         className={`text-2xl font-semibold text-center mb-2 transition-all duration-500 delay-200 ${
                             showCheck ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                     >
                         Woof ! Ta résa est confirmée ! 🐕
                     </h1>
-                    <p 
+                    <p
                         className={`text-secondary text-center transition-all duration-500 delay-300 ${
                             showCheck ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
@@ -155,7 +188,7 @@ export const BookingConfirmation = ({
                 </div>
 
                 {/* Booking details */}
-                <div 
+                <div
                     className={`px-6 transition-all duration-700 ${
                         showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                     }`}
@@ -167,7 +200,7 @@ export const BookingConfirmation = ({
                             <span className="text-xl font-mono font-semibold tracking-wider">
                                 {bookingNumber}
                             </span>
-                            <button 
+                            <button
                                 onClick={copyBookingNumber}
                                 className="p-2 rounded-full hover:bg-gray-200 transition-colors"
                             >
@@ -200,7 +233,7 @@ export const BookingConfirmation = ({
                     {/* Reservation details */}
                     <div className="space-y-4 mb-6">
                         <h2 className="text-h3">Ton séjour</h2>
-                        
+
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                                 <Calendar className="w-5 h-5 text-secondary" />
@@ -297,7 +330,7 @@ export const BookingConfirmation = ({
                                             Arrivée : {accessInstructions.checkInTime} • Départ : {accessInstructions.checkOutTime}
                                         </p>
                                     </div>
-                                    
+
                                     <div>
                                         <p className="text-caption text-secondary mb-1">Code d'accès</p>
                                         <p className="text-body-sm font-mono bg-gray-100 px-3 py-2 rounded-lg">
@@ -330,7 +363,7 @@ export const BookingConfirmation = ({
             </div>
 
             {/* Bottom buttons */}
-            <div 
+            <div
                 className="shrink-0 bg-white border-t border-[#ebebeb] px-4 sm:px-6 py-4"
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
@@ -361,7 +394,7 @@ export const BookingConfirmation = ({
                     top: -20px;
                     animation: fall 3s linear forwards;
                 }
-                
+
                 @keyframes fall {
                     0% {
                         transform: translateY(0) rotate(0deg);

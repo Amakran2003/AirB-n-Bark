@@ -128,6 +128,7 @@ export interface ListingCardData {
     antiCat: AntiCatOption;
     maxDogs: number; // Nombre max de chiens acceptés
     availableDateRanges: DateRange[]; // Plages de dates où l'annonce est disponible
+    instructions?: string; // Instructions d'arrivée (optionnel, visible après réservation)
 }
 
 // Données complètes pour la page détail
@@ -1133,29 +1134,60 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
 /**
  * ==================== FONCTIONS UTILITAIRES ====================
  * Helpers pour récupérer les données (simule une API)
+ *
+ * TODO API:
+ * - GET /api/listings → remplacer getListings()
+ * - GET /api/listings/:id → remplacer getListingById()
+ * - GET /api/listings?favorites=id1,id2 → remplacer getFavorites()
+ * - GET /api/listings?type=niche → remplacer getListingsByType()
+ * - GET /api/listings?antiCat=true → remplacer getAntiCatListings()
  */
 
-// Récupérer toutes les annonces (cartes)
+// Clé localStorage pour les annonces créées par les hôtes
+const LISTINGS_STORAGE_KEY = 'airbnbark_host_listings';
+
+// Récupérer les annonces du localStorage (créées par les hôtes)
+const getHostListings = (): ListingFullData[] => {
+    try {
+        const stored = localStorage.getItem(LISTINGS_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+};
+
+// Récupérer toutes les annonces (cartes) - mock + localStorage
 export const getListings = (): ListingCardData[] => {
-    return MOCK_LISTINGS;
+    const hostListings = getHostListings();
+    // On combine les mock + celles du localStorage
+    return [...MOCK_LISTINGS, ...hostListings];
 };
 
 // Récupérer une annonce complète par ID
 export const getListingById = (id: string): ListingFullData | null => {
-    return MOCK_LISTINGS_FULL[id] || null;
+    // D'abord chercher dans les mocks
+    if (MOCK_LISTINGS_FULL[id]) {
+        return MOCK_LISTINGS_FULL[id];
+    }
+    // Sinon chercher dans le localStorage (annonces créées par hôtes)
+    const hostListings = getHostListings();
+    return hostListings.find(l => l.id === id) || null;
 };
 
 // Récupérer les favoris (pour plus tard)
 export const getFavorites = (ids: string[]): ListingCardData[] => {
-    return MOCK_LISTINGS.filter((listing) => ids.includes(listing.id));
+    const allListings = getListings();
+    return allListings.filter((listing) => ids.includes(listing.id));
 };
 
 // Filtrer par type de logement
 export const getListingsByType = (type: ListingType): ListingCardData[] => {
-    return MOCK_LISTINGS.filter((listing) => listing.type === type);
+    const allListings = getListings();
+    return allListings.filter((listing) => listing.type === type);
 };
 
 // Filtrer les annonces avec option Anti-Chat disponible
 export const getAntiCatListings = (): ListingCardData[] => {
-    return MOCK_LISTINGS.filter((listing) => listing.antiCat.available);
+    const allListings = getListings();
+    return allListings.filter((listing) => listing.antiCat.available);
 };

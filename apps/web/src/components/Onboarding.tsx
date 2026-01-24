@@ -29,7 +29,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     const [isExiting, setIsExiting] = useState(false);
     const [isFading, setIsFading] = useState(false);
     const [showIOSPrompt, setShowIOSPrompt] = useState(false);
-    
+
     const { isInstallable, isIOSSafari, isInstalled, promptInstall } = usePWAInstall();
 
     // Auto-scroll des quotes
@@ -69,7 +69,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         if (isInstallable) {
             await promptInstall();
         }
-        
+
         // Continuer vers le tutoriel
         proceedToTutorial();
     };
@@ -128,7 +128,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                 style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' }}
             >
                 <button
-                    className="btn-primary btn-full btn-lg rounded-xl"
+                    className="btn-primary btn-full"
                     onClick={handleStart}
                 >
                     Commencer
@@ -136,9 +136,9 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
             </div>
 
             {/* iOS Install Prompt */}
-            <IOSInstallPrompt 
-                isOpen={showIOSPrompt} 
-                onClose={handleIOSPromptClose} 
+            <IOSInstallPrompt
+                isOpen={showIOSPrompt}
+                onClose={handleIOSPromptClose}
             />
         </div>
     );

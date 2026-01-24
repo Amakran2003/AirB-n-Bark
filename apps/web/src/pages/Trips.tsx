@@ -1,32 +1,38 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, Calendar, MapPin, MoreHorizontal, X, AlertTriangle, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, MapPin, MoreHorizontal, X, AlertTriangle, Check } from 'lucide-react';
 import { BottomNavbar } from '../components/BottomNavbar';
+import { EmptyState } from '../components/EmptyState';
 import { useBookings, Booking } from '../contexts/BookingContext';
 import { getListingById } from '../data/listings';
 import { CANCELLATION_FEE_PERCENT } from './Payment';
+import { formatDateRange, calculateNights } from '../utils/dateFormatters';
 
 /**
- * ==================== PAGE TRIPS (MES RÉSERVATIONS) ====================
- * Affiche toutes les réservations de l'utilisateur
- * - Réservations à venir / passées
- * - Possibilité d'annuler ou modifier
- * - Swipe pour retourner à Home
+ * ==================== PAGE TRIPS (MES RESERVATIONS) ====================
+ * Affiche toutes les reservations de l'utilisateur
+ * - Reservations a venir / passees
+ * - Possibilite d'annuler ou modifier
+ *
+ * TODO API:
+ * - GET /api/bookings → recuperer les reservations de l'utilisateur
+ * - GET /api/bookings/:id → details d'une reservation
+ * - PUT /api/bookings/:id → modifier les dates
+ * - DELETE /api/bookings/:id → annuler une reservation
+ * - POST /api/bookings/:id/cancel → annulation avec calcul des frais
  */
 
 interface TripsProps {
-    onBack: () => void;
-    onTabChange: (tab: 'home' | 'trips' | 'messages' | 'profile') => void;
+    onTabChange?: (tab: 'home' | 'trips' | 'messages' | 'profile') => void;
 }
 
 type BookingTab = 'upcoming' | 'past';
 
-export const Trips = ({ onBack, onTabChange }: TripsProps) => {
+export const Trips = ({ onTabChange }: TripsProps) => {
     const { bookings, cancelBooking } = useBookings();
     const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showModifyModal, setShowModifyModal] = useState(false);
-    const [isExiting, setIsExiting] = useState(false);
 
     // Séparer les réservations à venir et passées
     const today = new Date();
@@ -34,38 +40,15 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
 
     const upcomingBookings = bookings.filter((b) => {
         const endDate = new Date(b.endDate);
-        return endDate >= today && b.status !== 'cancelled';
+        return endDate >= today && b.status !== 'cancelled' && b.status !== 'rejected';
     });
 
     const pastBookings = bookings.filter((b) => {
         const endDate = new Date(b.endDate);
-        return endDate < today || b.status === 'cancelled';
+        return endDate < today || b.status === 'cancelled' || b.status === 'rejected';
     });
 
     const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
-
-    // Formater la date
-    const formatDate = (dateStr: string): string => {
-        const date = new Date(dateStr + 'T00:00:00');
-        return date.toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'short',
-        });
-    };
-
-    const formatDateRange = (startDate: string, endDate: string): string => {
-        const start = formatDate(startDate);
-        const end = formatDate(endDate);
-        const endYear = new Date(endDate + 'T00:00:00').getFullYear();
-        return `${start} - ${end} ${endYear}`;
-    };
-
-    // Calculer le nombre de nuits
-    const calculateNights = (startDate: string, endDate: string): number => {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    };
 
     // Gérer l'annulation
     const handleCancel = () => {
@@ -76,78 +59,14 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
         }
     };
 
-    // Swipe retour
-    const [swipeX, setSwipeX] = useState(0);
-    const [isSwiping, setIsSwiping] = useState(false);
-    const touchStartRef = { current: null as { x: number; y: number } | null };
-
-    useEffect(() => {
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            setIsSwiping(false);
-        };
-
-        const handleTouchMove = (e: TouchEvent) => {
-            if (!touchStartRef.current) return;
-            const deltaX = e.touches[0].clientX - touchStartRef.current.x;
-            const deltaY = e.touches[0].clientY - touchStartRef.current.y;
-
-            if (!isSwiping) {
-                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 20) {
-                    setIsSwiping(true);
-                } else if (Math.abs(deltaY) > 10) {
-                    touchStartRef.current = null;
-                    return;
-                }
-            }
-
-            if (isSwiping && deltaX > 0) {
-                setSwipeX(deltaX * 0.8);
-            }
-        };
-
-        const handleTouchEnd = () => {
-            if (isSwiping && swipeX > 100) {
-                setIsExiting(true);
-                setSwipeX(window.innerWidth);
-                setTimeout(() => {
-                    onBack();
-                }, 250);
-            } else {
-                setSwipeX(0);
-            }
-            touchStartRef.current = null;
-            setIsSwiping(false);
-        };
-
-        document.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleTouchEnd);
-        return () => {
-            document.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchmove', handleTouchMove);
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, [isSwiping, swipeX, onBack]);
-
-    const swipeStyle = {
-        transform: `translateX(${swipeX}px)`,
-        transition: isSwiping ? 'none' : 'transform 0.25s ease-out',
-        opacity: isExiting ? 1 - swipeX / window.innerWidth : 1,
-    };
-
     return (
-        <div className="h-screen flex flex-col bg-white" style={swipeStyle}>
+        <div className="fixed inset-0 bg-white flex flex-col">
             {/* Header */}
             <header
-                className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-[#ebebeb]"
+                className="shrink-0 flex items-center justify-center px-4 py-4 border-b border-[#ebebeb]"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
-                <button className="btn-icon" onClick={onBack}>
-                    <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-h3 font-semibold">Mes voyages</span>
-                <div className="w-10" />
+                <h1 className="text-h2">Mes voyages</h1>
             </header>
 
             {/* Tabs */}
@@ -175,36 +94,42 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div
+                className="flex-1 overflow-y-auto"
+                style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
+            >
                 {displayedBookings.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full px-8 text-center">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                            <Calendar className="w-10 h-10 text-gray-400" />
-                        </div>
-                        <h3 className="text-h2 mb-2">
-                            {activeTab === 'upcoming'
-                                ? 'Aucun voyage prévu'
-                                : 'Aucun voyage passé'}
-                        </h3>
-                        <p className="text-body text-secondary">
-                            {activeTab === 'upcoming'
-                                ? 'Swipe sur les annonces pour trouver ta prochaine niche de rêve ! 🐕'
-                                : 'Tes anciens voyages s\'afficheront ici.'}
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Calendar}
+                        title={activeTab === 'upcoming' ? 'Aucun voyage prévu' : 'Aucun voyage passé'}
+                        description={activeTab === 'upcoming'
+                            ? 'Swipe sur les annonces pour trouver ta prochaine niche de reve'
+                            : 'Tes anciens voyages s\'afficheront ici'}
+                    />
                 ) : (
                     <div className="p-4 space-y-4">
                         {displayedBookings.map((booking) => {
-                            const listing = getListingById(booking.listingId);
+                            // Utiliser les données dénormalisées du booking, sinon fallback sur getListingById
+                            const listing = booking.listingTitle ? {
+                                id: booking.listingId,
+                                title: booking.listingTitle,
+                                subtitle: booking.listingLocation || '',
+                                image: booking.listingImage || '/placeholder-dog.svg',
+                                location: booking.listingLocation || '',
+                                price: booking.listingPrice || (booking.totalPrice / calculateNights(booking.startDate, booking.endDate)),
+                            } : getListingById(booking.listingId);
+
                             if (!listing) return null;
 
                             const nights = calculateNights(booking.startDate, booking.endDate);
                             const isCancelled = booking.status === 'cancelled';
+                            const isRejected = booking.status === 'rejected';
+                            const isInactive = isCancelled || isRejected;
 
                             return (
                                 <div
                                     key={booking.id}
-                                    className={`card p-4 ${isCancelled ? 'opacity-60' : ''}`}
+                                    className={`card p-4 ${isInactive ? 'opacity-60' : ''}`}
                                 >
                                     <div className="flex gap-4">
                                         <img
@@ -222,7 +147,7 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
                                                         {listing.title}
                                                     </h3>
                                                 </div>
-                                                {!isCancelled && activeTab === 'upcoming' && (
+                                                {!isInactive && activeTab === 'upcoming' && (
                                                     <button
                                                         className="btn-icon shrink-0"
                                                         onClick={() => {
@@ -251,12 +176,17 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
                                                 <span className="text-body-md font-medium">
                                                     €{listing.price * nights}
                                                 </span>
-                                                {isCancelled && (
+                                                {isRejected && (
                                                     <span className="px-2 py-1 bg-red-100 text-red-700 text-caption rounded-full">
+                                                        Refusée
+                                                    </span>
+                                                )}
+                                                {isCancelled && (
+                                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-caption rounded-full">
                                                         Annulée
                                                     </span>
                                                 )}
-                                                {booking.status === 'confirmed' && !isCancelled && (
+                                                {booking.status === 'confirmed' && !isInactive && (
                                                     <span className="px-2 py-1 bg-green-100 text-green-700 text-caption rounded-full">
                                                         Confirmée
                                                     </span>
@@ -319,7 +249,7 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
                                         setShowCancelModal(true);
                                     }}
                                 >
-                                    Annuler le séjour 😿
+                                    Annuler le sejour
                                 </button>
                             </div>
                         </div>
@@ -330,8 +260,8 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
             {/* Modal Confirmation Annulation */}
             {showCancelModal && selectedBooking && (() => {
                 const hasFreeCancellation = selectedBooking.hasFreeCancellation;
-                const cancellationFee = hasFreeCancellation 
-                    ? 0 
+                const cancellationFee = hasFreeCancellation
+                    ? 0
                     : Math.round(selectedBooking.totalPrice * CANCELLATION_FEE_PERCENT);
                 const refundAmount = selectedBooking.totalPrice - cancellationFee;
 
@@ -356,7 +286,7 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
                                     <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl mb-3">
                                         <Check className="w-5 h-5 text-green-600 shrink-0" />
                                         <p className="text-sm text-green-700">
-                                            Annulation gratuite ! Tu seras remboursé intégralement. 🎉
+                                            Annulation gratuite ! Tu seras rembourse integralement
                                         </p>
                                     </div>
                                     <p className="text-body text-secondary">
@@ -369,10 +299,10 @@ export const Trips = ({ onBack, onTabChange }: TripsProps) => {
                                         <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                                         <div>
                                             <p className="text-sm text-amber-700 font-medium">
-                                                Aïe, des frais s'appliquent 🐾
+                                                Aie, des frais s'appliquent
                                             </p>
                                             <p className="text-sm text-amber-600 mt-1">
-                                                Cette niche n'offre pas l'annulation gratuite. 
+                                                Cette niche n'offre pas l'annulation gratuite.
                                                 {Math.round(CANCELLATION_FEE_PERCENT * 100)}% de frais seront prélevés sur tes croquettes.
                                             </p>
                                         </div>

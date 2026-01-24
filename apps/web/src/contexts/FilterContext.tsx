@@ -1,12 +1,23 @@
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import type { ListingType, ListingCardData } from '../data/listings';
-import { MOCK_LISTINGS } from '../data/listings';
+import { getListings } from '../data/listings';
+import type { ListingCard, ListingsFilters } from '../types/api.types';
+import { api } from '../services/api';
 
 /**
  * ==================== FILTER CONTEXT ====================
  * Gestion globale des filtres de recherche
- * Prêt pour connexion API
+ *
+ * Architecture API-Ready:
+ * - USE_API = true  → appels API réels
+ * - USE_API = false → mock data local (par défaut)
+ *
+ * Endpoints API:
+ * - GET /api/listings?filters=... → filtrage cote serveur
  */
+
+// Toggle pour activer l'API (mettre à true quand le backend est prêt)
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 export interface FilterState {
     // Dates
@@ -41,8 +52,12 @@ interface FilterContextType {
     openFilterModal: () => void;
     closeFilterModal: () => void;
     activeFiltersCount: number;
-    // Nouveau: listings filtrés
+    // Listings filtrés
     filteredListings: ListingCardData[];
+    // États de chargement pour API
+    isLoading: boolean;
+    error: string | null;
+    refetch: () => void;
 }
 
 const defaultFilters: FilterState = {
@@ -62,6 +77,11 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
     const [filters, setFiltersState] = useState<FilterState>(defaultFilters);
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+    // États API
+    const [apiListings, setApiListings] = useState<ListingCard[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const setFilters = (newFilters: Partial<FilterState>) => {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
@@ -86,11 +106,54 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     ].filter(Boolean).length;
 
     /**
-     * Filtrage local des listings
-     * TODO: Remplacer par appel API quand le backend sera prêt
+     * Fetch listings depuis l'API
      */
-    const filteredListings = useMemo(() => {
-        let result = [...MOCK_LISTINGS];
+    const fetchFromApi = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+
+        const apiFilters: ListingsFilters = {
+            city: filters.city || undefined,
+            startDate: filters.checkIn || undefined,
+            endDate: filters.checkOut || undefined,
+            minCapacity: filters.dogsCount > 1 ? filters.dogsCount : undefined,
+            type: filters.listingTypes.length > 0 ? filters.listingTypes : undefined,
+            minPrice: filters.priceMin || undefined,
+            maxPrice: filters.priceMax || undefined,
+            minRating: filters.minRating || undefined,
+            antiCat: filters.antiCatOnly || undefined,
+        };
+
+        const response = await api.listings.getAll(apiFilters);
+
+        if (response.success && response.data?.listings) {
+            setApiListings(response.data.listings);
+        } else if (response.success) {
+            // L'API peut retourner directement un tableau ou un objet vide
+            setApiListings(Array.isArray(response.data) ? response.data : []);
+        } else {
+            setError(response.error?.message || 'Erreur de chargement');
+            setApiListings([]);
+        }
+
+        setIsLoading(false);
+    }, [filters]);
+
+    // Refetch quand USE_API est actif et les filtres changent
+    useEffect(() => {
+        if (USE_API) {
+            fetchFromApi();
+        }
+    }, [fetchFromApi]);
+
+    /**
+     * Filtrage local des listings (fallback quand API désactivée)
+     */
+    const localFilteredListings = useMemo(() => {
+        if (USE_API) return []; // Ne pas calculer si on utilise l'API
+
+        // Récupère les mocks + les annonces créées par les hôtes (localStorage)
+        let result = [...getListings()];
 
         // Filtre par type de logement
         if (filters.listingTypes.length > 0) {
@@ -126,7 +189,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         if (filters.checkIn && filters.checkOut) {
             const checkInDate = new Date(filters.checkIn);
             const checkOutDate = new Date(filters.checkOut);
-            
+
             result = result.filter((listing) => {
                 // Vérifier si au moins une plage de dates contient les dates demandées
                 return listing.availableDateRanges.some((range) => {
@@ -140,6 +203,11 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         return result;
     }, [filters]);
 
+    // Choix entre API et local - avec fallback sur tableau vide
+    const filteredListings = USE_API
+        ? (apiListings as unknown as ListingCardData[]) || []
+        : localFilteredListings;
+
     return (
         <FilterContext.Provider
             value={{
@@ -151,6 +219,9 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
                 closeFilterModal,
                 activeFiltersCount,
                 filteredListings,
+                isLoading,
+                error,
+                refetch: fetchFromApi,
             }}
         >
             {children}

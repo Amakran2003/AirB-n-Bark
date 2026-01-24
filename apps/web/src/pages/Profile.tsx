@@ -1,53 +1,51 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, ChevronDown, Camera } from 'lucide-react';
+import { ChevronDown, Camera, Dog, Home, Check, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { BottomNavbar } from '../components/BottomNavbar';
 
 /**
  * ==================== PAGE PROFIL ====================
- * Page profil utilisateur pour AirB'n'Bark
- * Utilise les classes CSS existantes du projet
+ * Profil du toutou sur AirB'n'Bark
+ *
+ * TODO API:
+ * - GET /api/users/:id/profile → recuperer les donnees du profil
+ * - PUT /api/users/:id/profile → mettre a jour le profil
+ * - POST /api/users/:id/avatar → upload de la photo de profil
+ * - PUT /api/users/:id/password → changer le mot de passe
+ * - PUT /api/users/:id/languages → mettre a jour les langues
  */
-type ProfileProps = {
-    onClose?: () => void;
-    displayName?: string;
-    commentsCount?: number;
-    yearsOnPlatform?: number;
-};
 
-export const Profile = ({
-    onClose,
-    displayName,
-    commentsCount = 0,
-    yearsOnPlatform = 0,
-}: ProfileProps) => {
-    const { user } = useAuth();
+interface ProfileProps {
+    onTabChange?: (tab: 'home' | 'trips' | 'messages' | 'profile') => void;
+    onBecomeHost?: () => void;
+    onGoToHostDashboard?: () => void;
+    isHostMode?: boolean;
+    onSwitchToGuest?: () => void;
+}
+
+export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHostMode = false, onSwitchToGuest }: ProfileProps) => {
+    const { user, becomeHost, logout, openAuthModal, updateAvatar } = useAuth();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+
     const [showLanguages, setShowLanguages] = useState(false);
-    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['Français']);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('Français');
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
-    const [email, setEmail] = useState(user?.email ?? 'user@gmail.com');
-    const [tempEmail, setTempEmail] = useState(user?.email ?? 'user@gmail.com');
-    const [password, setPassword] = useState('••••••••');
+    const [email, setEmail] = useState(user?.email ?? '');
+    const [tempEmail, setTempEmail] = useState(user?.email ?? '');
     const [tempPassword, setTempPassword] = useState('');
-    const [profileImageUrl, setProfileImageUrl] = useState(
-        'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop'
-    );
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-    const languages = ['Français', 'Anglais', 'Espagnol', 'Allemand', 'Italien', 'Portugais'];
-    const selectedLabel = selectedLanguages.length
-        ? selectedLanguages.join(', ')
-        : 'Choisir vos langues';
+    const languages = ['Français', 'English', 'Español', 'Deutsch'];
 
-    const toggleLanguage = (language: string) => {
-        setSelectedLanguages((prev) =>
-            prev.includes(language)
-                ? prev.filter((item) => item !== language)
-                : [...prev, language]
-        );
+    const selectLanguage = (language: string) => {
+        setSelectedLanguage(language);
+        // TODO: Changer la langue de l'app
+        setShowLanguages(false);
     };
 
-    const handleSaveEmail = () => {
+    const handleSaveEmail = async () => {
+        // TODO: PUT /api/users/:id/profile { email: tempEmail }
         setEmail(tempEmail);
         setIsEditingEmail(false);
     };
@@ -57,9 +55,9 @@ export const Profile = ({
         setIsEditingEmail(false);
     };
 
-    const handleSavePassword = () => {
+    const handleSavePassword = async () => {
         if (tempPassword.length >= 6) {
-            setPassword('••••••••');
+            // TODO: PUT /api/users/:id/password { password: tempPassword }
             setTempPassword('');
             setIsEditingPassword(false);
         }
@@ -74,23 +72,42 @@ export const Profile = ({
         fileInputRef.current?.click();
     };
 
-    const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file) {
-            return;
-        }
-        const nextUrl = URL.createObjectURL(file);
-        setProfileImageUrl((prevUrl) => {
-            if (prevUrl.startsWith('blob:')) {
-                URL.revokeObjectURL(prevUrl);
+        if (!file) return;
+
+        // Convertir en base64 pour stockage
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Url = e.target?.result as string;
+
+            // Mettre à jour localement d'abord pour feedback immédiat
+            setProfileImageUrl((prevUrl) => {
+                if (prevUrl?.startsWith('blob:')) {
+                    URL.revokeObjectURL(prevUrl);
+                }
+                return base64Url;
+            });
+
+            // Sauvegarder via l'API
+            const result = await updateAvatar(base64Url);
+            if (!result.success) {
+                console.error('Erreur lors de la sauvegarde de l\'avatar:', result.error);
             }
-            return nextUrl;
-        });
+        };
+        reader.readAsDataURL(file);
     };
+
+    // Charger l'avatar de l'utilisateur au démarrage
+    useEffect(() => {
+        if (user?.avatar && !profileImageUrl) {
+            setProfileImageUrl(user.avatar);
+        }
+    }, [user?.avatar]);
 
     useEffect(() => {
         return () => {
-            if (profileImageUrl.startsWith('blob:')) {
+            if (profileImageUrl?.startsWith('blob:')) {
                 URL.revokeObjectURL(profileImageUrl);
             }
         };
@@ -103,278 +120,281 @@ export const Profile = ({
         }
     }, [user?.email]);
 
-    const resolvedName = displayName ?? user?.pseudo ?? 'Utilisateur';
+    const displayName = user?.pseudo ?? 'Mon Toutou';
 
     return (
-        <div className="profile-page">
-            {/* Header avec icône X - UTILISE btn-icon existant */}
-            <div style={{ padding: '16px', paddingTop: 'calc(16px + env(safe-area-inset-top))' }}>
-                <button
-                    className="btn-icon"
-                    type="button"
-                    aria-label="Fermer"
-                    onClick={onClose}
-                >
-                    <X className="w-6 h-6" />
-                </button>
+        <div className="fixed inset-0 bg-[#f7f7f7] flex flex-col">
+            <div
+                className="shrink-0 flex items-center justify-center px-4 py-4 bg-white border-b border-[#ebebeb]"
+                style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
+            >
+                <h1 className="text-h2">Mon Profil</h1>
             </div>
 
-            {/* Carte principale avec photo et infos - UTILISE card existant */}
-            <div className="card card-shadow" style={{ 
-                margin: '0 16px 16px', 
-                padding: '32px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center',
-                background: 'white'
-            }}>
-                {/* Photo de profil du chien - UTILISE avatar-xl existant */}
-                <div style={{ marginBottom: '24px', position: 'relative' }}>
-                    <div className="avatar avatar-xl" style={{ width: '120px', height: '120px', border: '3px solid white', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}>
-                        <img
-                            src={profileImageUrl}
-                            alt="Photo de profil du chien"
-                        />
-                    </div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        style={{ display: 'none' }}
-                    />
-                    <button 
-                        style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            right: 0,
-                            width: '36px',
-                            height: '36px',
-                            backgroundColor: '#ff385c',
-                            border: '3px solid white',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            color: 'white',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-                        }}
-                        type="button"
-                        onClick={handlePhotoClick}
-                    >
-                        <Camera className="w-5 h-5" />
-                    </button>
-                </div>
-
-                {/* Nom et badge */}
-                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                    <h1 className="text-h1" style={{ fontSize: '32px', fontWeight: 600, margin: '0 0 4px 0' }}>
-                        {resolvedName}
-                    </h1>
-                    <span className="text-body-md text-secondary">Voyageur</span>
-                </div>
-
-                {/* Stats - UTILISE divider existant */}
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '32px', 
-                    paddingTop: '16px', 
-                    borderTop: '1px solid var(--color-border-light)',
-                    width: '100%',
-                    justifyContent: 'center'
-                }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <span className="text-h2">{commentsCount}</span>
-                        <span className="text-caption text-secondary">commentaires</span>
-                    </div>
-                    <div style={{ width: '1px', height: '32px', backgroundColor: 'var(--color-border-light)' }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <span className="text-h2">{yearsOnPlatform}</span>
-                        <span className="text-caption text-secondary">années sur AirB'n'Bark</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Section Email - UTILISE card et btn existants */}
-            <div className="card card-shadow" style={{ margin: '0 16px 16px', padding: '24px', background: 'white' }}>
-                {!isEditingEmail ? (
-                    <div className="flex flex-between gap-md">
-                        <div className="flex-col gap-xs" style={{ flex: 1 }}>
-                            <span className="text-body-md">Email : </span>
-                            <span className="text-body-sm text-secondary">{email}</span>
-                        </div>
-                        <button
-                            style={{ 
-                                fontSize: '14px', 
-                                color: 'var(--color-text-primary)', 
-                                textDecoration: 'underline',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '4px 8px',
-                                fontWeight: 500
-                            }}
-                            type="button"
-                            onClick={() => setIsEditingEmail(true)}
-                        >
-                            Modifier
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex-col gap-md">
-                        <label className="input-label">Email</label>
-                        <input
-                            type="email"
-                            value={tempEmail}
-                            onChange={(e) => setTempEmail(e.target.value)}
-                            className="input"
-                            placeholder="Votre email"
-                        />
-                        <div className="flex gap-sm" style={{ justifyContent: 'flex-end' }}>
-                            <button
-                                className="btn-secondary btn-sm"
-                                type="button"
-                                onClick={handleCancelEmail}
-                            >
-                                Annuler
-                            </button>
-                            <button
-                                className="btn-primary btn-sm"
-                                type="button"
-                                onClick={handleSaveEmail}
-                            >
-                                Enregistrer
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Section Mot de passe - UTILISE card et btn existants */}
-            <div className="card card-shadow" style={{ margin: '0 16px 16px', padding: '24px', background: 'white' }}>
-                {!isEditingPassword ? (
-                    <div className="flex flex-between gap-md">
-                        <div className="flex-col gap-xs" style={{ flex: 1 }}>
-                            <span className="text-body-md">Mot de passe : </span>
-                            <span className="text-body-sm text-secondary">{password}</span>
-                        </div>
-                        <button
-                            style={{ 
-                                fontSize: '14px', 
-                                color: 'var(--color-text-primary)', 
-                                textDecoration: 'underline',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '4px 8px',
-                                fontWeight: 500
-                            }}
-                            type="button"
-                            onClick={() => setIsEditingPassword(true)}
-                        >
-                            Modifier
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex-col gap-md">
-                        <label className="input-label">Nouveau mot de passe</label>
-                        <input
-                            type="password"
-                            value={tempPassword}
-                            onChange={(e) => setTempPassword(e.target.value)}
-                            className="input"
-                            placeholder="Minimum 6 caractères"
-                        />
-                        <div className="flex gap-sm" style={{ justifyContent: 'flex-end' }}>
-                            <button
-                                className="btn-secondary btn-sm"
-                                type="button"
-                                onClick={handleCancelPassword}
-                            >
-                                Annuler
-                            </button>
-                            <button
-                                className="btn-primary btn-sm"
-                                type="button"
-                                onClick={handleSavePassword}
-                                disabled={tempPassword.length < 6}
-                            >
-                                Enregistrer
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Sélecteur de langues - UTILISE card existant */}
-            <div className="card card-shadow" style={{ margin: '0 16px 80px', padding: '24px', background: 'white' }}>
-                <button
-                    style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        width: '100%',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        padding: 0
-                    }}
-                    type="button"
-                    onClick={() => setShowLanguages((prev) => !prev)}
-                    aria-expanded={showLanguages}
-                >
-                    <span className="text-body-md">
-                        Langues : <span className="text-body-sm text-secondary">{selectedLabel}</span>
-                    </span>
-                    <ChevronDown
-                        className={`w-5 h-5`}
-                        style={{ 
-                            transition: 'transform 0.2s',
-                            transform: showLanguages ? 'rotate(180deg)' : 'rotate(0deg)'
-                        }}
-                    />
-                </button>
-
-                {showLanguages && (
-                    <div style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: '8px',
-                        marginTop: '16px',
-                        paddingTop: '16px',
-                        borderTop: '1px solid var(--color-border-light)'
-                    }}>
-                        {languages.map((language) => (
-                            <label 
-                                key={language}
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '16px',
-                                    padding: '8px 0',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedLanguages.includes(language)}
-                                    onChange={() => toggleLanguage(language)}
-                                    style={{ 
-                                        width: '20px', 
-                                        height: '20px', 
-                                        cursor: 'pointer',
-                                        accentColor: 'var(--color-primary)'
-                                    }}
+            <div
+                className="flex-1 overflow-y-auto"
+                style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
+            >
+                <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-6">
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="relative mb-4">
+                            {profileImageUrl ? (
+                                <img
+                                    src={profileImageUrl}
+                                    alt="Photo de profil"
+                                    className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
                                 />
-                                <span className="text-body">{language}</span>
-                            </label>
-                        ))}
+                            ) : (
+                                <div className="w-28 h-28 rounded-full bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center">
+                                    <Dog className="w-12 h-12 text-gray-400" />
+                                </div>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoChange}
+                                className="hidden"
+                            />
+                            <button
+                                onClick={handlePhotoClick}
+                                className="absolute bottom-0 right-0 w-9 h-9 bg-[#3B82F6] rounded-full flex items-center justify-center border-3 border-white shadow-md"
+                            >
+                                <Camera className="w-4 h-4 text-white" />
+                            </button>
+                        </div>
+
+                        <h2 className="text-xl font-semibold">{displayName}</h2>
+                        <span className="text-secondary text-sm">Toutou voyageur</span>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-8 pt-4 border-t border-[#ebebeb]">
+                        <div className="text-center">
+                            <p className="text-xl font-semibold">0</p>
+                            <p className="text-caption text-secondary">voyages</p>
+                        </div>
+                        <div className="w-px h-8 bg-[#ebebeb]" />
+                        <div className="text-center">
+                            <p className="text-xl font-semibold">0</p>
+                            <p className="text-caption text-secondary">avis</p>
+                        </div>
+                        <div className="w-px h-8 bg-[#ebebeb]" />
+                        <div className="text-center">
+                            <p className="text-xl font-semibold">2026</p>
+                            <p className="text-caption text-secondary">membre depuis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-4">
+                    {!isEditingEmail ? (
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-body-md font-medium">Email</p>
+                                <p className="text-sm text-secondary">{email || 'Non renseigné'}</p>
+                            </div>
+                            <button
+                                onClick={() => setIsEditingEmail(true)}
+                                className="text-sm text-[#3B82F6] font-medium"
+                            >
+                                Modifier
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <label className="text-sm text-secondary">Email</label>
+                            <input
+                                type="email"
+                                value={tempEmail}
+                                onChange={(e) => setTempEmail(e.target.value)}
+                                className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                placeholder="ton@email.com"
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={handleCancelEmail}
+                                    className="px-4 py-2 text-sm font-medium text-secondary"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={handleSaveEmail}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-[#3B82F6] rounded-lg"
+                                >
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-4">
+                    {!isEditingPassword ? (
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-body-md font-medium">Mot de passe</p>
+                                <p className="text-sm text-secondary">••••••••</p>
+                            </div>
+                            <button
+                                onClick={() => setIsEditingPassword(true)}
+                                className="text-sm text-[#3B82F6] font-medium"
+                            >
+                                Modifier
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <label className="text-sm text-secondary">Nouveau mot de passe</label>
+                            <input
+                                type="password"
+                                value={tempPassword}
+                                onChange={(e) => setTempPassword(e.target.value)}
+                                className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                placeholder="Minimum 6 caractères"
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={handleCancelPassword}
+                                    className="px-4 py-2 text-sm font-medium text-secondary"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={handleSavePassword}
+                                    disabled={tempPassword.length < 6}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-[#3B82F6] rounded-lg disabled:opacity-50"
+                                >
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm p-4">
+                    <button
+                        onClick={() => setShowLanguages(!showLanguages)}
+                        className="w-full flex items-center justify-between"
+                    >
+                        <div>
+                            <p className="text-body-md font-medium text-left">Langue de l'app</p>
+                            <p className="text-sm text-secondary text-left">
+                                {selectedLanguage}
+                            </p>
+                        </div>
+                        <ChevronDown
+                            className={`w-5 h-5 text-secondary transition-transform ${showLanguages ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+
+                    {showLanguages && (
+                        <div className="mt-4 pt-4 border-t border-[#ebebeb] space-y-1">
+                            {languages.map((language) => (
+                                <button
+                                    key={language}
+                                    onClick={() => selectLanguage(language)}
+                                    className={`w-full flex items-center justify-between py-3 px-2 rounded-lg ${
+                                        selectedLanguage === language ? 'bg-blue-50' : ''
+                                    }`}
+                                >
+                                    <span className="text-body">{language}</span>
+                                    {selectedLanguage === language && (
+                                        <Check className="w-5 h-5 text-blue-600" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Section Devenir Hote - toujours affiché si pas hôte */}
+                {!user?.isHost && (
+                    <div className="mx-4 mt-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl shadow-sm p-4 border border-amber-200">
+                        <button
+                            onClick={() => {
+                                if (!user) {
+                                    // Pas connecté → ouvrir modal de connexion
+                                    openAuthModal();
+                                } else {
+                                    // Connecté → devenir hôte
+                                    becomeHost();
+                                    onBecomeHost?.();
+                                }
+                            }}
+                            className="w-full flex items-center gap-4"
+                        >
+                            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <Home className="w-6 h-6 text-amber-600" />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <p className="text-body-md font-semibold">Devenir un hote</p>
+                                <p className="text-sm text-secondary">Propose ta niche aux toutous voyageurs</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-secondary" />
+                        </button>
                     </div>
                 )}
+
+                {/* Badge Hote si deja hote */}
+                {user?.isHost && (
+                    <div className="mx-4 mt-4 bg-green-50 rounded-2xl shadow-sm p-4 border border-green-200">
+                        {isHostMode ? (
+                            /* En mode hôte → bouton pour passer en mode voyageur */
+                            <button
+                                onClick={onSwitchToGuest}
+                                className="w-full flex items-center gap-4"
+                            >
+                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                    <Dog className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <p className="text-body-md font-semibold text-blue-700">Mode voyageur</p>
+                                    <p className="text-sm text-blue-600">Trouve une niche pour ton toutou</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-blue-600" />
+                            </button>
+                        ) : (
+                            /* En mode voyageur → bouton pour passer en mode hôte */
+                            <button
+                                onClick={onGoToHostDashboard}
+                                className="w-full flex items-center gap-4"
+                            >
+                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                    <Check className="w-6 h-6 text-green-600" />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <p className="text-body-md font-semibold text-green-700">Tu es hote</p>
+                                    <p className="text-sm text-green-600">Accede a ton espace hote</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-green-600" />
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                <div className="mx-4 mt-4 mb-4">
+                    {user ? (
+                        <button
+                            onClick={() => {
+                                logout();
+                            }}
+                            className="w-full py-3 text-red-500 font-medium text-center"
+                        >
+                            Se deconnecter
+                        </button>
+                    ) : (
+                        <button
+                            onClick={openAuthModal}
+                            className="btn-primary btn-full"
+                        >
+                            Se connecter
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* BottomNavbar seulement en mode voyageur */}
+            {!isHostMode && <BottomNavbar activeTab="profile" onTabChange={onTabChange} />}
         </div>
     );
 };

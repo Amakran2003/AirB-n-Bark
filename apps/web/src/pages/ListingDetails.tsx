@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
     ChevronLeft,
     Share,
-    Heart,
     Search,
     Star,
     Flame,
@@ -27,6 +26,7 @@ import {
     Award,
 } from 'lucide-react';
 import type { ListingFullData } from '../data/listings';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 /**
  * ==================== CONFIGURATION ====================
@@ -65,6 +65,13 @@ const HighlightIcon = ({ type }: { type: string }) => {
 
 /**
  * ==================== COMPOSANT PRINCIPAL ====================
+ *
+ * TODO API:
+ * - GET /api/listings/:id → details complets de l'annonce
+ * - GET /api/listings/:id/reviews → avis (avec pagination)
+ * - GET /api/listings/:id/availability → calendrier de disponibilite
+ * - POST /api/listings/:id/share → tracker les partages (analytics)
+ * - GET /api/listings/:id/similar → annonces similaires
  */
 interface ListingDetailsProps {
     listing: ListingFullData;
@@ -86,12 +93,6 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
             console.log('Réservation pour:', listing.title);
         }
     };
-
-    // Swipe retour
-    const [swipeX, setSwipeX] = useState(0);
-    const [isExiting, setIsExiting] = useState(false);
-    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-    const isSwipingRef = useRef(false);
 
     // Calculs de scroll
     const imageHeight = (viewportHeight * IMAGE_HEIGHT_VH) / 100;
@@ -118,58 +119,8 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
         };
     }, []);
 
-    // Gestion swipe retour
-    useEffect(() => {
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            isSwipingRef.current = false;
-        };
-
-        const handleTouchMove = (e: TouchEvent) => {
-            if (!touchStartRef.current) return;
-
-            const deltaX = e.touches[0].clientX - touchStartRef.current.x;
-            const deltaY = e.touches[0].clientY - touchStartRef.current.y;
-
-            if (!isSwipingRef.current) {
-                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 20) {
-                    isSwipingRef.current = true;
-                } else if (Math.abs(deltaY) > 10) {
-                    touchStartRef.current = null;
-                    return;
-                }
-            }
-
-            if (isSwipingRef.current && deltaX > 0) {
-                setSwipeX(deltaX * 0.8);
-            }
-        };
-
-        const handleTouchEnd = () => {
-            if (isSwipingRef.current && swipeX > 100) {
-                setIsExiting(true);
-                setSwipeX(window.innerWidth);
-                setTimeout(() => {
-                    if (onBack) {
-                        onBack();
-                    }
-                }, 250);
-            } else {
-                setSwipeX(0);
-            }
-            touchStartRef.current = null;
-            isSwipingRef.current = false;
-        };
-
-        document.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleTouchEnd);
-        return () => {
-            document.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchmove', handleTouchMove);
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, [swipeX, onBack]);
+    // Swipe retour avec le hook
+    const { swipeX, containerStyle } = useSwipeBack(onBack);
 
     // Navigation images
     const nextImage = () => setCurrentImage((prev) => (prev + 1) % listing.images.length);
@@ -179,12 +130,6 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
         if (onBack) {
             onBack();
         }
-    };
-
-    // Style commun pour le transform
-    const swipeStyle = {
-        transform: `translateX(${swipeX}px)`,
-        transition: isExiting || swipeX === 0 ? 'transform 0.25s ease-out' : 'none',
     };
 
     return (
@@ -202,7 +147,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     paddingTop: 'env(safe-area-inset-top)',
                     backgroundColor: `rgba(255, 255, 255, ${navbarBgOpacity})`,
                     boxShadow: isAtTop ? '0 1px 0 rgba(0,0,0,0.08)' : 'none',
-                    ...swipeStyle,
+                    ...containerStyle,
                 }}
             >
                 <div className="flex items-center justify-between px-4 py-3">
@@ -220,12 +165,6 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                         >
                             <Share className="icon-md" />
                         </button>
-                        <button
-                            className="btn-icon"
-                            style={{ boxShadow: !isAtTop ? '0 2px 8px rgba(0,0,0,0.15)' : 'none' }}
-                        >
-                            <Heart className="icon-md" />
-                        </button>
                     </div>
                 </div>
             </div>
@@ -233,7 +172,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
             {/* Footer réservation */}
             <div
                 className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
-                style={{ ...swipeStyle, paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
+                style={{ ...containerStyle, paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
             >
                 <div className="flex items-center justify-between">
                     <div>
@@ -262,7 +201,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
             {/* Image Hero */}
             <div
                 className="fixed top-0 left-0 right-0 bg-white z-10"
-                style={{ height: `${IMAGE_HEIGHT_VH}vh`, ...swipeStyle }}
+                style={{ height: `${IMAGE_HEIGHT_VH}vh`, ...containerStyle }}
             >
                 <div
                     className="w-full h-full overflow-hidden"
@@ -305,7 +244,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
             {/* Contenu scrollable */}
             <div
                 className="min-h-screen relative z-20"
-                style={{ ...swipeStyle, pointerEvents: 'none' }}
+                style={{ ...containerStyle, pointerEvents: 'none' }}
             >
                 <div style={{ height: `${IMAGE_HEIGHT_VH - 6}vh` }} />
 

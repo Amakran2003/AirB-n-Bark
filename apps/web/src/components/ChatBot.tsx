@@ -1,20 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, Send, Bot, User } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Bot, User } from 'lucide-react';
+import { ChatModal, ChatMessage } from './ChatModal';
 
 /**
  * ==================== CHATBOT ====================
- * Interface de chat connectée à n8n
- * - Messages utilisateur/bot
- * - Connexion webhook n8n
- * - Swipe down pour fermer
+ * Assistant IA connecté à n8n
+ * Utilise ChatModal comme base
+ *
+ * TODO API:
+ * - POST n8n webhook → envoyer un message au chatbot
+ * - GET /api/chat/history → historique des conversations
  */
-
-interface Message {
-    id: string;
-    role: 'user' | 'bot';
-    content: string;
-    timestamp: Date;
-}
 
 interface ChatBotProps {
     isOpen: boolean;
@@ -25,148 +21,65 @@ interface ChatBotProps {
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 
 export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
-    const [messages, setMessages] = useState<Message[]>([
+    const [messages, setMessages] = useState<ChatMessage[]>([
         {
             id: '1',
-            role: 'bot',
+            senderId: 'other',
             content: 'Wouf ! 🐕 Je suis BarkBot, ton assistant AirB\'n\'Bark. Comment puis-je t\'aider aujourd\'hui ?',
             timestamp: new Date(),
         },
     ]);
-    const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [modalHeight, setModalHeight] = useState('85vh');
-    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
 
-    // Swipe to close
-    const [swipeY, setSwipeY] = useState(0);
-    const touchStartRef = useRef<number | null>(null);
-
-    // Ajuster la hauteur du modal quand le clavier s'ouvre
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const initialHeight = window.visualViewport?.height || window.innerHeight;
-
-        const updateHeight = () => {
-            if (window.visualViewport) {
-                const vh = window.visualViewport.height;
-                // Garder 85% mais max viewport height - 20px de marge en haut
-                const maxHeight = vh - 20;
-                const targetHeight = Math.min(vh * 0.85, maxHeight);
-                setModalHeight(`${targetHeight}px`);
-                
-                // Détecter si le clavier est ouvert (viewport réduit de plus de 100px)
-                setIsKeyboardOpen(initialHeight - vh > 100);
-            }
-        };
-
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', updateHeight);
-            window.visualViewport.addEventListener('scroll', updateHeight);
-            updateHeight();
-        }
-
-        return () => {
-            if (window.visualViewport) {
-                window.visualViewport.removeEventListener('resize', updateHeight);
-                window.visualViewport.removeEventListener('scroll', updateHeight);
-            }
-            setModalHeight('85vh');
-            setIsKeyboardOpen(false);
-        };
-    }, [isOpen]);
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        touchStartRef.current = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (touchStartRef.current === null) return;
-        const deltaY = e.touches[0].clientY - touchStartRef.current;
-        if (deltaY > 0) {
-            setSwipeY(deltaY);
-        }
-    };
-
-    const handleTouchEnd = () => {
-        if (swipeY > 100) {
-            onClose();
-        }
-        setSwipeY(0);
-        touchStartRef.current = null;
-    };
-
-    // Scroll to bottom on new message
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    // Focus input on open
-    useEffect(() => {
-        if (isOpen) {
-            setTimeout(() => inputRef.current?.focus(), 300);
-        }
-    }, [isOpen]);
-
-    const sendMessage = async () => {
-        if (!input.trim() || isLoading) return;
-
-        const userMessage: Message = {
+    const handleSendMessage = useCallback(async (content: string) => {
+        // Ajouter le message utilisateur
+        const userMessage: ChatMessage = {
             id: Date.now().toString(),
-            role: 'user',
-            content: input.trim(),
+            senderId: 'user',
+            content,
             timestamp: new Date(),
         };
-
         setMessages((prev) => [...prev, userMessage]);
-        setInput('');
         setIsLoading(true);
 
         try {
-            // Appel au webhook n8n
             if (N8N_WEBHOOK_URL) {
+                // Appel au webhook n8n
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        message: userMessage.content,
+                        message: content,
                         sessionId: 'user-session-id', // TODO: utiliser l'ID user réel
-                        timestamp: userMessage.timestamp.toISOString(),
+                        timestamp: new Date().toISOString(),
                     }),
                 });
 
                 const data = await response.json();
-                
-                const botMessage: Message = {
+
+                const botMessage: ChatMessage = {
                     id: (Date.now() + 1).toString(),
-                    role: 'bot',
+                    senderId: 'other',
                     content: data.response || data.message || 'Je n\'ai pas compris, peux-tu reformuler ?',
                     timestamp: new Date(),
                 };
-
                 setMessages((prev) => [...prev, botMessage]);
             } else {
                 // Mode demo sans n8n
-                setTimeout(() => {
-                    const botMessage: Message = {
-                        id: (Date.now() + 1).toString(),
-                        role: 'bot',
-                        content: getDemoResponse(userMessage.content),
-                        timestamp: new Date(),
-                    };
-                    setMessages((prev) => [...prev, botMessage]);
-                }, 800);
+                await new Promise((resolve) => setTimeout(resolve, 800));
+                const botMessage: ChatMessage = {
+                    id: (Date.now() + 1).toString(),
+                    senderId: 'other',
+                    content: getDemoResponse(content),
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, botMessage]);
             }
         } catch (error) {
             console.error('Erreur ChatBot:', error);
-            const errorMessage: Message = {
+            const errorMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
-                role: 'bot',
+                senderId: 'other',
                 content: 'Oups ! J\'ai eu un problème. Réessaie dans quelques instants. 🐕',
                 timestamp: new Date(),
             };
@@ -174,159 +87,47 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div
-            className="fixed inset-0 z-200 flex items-end bg-black/50 touch-none"
-            onClick={onClose}
-        >
-            <div
-                className="w-full bg-white rounded-t-3xl overflow-hidden flex flex-col touch-none"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                    height: modalHeight,
-                    maxHeight: '85vh',
-                    animation: swipeY === 0 ? 'slideUp 0.4s ease-out' : 'none',
-                    transform: `translateY(${swipeY}px)`,
-                    transition: swipeY === 0 ? 'transform 0.3s ease-out' : 'none',
-                }}
-            >
-                {/* Swipe indicator + Header - zone de swipe pour fermer */}
-                <div 
-                    className="touch-auto"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 bg-gray-300 rounded-full" />
-                    </div>
-
-                    {/* Header */}
-                    <div className="shrink-0 flex items-center justify-between p-4 border-b border-gray-200">
-                        <button className="btn-icon" onClick={onClose}>
-                            <X className="w-4 h-4" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                            <Bot className="w-5 h-5 text-primary" />
-                            <span className="text-base font-semibold text-primary">BarkBot</span>
-                        </div>
-                        <div className="w-10" />
-                    </div>
-                </div>
-
-                {/* Messages */}
-                <div 
-                    className="flex-1 overflow-y-auto p-4 space-y-4 touch-auto overscroll-contain"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
-                >
-                    {messages.map((message) => (
-                        <div
-                            key={message.id}
-                            className={`flex items-end gap-2 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-                        >
-                            {/* Avatar */}
-                            <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                                    message.role === 'bot'
-                                        ? 'bg-secondary'
-                                        : 'bg-blue-500'
-                                }`}
-                            >
-                                {message.role === 'bot' ? (
-                                    <Bot className="w-4 h-4 text-primary" />
-                                ) : (
-                                    <User className="w-4 h-4 text-white" />
-                                )}
-                            </div>
-
-                            {/* Message bubble */}
-                            <div
-                                className={`max-w-[75%] px-4 py-3 rounded-2xl ${
-                                    message.role === 'bot'
-                                        ? 'bg-secondary rounded-bl-md'
-                                        : 'bg-blue-500 rounded-br-md'
-                                }`}
-                            >
-                                <p className={`text-sm leading-relaxed ${message.role === 'user' ? 'text-white' : 'text-primary'}`}>
-                                    {message.content}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-
-                    {/* Loading indicator */}
-                    {isLoading && (
-                        <div className="flex items-end gap-2">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary">
-                                <Bot className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="bg-secondary px-4 py-3 rounded-2xl rounded-bl-md">
-                                <div className="flex gap-1">
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div ref={messagesEndRef} />
-                </div>
-
-                {/* Input */}
-                <div 
-                    className="shrink-0 p-4 border-t border-gray-200 bg-white"
-                    style={{ paddingBottom: isKeyboardOpen ? '16px' : 'calc(24px + env(safe-area-inset-bottom))' }}
-                >
-                    <div className="flex items-center gap-3">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            placeholder="Pose ta question..."
-                            className="flex-1 px-4 py-3 rounded-full border border-gray-300 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-primary"
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onTouchStart={(e) => e.preventDefault()}
-                            onClick={sendMessage}
-                            disabled={!input.trim() || isLoading}
-                            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                                input.trim() && !isLoading
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-secondary text-gray-400'
-                            }`}
-                        >
-                            <Send className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <style>{`
-                @keyframes slideUp {
-                    from { transform: translateY(100%); }
-                    to { transform: translateY(0); }
-                }
-            `}</style>
+    // Header du ChatBot
+    const headerContent = (
+        <div className="flex items-center gap-2 flex-1 justify-center">
+            <Bot className="w-5 h-5 text-primary" />
+            <span className="text-base font-semibold text-primary">BarkBot</span>
         </div>
     );
+
+    // Avatar du bot
+    const botAvatar = (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary">
+            <Bot className="w-4 h-4 text-primary" />
+        </div>
+    );
+
+    // Avatar utilisateur
+    const userAvatar = (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500">
+            <User className="w-4 h-4 text-white" />
+        </div>
+    );
+
+    return (
+        <ChatModal
+            isOpen={isOpen}
+            onClose={onClose}
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            headerContent={headerContent}
+            otherAvatar={botAvatar}
+            userAvatar={userAvatar}
+            placeholder="Pose ta question..."
+            emptyMessage="Wouf ! Comment puis-je t'aider ? 🐕"
+            otherBubbleColor="bg-secondary"
+            isLoading={isLoading}
+        />
+    );
 };
+
 /**
  * Réponses de démo quand n8n n'est pas configuré
  */

@@ -1,13 +1,20 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, CreditCard, Lock, Check, AlertCircle } from 'lucide-react';
 import type { ListingCardData } from '../data/listings';
+import { useSwipeBack } from '../hooks/useSwipeBack';
 
 /**
  * ==================== PAGE PAYMENT ====================
- * Page de paiement pour confirmer une réservation
- * - Récap de la réservation
- * - Formulaire de carte bancaire (simple pour l'instant)
- * - TODO: Intégrer Stripe pour Apple Pay / Google Pay
+ * Page de paiement pour confirmer une reservation
+ * - Recap de la reservation
+ * - Formulaire de carte bancaire
+ *
+ * TODO API:
+ * - POST /api/payments/intent → creer un payment intent Stripe
+ * - POST /api/payments/confirm → confirmer le paiement
+ * - GET /api/payments/:id/status → verifier le statut
+ * - POST /api/bookings → creer la reservation apres paiement
+ * - Integration Stripe Elements pour Apple Pay / Google Pay
  */
 
 interface PaymentProps {
@@ -42,64 +49,8 @@ export const Payment = ({
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Swipe retour
-    const [swipeX, setSwipeX] = useState(0);
-    const [isExiting, setIsExiting] = useState(false);
-    const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-    const isSwipingRef = useRef(false);
-
-    useEffect(() => {
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            isSwipingRef.current = false;
-        };
-
-        const handleTouchMove = (e: TouchEvent) => {
-            if (!touchStartRef.current) return;
-            const deltaX = e.touches[0].clientX - touchStartRef.current.x;
-            const deltaY = e.touches[0].clientY - touchStartRef.current.y;
-
-            if (!isSwipingRef.current) {
-                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 20) {
-                    isSwipingRef.current = true;
-                } else if (Math.abs(deltaY) > 10) {
-                    touchStartRef.current = null;
-                    return;
-                }
-            }
-
-            if (isSwipingRef.current && deltaX > 0) {
-                setSwipeX(deltaX * 0.8);
-            }
-        };
-
-        const handleTouchEnd = () => {
-            if (isSwipingRef.current && swipeX > 100) {
-                setIsExiting(true);
-                setSwipeX(window.innerWidth);
-                setTimeout(() => onBack(), 250);
-            } else {
-                setSwipeX(0);
-            }
-            touchStartRef.current = null;
-            isSwipingRef.current = false;
-        };
-
-        document.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleTouchEnd);
-        return () => {
-            document.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchmove', handleTouchMove);
-            document.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, [swipeX, onBack]);
-
-    const swipeStyle = {
-        transform: `translateX(${swipeX}px)`,
-        transition: isSwipingRef.current ? 'none' : 'transform 0.25s ease-out',
-        opacity: isExiting ? 1 - swipeX / window.innerWidth : 1,
-    };
+    // Swipe retour avec le hook
+    const { containerStyle } = useSwipeBack(onBack);
 
     // Formater le numéro de carte (4 chiffres par groupe)
     const formatCardNumber = (value: string) => {
@@ -163,7 +114,7 @@ export const Payment = ({
     const grandTotal = totalPrice + serviceFee;
 
     return (
-        <div className="fixed inset-0 z-150 bg-white flex flex-col" style={swipeStyle}>
+        <div className="fixed inset-0 z-150 bg-white flex flex-col" style={containerStyle}>
             {/* Header */}
             <header
                 className="shrink-0 flex items-center justify-between px-4 py-4 border-b border-[#ebebeb]"
@@ -300,7 +251,7 @@ export const Payment = ({
                         </div>
 
                         {/* TODO: Apple Pay / Google Pay */}
-                        {/* 
+                        {/*
                         <div className="mt-6">
                             <p className="text-caption text-secondary text-center mb-3">ou payer avec</p>
                             <div className="flex gap-3">
@@ -323,11 +274,7 @@ export const Payment = ({
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 <button
-                    className={`btn-full py-4 rounded-xl font-medium transition-all ${
-                        isFormValid && !isProcessing
-                            ? 'bg-[#3B82F6] text-white'
-                            : 'bg-gray-200 text-gray-500'
-                    }`}
+                    className={`btn-primary btn-full ${!isFormValid || isProcessing ? 'btn-disabled' : ''}`}
                     onClick={handlePayment}
                     disabled={!isFormValid || isProcessing}
                 >

@@ -376,7 +376,7 @@ export const DatePicker = ({
                     className="p-4 border-t border-[#ebebeb]"
                     style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
-                    <button className="btn-primary btn-full btn-lg" onClick={handleConfirm}>
+                    <button className="btn-primary btn-full" onClick={handleConfirm}>
                         Confirmer
                     </button>
                 </div>

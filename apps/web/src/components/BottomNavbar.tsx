@@ -1,4 +1,6 @@
 import { Home, Calendar, MessageCircle, User } from 'lucide-react';
+import { useMessages } from '../contexts/MessagesContext';
+import { NavItem } from './NavItem';
 
 /**
  * ==================== BOTTOM NAVBAR ====================
@@ -6,31 +8,21 @@ import { Home, Calendar, MessageCircle, User } from 'lucide-react';
  * 4 onglets : Swipe (Home), Voyages, Messages, Profil
  */
 
-interface NavItemProps {
-    icon: React.ReactNode;
-    label: string;
-    isActive?: boolean;
-    onClick?: () => void;
-}
-
-const NavItem = ({ icon, label, isActive = false, onClick }: NavItemProps) => (
-    <button
-        onClick={onClick}
-        className={`bottom-nav-item ${isActive ? 'bottom-nav-item-active' : ''}`}
-    >
-        {icon}
-        <span className={`text-[10px] mt-1 ${isActive ? 'text-[#3B82F6] font-medium' : 'text-secondary'}`}>
-            {label}
-        </span>
-    </button>
-);
-
 interface BottomNavbarProps {
     activeTab?: 'home' | 'trips' | 'messages' | 'profile';
     onTabChange?: (tab: 'home' | 'trips' | 'messages' | 'profile') => void;
 }
 
 export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarProps) => {
+    // Récupérer le nombre de messages non lus
+    let unreadCount = 0;
+    try {
+        const { totalUnreadCount } = useMessages();
+        unreadCount = totalUnreadCount;
+    } catch {
+        // Context non disponible, pas de badge
+    }
+
     return (
         <nav className="bottom-navbar">
             <NavItem
@@ -60,6 +52,7 @@ export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarPr
                 label="Messages"
                 isActive={activeTab === 'messages'}
                 onClick={() => onTabChange?.('messages')}
+                badge={unreadCount}
             />
             <NavItem
                 icon={
