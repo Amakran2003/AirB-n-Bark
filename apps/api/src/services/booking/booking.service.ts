@@ -108,8 +108,10 @@ export async function getGuestBookings(
         createdAt: booking.createdAt.toISOString(),
         // Dénormalisé pour le frontend
         listingTitle: booking.listing.title,
+        listingSubtitle: booking.listing.subtitle,
         listingImage: booking.listing.mainImage,
         listingLocation: `${booking.listing.city}, ${booking.listing.country}`,
+        listingPrice: booking.listing.pricePerNight,
         hostName: booking.host.name,
         hostAvatar: booking.host.avatar,
     }));
@@ -410,10 +412,14 @@ export async function createBooking(
  * Annule une réservation (par le guest)
  */
 export async function cancelBooking(bookingId: string, userId: string) {
+    // Permettre au guest OU à l'hôte d'annuler
     const booking = await prisma.booking.findFirst({
         where: {
             id: bookingId,
-            guestId: userId,
+            OR: [
+                { guestId: userId },
+                { hostId: userId },
+            ],
             status: { in: ['pending', 'confirmed'] },
         },
     });
@@ -487,6 +493,13 @@ export async function getHostBookings(
         },
     });
 
+    console.log('🔍 Host bookings raw from DB:', bookings.map(b => ({
+        bookingId: b.id,
+        listingId: b.listingId,
+        listingTitle: b.listing.title,
+        guestName: b.guest.name,
+    })));
+
     // Transformer pour correspondre au format frontend (HostBookings.tsx)
     const formattedBookings = bookings.map(booking => ({
         id: booking.id,
@@ -494,15 +507,14 @@ export async function getHostBookings(
         listingId: booking.listingId,
         listingTitle: booking.listing.title,
         listingImage: booking.listing.mainImage,
+        guestId: booking.guestId,
         guestName: booking.guest.name,
         guestAvatar: booking.guest.avatar,
         guestEmail: booking.guest.email,
         guestPhone: booking.guest.phone,
-        dogName: 'Toutou', // TODO: ajouter au schema si nécessaire
-        dogBreed: 'Non spécifié',
-        dogSize: 'medium',
-        checkIn: booking.startDate.toISOString().split('T')[0],
-        checkOut: booking.endDate.toISOString().split('T')[0],
+        dogsCount: booking.guestsCount,
+        startDate: booking.startDate.toISOString().split('T')[0],
+        endDate: booking.endDate.toISOString().split('T')[0],
         nights: booking.nights,
         totalPrice: booking.totalPrice,
         status: booking.status,
@@ -574,9 +586,8 @@ export async function rejectBooking(bookingId: string, hostId: string, reason?: 
     const updated = await prisma.booking.update({
         where: { id: bookingId },
         data: {
-            status: 'cancelled',
+            status: 'rejected',
             cancelledAt: new Date(),
-            // TODO: ajouter un champ rejectionReason si nécessaire
         },
     });
 

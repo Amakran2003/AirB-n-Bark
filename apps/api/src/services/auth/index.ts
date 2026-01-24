@@ -1,5 +1,8 @@
-import { Router } from 'express';
-import { authRoutes } from './routes/auth.routes.js';
+/**
+ * ==================== AUTH SERVICE INDEX ====================
+ * Point d'entrée pour le microservice auth
+ */
 
-export const authRouter = Router();
-authRouter.use('/', authRoutes);
+export { default as authRoutes } from './auth.routes.js';
+export * from './auth.service.js';
+export * from './auth.validation.js';

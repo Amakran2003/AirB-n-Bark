@@ -12,7 +12,7 @@ export const config = {
     databaseUrl: process.env.DATABASE_URL || '',
     
     // JWT
-    jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
+    jwtSecret: process.env.JWT_SECRET || 'airbonbark-dev-secret-key-2026-x7k9m2p4q8r1s5t3',
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
     jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
     

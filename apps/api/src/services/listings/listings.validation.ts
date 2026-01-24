@@ -9,6 +9,41 @@ import { z } from 'zod';
 
 export const ListingTypeEnum = z.enum(['niche', 'nicholoc', 'nichortoir']);
 export const CancellationPolicyEnum = z.enum(['flexible', 'moderate', 'strict']);
+export const AmenityIconEnum = z.enum(['flame', 'droplets', 'scroll', 'home', 'cat', 'bone', 'shield', 'leaf', 'moon', 'sun']);
+export const HighlightIconEnum = z.enum(['search', 'star', 'check', 'paw', 'shield']);
+
+// ==================== NESTED SCHEMAS ====================
+
+export const AmenitySchema = z.object({
+    name: z.string().min(1).max(100),
+    icon: AmenityIconEnum,
+});
+
+export const HighlightSchema = z.object({
+    title: z.string().min(1).max(100),
+    description: z.string().min(1).max(200),
+    icon: HighlightIconEnum,
+});
+
+export const RoomSchema = z.object({
+    name: z.string().min(1).max(100),
+    description: z.string().min(1).max(500),
+    image: z.string().min(1), // URL ou base64
+});
+
+export const RulesSchema = z.object({
+    maxBarkHour: z.string().default('22h00'),
+    mustBeVaccinated: z.boolean().default(true),
+    mustBeNeutered: z.boolean().default(false),
+    allowsPuppies: z.boolean().default(true),
+    minAge: z.number().int().min(0).default(0),
+});
+
+export const AvailabilityRangeSchema = z.object({
+    startDate: z.string(), // ISO date string
+    endDate: z.string(),
+    isBlocked: z.boolean().default(false),
+});
 
 // ==================== CREATE LISTING ====================
 
@@ -45,9 +80,9 @@ export const CreateListingSchema = z.object({
     maxDogs: z.number().int().min(1).max(20).default(1),
     capacity: z.string().min(1).max(100), // "2 chiens max"
     
-    // Images
-    mainImage: z.string().url('URL image principale invalide'),
-    images: z.array(z.string().url('URL image invalide')).max(20).default([]),
+    // Images - accepte URL ou base64
+    mainImage: z.string().min(1, 'Image principale requise'),
+    images: z.array(z.string()).max(20).default([]),
     
     // Policies
     cancellationPolicy: CancellationPolicyEnum.default('flexible'),
@@ -55,7 +90,29 @@ export const CreateListingSchema = z.object({
     
     // Anti-cat
     antiCatAvailable: z.boolean().default(false),
+    antiCatRiskScore: z.number().int().min(0).max(100).default(0),
     antiCatExtraPrice: z.number().min(0).default(0),
+    
+    // Relations (optionnelles à la création, peuvent être ajoutées après)
+    amenities: z.array(AmenitySchema).max(20).optional(),
+    highlights: z.array(HighlightSchema).max(10).optional(),
+    rooms: z.array(RoomSchema).max(10).optional(),
+    rules: RulesSchema.optional(),
+    availableDateRanges: z.array(AvailabilityRangeSchema).max(365).optional(),
+    
+    // Instructions d'arrivée (structurées, optionnel)
+    instructions: z.object({
+        checkInTime: z.string().max(20),
+        checkOutTime: z.string().max(20),
+        accessCode: z.string().max(50).optional(),
+        wifiName: z.string().max(50).optional(),
+        wifiPassword: z.string().max(50).optional(),
+        parkingInfo: z.string().max(200).optional(),
+        specialNotes: z.string().max(500).optional(),
+    }).optional(),
+    
+    // Publication directe
+    isPublished: z.boolean().default(false),
 });
 
 export type CreateListingInput = z.infer<typeof CreateListingSchema>;
@@ -77,7 +134,11 @@ export const ListingsQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(50).default(20),
     
     // Filtres de base
-    type: ListingTypeEnum.optional(),
+    type: z.string().optional().transform(val => {
+        if (!val) return undefined;
+        const types = val.split(',').filter(t => ['niche', 'nicholoc', 'nichortoir'].includes(t));
+        return types.length > 0 ? types as ('niche' | 'nicholoc' | 'nichortoir')[] : undefined;
+    }),
     city: z.string().max(100).optional(),
     country: z.string().max(100).optional(),
     
@@ -87,6 +148,12 @@ export const ListingsQuerySchema = z.object({
     
     // Filtres de capacité
     minCapacity: z.coerce.number().int().min(1).optional(),
+    
+    // Filtre anti-chat
+    antiCat: z.coerce.boolean().optional(),
+    
+    // Filtre note minimum
+    minRating: z.coerce.number().min(0).max(5).optional(),
     
     // Filtres de dates
     startDate: z.string().optional(),

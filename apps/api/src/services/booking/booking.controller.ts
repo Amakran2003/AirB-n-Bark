@@ -46,7 +46,10 @@ export async function getMyBookings(req: AuthenticatedRequest, res: Response, ne
 
         return res.json({
             success: true,
-            data: result.data,
+            data: {
+                bookings: result.data,
+                total: result.pagination.total,
+            },
             pagination: result.pagination,
         });
     } catch (error) {
@@ -270,7 +273,10 @@ export async function getHostBookings(req: AuthenticatedRequest, res: Response, 
 
         return res.json({
             success: true,
-            data: result.data,
+            data: {
+                bookings: result.data,
+                total: result.pagination.total,
+            },
             pagination: result.pagination,
         });
     } catch (error) {

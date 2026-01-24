@@ -17,6 +17,108 @@ import {
     formatZodErrors,
 } from './listings.validation.js';
 
+// ==================== HELPERS ====================
+
+/**
+ * Transforme un listing DB en format frontend
+ */
+function formatListingForFrontend(listing: any) {
+    const hostingSince = listing.host?.hostingSince || listing.host?.createdAt;
+    const isNewHost = hostingSince 
+        ? (Date.now() - new Date(hostingSince).getTime()) < 90 * 24 * 60 * 60 * 1000 // < 90 jours
+        : true;
+
+    return {
+        id: listing.id,
+        type: listing.type,
+        title: listing.title,
+        subtitle: listing.subtitle,
+        location: `${listing.city}, ${listing.country}`,
+        image: listing.mainImage,
+        images: listing.images || [],
+        price: listing.pricePerNight,
+        rating: listing.rating || 0,
+        reviewsCount: listing.reviewsCount || 0,
+        hostName: listing.host?.name || 'Hôte',
+        hostAvatar: listing.host?.avatar || '',
+        antiCat: {
+            available: listing.antiCatAvailable || false,
+            riskScore: listing.antiCatRiskScore || 0,
+            extraPrice: listing.antiCatExtraPrice || 0,
+        },
+        maxDogs: listing.maxDogs || 1,
+        availableDateRanges: (listing.availability || []).map((a: any) => ({
+            start: a.startDate?.toISOString?.()?.split('T')[0] || a.startDate,
+            end: a.endDate?.toISOString?.()?.split('T')[0] || a.endDate,
+        })),
+        // Données complètes pour ListingDetails
+        capacity: listing.capacity || `${listing.maxDogs} chien${listing.maxDogs > 1 ? 's' : ''} max`,
+        description: listing.description || '',
+        host: {
+            id: listing.host?.id || '',
+            name: listing.host?.name || 'Hôte',
+            avatar: listing.host?.avatar || '',
+            isNewHost,
+            isSuperHost: listing.host?.isSuperHost || false,
+            hostingSince: hostingSince?.toISOString?.()?.split('T')[0] || new Date().toISOString().split('T')[0],
+            responseRate: listing.host?.responseRate || 100,
+            description: listing.host?.hostDescription || 'Hôte passionné par les chiens.',
+            joinedDate: listing.host?.createdAt?.toISOString?.()?.split('T')[0] || new Date().toISOString().split('T')[0],
+        },
+        locationDetails: {
+            address: listing.address || '',
+            city: listing.city || '',
+            country: listing.country || 'France',
+            lat: listing.lat || 0,
+            lng: listing.lng || 0,
+            neighborhood: listing.city || '',
+        },
+        rooms: (listing.rooms || []).map((r: any) => ({
+            name: r.name,
+            description: r.description,
+            image: r.image,
+        })),
+        amenities: (listing.amenities || []).map((a: any) => ({
+            name: a.name,
+            icon: a.icon,
+        })),
+        highlights: (listing.highlights || []).map((h: any) => ({
+            icon: h.icon,
+            title: h.title,
+            description: h.description,
+        })),
+        reviews: (listing.reviews || []).map((r: any) => ({
+            author: r.author?.name || 'Anonyme',
+            avatar: r.author?.avatar || '',
+            rating: r.rating,
+            date: r.createdAt?.toISOString?.()?.split('T')[0] || '',
+            content: r.content,
+            platformDate: r.createdAt?.toISOString?.()?.split('T')[0] || '',
+        })),
+        pricing: {
+            amount: listing.pricePerNight || 0,
+            currency: listing.currency === 'EUR' ? '€' : listing.currency || '€',
+            nights: 1, // Sera calculé côté frontend selon les dates sélectionnées
+            dateRange: 'Sélectionnez des dates',
+            hasFreeCancellation: listing.hasFreeCancellation ?? true,
+        },
+        rules: listing.rules ? {
+            maxBarkHour: listing.rules.maxBarkHour || '22h00',
+            mustBeVaccinated: listing.rules.mustBeVaccinated ?? true,
+            mustBeNeutered: listing.rules.mustBeNeutered ?? false,
+            allowsPuppies: listing.rules.allowsPuppies ?? true,
+            minAge: listing.rules.minAge || 0,
+        } : {
+            maxBarkHour: '22h00',
+            mustBeVaccinated: true,
+            mustBeNeutered: false,
+            allowsPuppies: true,
+            minAge: 0,
+        },
+        cancellationPolicy: listing.cancellationPolicy || 'flexible',
+    };
+}
+
 // ==================== GUEST CONTROLLERS ====================
 
 /**
@@ -44,9 +146,14 @@ export async function getListings(
 
         const listings = await listingsService.getListings(result.data);
 
+        // Formater les listings pour le frontend
+        const formattedListings = listings.data.map(formatListingForFrontend);
+
         return res.json({
             success: true,
-            data: listings.data,
+            data: {
+                listings: formattedListings,
+            },
             pagination: listings.pagination,
         });
     } catch (error) {
@@ -91,9 +198,12 @@ export async function getListingById(
             });
         }
 
+        // Formater pour le frontend
+        const formattedListing = formatListingForFrontend(listing);
+
         return res.json({
             success: true,
-            data: listing,
+            data: formattedListing,
         });
     } catch (error) {
         next(error);

@@ -25,17 +25,51 @@ export interface PaginatedResult<T> {
 export interface ListingsQuery {
     page?: number;
     limit?: number;
-    type?: 'niche' | 'nicholoc' | 'nichortoir';
+    type?: ('niche' | 'nicholoc' | 'nichortoir')[];
     city?: string;
     country?: string;
     minPrice?: number;
     maxPrice?: number;
     minCapacity?: number;
+    minRating?: number;
+    antiCat?: boolean;
     startDate?: string;
     endDate?: string;
     sortBy?: 'price' | 'rating' | 'createdAt';
     sortOrder?: 'asc' | 'desc';
     search?: string;
+}
+
+// Types pour les relations
+export interface AmenityData {
+    name: string;
+    icon: string;
+}
+
+export interface HighlightData {
+    title: string;
+    description: string;
+    icon: string;
+}
+
+export interface RoomData {
+    name: string;
+    description: string;
+    image: string;
+}
+
+export interface RulesData {
+    maxBarkHour?: string;
+    mustBeVaccinated?: boolean;
+    mustBeNeutered?: boolean;
+    allowsPuppies?: boolean;
+    minAge?: number;
+}
+
+export interface AvailabilityRangeData {
+    startDate: string;
+    endDate: string;
+    isBlocked?: boolean;
 }
 
 export interface CreateListingData {
@@ -57,12 +91,28 @@ export interface CreateListingData {
     cancellationPolicy?: 'flexible' | 'moderate' | 'strict';
     hasFreeCancellation?: boolean;
     antiCatAvailable?: boolean;
+    antiCatRiskScore?: number;
     antiCatExtraPrice?: number;
+    instructions?: {
+        checkInTime: string;
+        checkOutTime: string;
+        accessCode?: string;
+        wifiName?: string;
+        wifiPassword?: string;
+        parkingInfo?: string;
+        specialNotes?: string;
+    };
+    // Relations
+    amenities?: AmenityData[];
+    highlights?: HighlightData[];
+    rooms?: RoomData[];
+    rules?: RulesData;
+    availableDateRanges?: AvailabilityRangeData[];
+    isPublished?: boolean;
 }
 
 export interface UpdateListingData extends Partial<CreateListingData> {
     isActive?: boolean;
-    isPublished?: boolean;
 }
 
 // ==================== SELECT CONSTANTS ====================
@@ -91,6 +141,7 @@ const listingSelect = {
     antiCatExtraPrice: true,
     cancellationPolicy: true,
     hasFreeCancellation: true,
+    instructions: true,
     isActive: true,
     isPublished: true,
     createdAt: true,
@@ -100,6 +151,12 @@ const listingSelect = {
             id: true,
             name: true,
             avatar: true,
+            isHost: true,
+            isSuperHost: true,
+            hostingSince: true,
+            responseRate: true,
+            hostDescription: true,
+            createdAt: true,
         },
     },
     amenities: {
@@ -115,6 +172,18 @@ const listingSelect = {
             title: true,
             description: true,
             icon: true,
+        },
+    },
+    availability: {
+        where: {
+            endDate: { gte: new Date() },
+        },
+        orderBy: { startDate: 'asc' as const },
+        select: {
+            id: true,
+            startDate: true,
+            endDate: true,
+            isBlocked: true,
         },
     },
 } as const;
@@ -136,6 +205,23 @@ const listingDetailSelect = {
         },
         orderBy: { startDate: 'asc' as const },
     },
+    reviews: {
+        take: 5,
+        orderBy: { createdAt: 'desc' as const },
+        select: {
+            id: true,
+            rating: true,
+            content: true,
+            createdAt: true,
+            author: {
+                select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                },
+            },
+        },
+    },
 } as const;
 
 // ==================== GUEST SERVICES ====================
@@ -152,6 +238,11 @@ export async function getListings(query: ListingsQuery): Promise<PaginatedResult
         country,
         minPrice,
         maxPrice,
+        minCapacity,
+        minRating,
+        antiCat,
+        startDate,
+        endDate,
         sortBy = 'createdAt',
         sortOrder = 'desc',
         search,
@@ -163,9 +254,9 @@ export async function getListings(query: ListingsQuery): Promise<PaginatedResult
         isPublished: true,
     };
 
-    // Filtre par type
-    if (type) {
-        where.type = type;
+    // Filtre par type (peut être plusieurs)
+    if (type && type.length > 0) {
+        where.type = { in: type };
     }
 
     // Filtres de localisation
@@ -181,6 +272,37 @@ export async function getListings(query: ListingsQuery): Promise<PaginatedResult
         where.pricePerNight = {};
         if (minPrice !== undefined) where.pricePerNight.gte = minPrice;
         if (maxPrice !== undefined) where.pricePerNight.lte = maxPrice;
+    }
+
+    // Filtre de capacité (nombre de chiens min)
+    if (minCapacity !== undefined && minCapacity > 1) {
+        where.maxDogs = { gte: minCapacity };
+    }
+
+    // Filtre anti-chat
+    if (antiCat === true) {
+        where.antiCatAvailable = true;
+    }
+
+    // Filtre note minimum
+    if (minRating !== undefined && minRating > 0) {
+        where.rating = { gte: minRating };
+    }
+
+    // Filtre par dates de disponibilité
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        // Le listing doit avoir au moins une période de disponibilité 
+        // qui couvre entièrement la période demandée et n'est pas bloquée
+        where.availability = {
+            some: {
+                isBlocked: false,
+                startDate: { lte: start },
+                endDate: { gte: end },
+            }
+        };
     }
 
     // Recherche textuelle
@@ -448,38 +570,112 @@ export async function getHostListings(
 }
 
 /**
- * Crée un nouveau listing
+ * Crée un nouveau listing avec toutes ses relations
  */
 export async function createListing(hostId: string, data: CreateListingData) {
-    const listing = await prisma.listing.create({
-        data: {
-            hostId,
-            title: data.title,
-            subtitle: data.subtitle,
-            description: data.description,
-            type: data.type,
-            address: data.address,
-            city: data.city,
-            country: data.country || 'France',
-            lat: data.lat,
-            lng: data.lng,
-            pricePerNight: data.pricePerNight,
-            currency: data.currency || 'EUR',
-            maxDogs: data.maxDogs || 1,
-            capacity: data.capacity,
-            mainImage: data.mainImage,
-            images: data.images,
-            cancellationPolicy: data.cancellationPolicy || 'flexible',
-            hasFreeCancellation: data.hasFreeCancellation ?? true,
-            antiCatAvailable: data.antiCatAvailable ?? false,
-            antiCatExtraPrice: data.antiCatExtraPrice || 0,
-            isActive: true,
-            isPublished: false, // Doit être publié explicitement
-        },
+    // Utiliser une transaction pour créer le listing et ses relations
+    const listing = await prisma.$transaction(async (tx) => {
+        // 1. Créer le listing principal
+        const newListing = await tx.listing.create({
+            data: {
+                hostId,
+                title: data.title,
+                subtitle: data.subtitle,
+                description: data.description,
+                type: data.type,
+                address: data.address,
+                city: data.city,
+                country: data.country || 'France',
+                lat: data.lat,
+                lng: data.lng,
+                pricePerNight: data.pricePerNight,
+                currency: data.currency || 'EUR',
+                maxDogs: data.maxDogs || 1,
+                capacity: data.capacity,
+                mainImage: data.mainImage,
+                images: data.images || [],
+                cancellationPolicy: data.cancellationPolicy || 'flexible',
+                hasFreeCancellation: data.hasFreeCancellation ?? true,
+                antiCatAvailable: data.antiCatAvailable ?? false,
+                antiCatRiskScore: data.antiCatRiskScore || 0,
+                antiCatExtraPrice: data.antiCatExtraPrice || 0,
+                instructions: data.instructions ? data.instructions : undefined,
+                isActive: true,
+                isPublished: data.isPublished ?? true,
+            },
+        });
+
+        // 2. Créer les amenities
+        if (data.amenities && data.amenities.length > 0) {
+            await tx.listingAmenity.createMany({
+                data: data.amenities.map(a => ({
+                    listingId: newListing.id,
+                    name: a.name,
+                    icon: a.icon,
+                })),
+            });
+        }
+
+        // 3. Créer les highlights
+        if (data.highlights && data.highlights.length > 0) {
+            await tx.listingHighlight.createMany({
+                data: data.highlights.map(h => ({
+                    listingId: newListing.id,
+                    title: h.title,
+                    description: h.description,
+                    icon: h.icon,
+                })),
+            });
+        }
+
+        // 4. Créer les rooms
+        if (data.rooms && data.rooms.length > 0) {
+            await tx.listingRoom.createMany({
+                data: data.rooms.map(r => ({
+                    listingId: newListing.id,
+                    name: r.name,
+                    description: r.description,
+                    image: r.image,
+                })),
+            });
+        }
+
+        // 5. Créer les rules
+        if (data.rules) {
+            await tx.listingRules.create({
+                data: {
+                    listingId: newListing.id,
+                    maxBarkHour: data.rules.maxBarkHour || '22h00',
+                    mustBeVaccinated: data.rules.mustBeVaccinated ?? true,
+                    mustBeNeutered: data.rules.mustBeNeutered ?? false,
+                    allowsPuppies: data.rules.allowsPuppies ?? true,
+                    minAge: data.rules.minAge || 0,
+                },
+            });
+        }
+
+        // 6. Créer les disponibilités
+        if (data.availableDateRanges && data.availableDateRanges.length > 0) {
+            await tx.listingAvailability.createMany({
+                data: data.availableDateRanges.map(range => ({
+                    listingId: newListing.id,
+                    startDate: new Date(range.startDate),
+                    endDate: new Date(range.endDate),
+                    isBlocked: range.isBlocked ?? false,
+                })),
+            });
+        }
+
+        return newListing;
+    });
+
+    // Récupérer le listing complet avec toutes ses relations
+    const fullListing = await prisma.listing.findUnique({
+        where: { id: listing.id },
         select: listingDetailSelect,
     });
 
-    return listing;
+    return fullListing;
 }
 
 /**
@@ -567,9 +763,15 @@ export async function toggleListingStatus(id: string, hostId: string): Promise<b
         return null;
     }
 
+    const newActiveStatus = !existing.isActive;
+    
     const updated = await prisma.listing.update({
         where: { id },
-        data: { isActive: !existing.isActive },
+        data: { 
+            isActive: newActiveStatus,
+            // Quand on active, on publie aussi pour que l'annonce soit visible
+            ...(newActiveStatus && { isPublished: true }),
+        },
     });
 
     return updated.isActive;

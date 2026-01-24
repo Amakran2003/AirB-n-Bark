@@ -17,6 +17,7 @@ import {
 } from './middlewares/security.js';
 import { listingsRoutes } from './services/listings/index.js';
 import { bookingRoutes } from './services/booking/index.js';
+import { authRoutes } from './services/auth/index.js';
 
 // ==================== APP INITIALIZATION ====================
 
@@ -36,7 +37,13 @@ app.use(cors({
         // Autoriser les requêtes sans origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
         
-        if (config.corsOrigins.includes(origin) || config.isDev) {
+        // En développement, autoriser toutes les origines
+        if (!config.isProd) {
+            return callback(null, true);
+        }
+        
+        // En production, vérifier la whitelist
+        if (config.corsOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
@@ -53,15 +60,15 @@ app.use(globalRateLimiter);
 
 // ==================== PARSING MIDDLEWARES ====================
 
-// Body parsers avec limites de taille
+// Body parsers avec limites de taille (50mb pour supporter images base64)
 app.use(express.json({ 
-    limit: '10mb',
+    limit: '50mb',
     strict: true,
 }));
 
 app.use(express.urlencoded({ 
     extended: true, 
-    limit: '10mb',
+    limit: '50mb',
 }));
 
 // Sanitization globale du body
@@ -91,6 +98,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 // ==================== API ROUTES ====================
+
+// Auth microservice
+app.use('/api/auth', authRoutes);
 
 // Listings microservice
 app.use('/api/listings', listingsRoutes);
@@ -143,7 +153,6 @@ app.get('/api', (_req: Request, res: Response) => {
                 },
             },
         },
-        documentation: '/api/docs',
     });
 });
 

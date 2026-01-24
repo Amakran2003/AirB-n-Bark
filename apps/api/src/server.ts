@@ -22,20 +22,22 @@ async function bootstrap() {
         // Démarrer le serveur
         const server = app.listen(config.port, () => {
             console.log(`
-╔════════════════════════════════════════════════════════════╗
-║                                                            ║
-║   🐕 AirB-n-Bark API Server                               ║
-║                                                            ║
-║   Environment: ${config.nodeEnv.padEnd(40)}║
-║   Port: ${config.port.toString().padEnd(47)}║
-║   URL: http://localhost:${config.port.toString().padEnd(33)}║
-║                                                            ║
-║   Endpoints:                                               ║
-║   • Health: /health                                        ║
-║   • API: /api                                              ║
-║   • Listings: /api/listings                                ║
-║                                                            ║
-╚════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║   AirB-n-Bark API Server                                       ║
+║                                                                ║
+║   Environment: ${config.nodeEnv.padEnd(40)}        ║
+║   Port: ${config.port.toString().padEnd(47)}        ║
+║   URL: http://localhost:${config.port.toString().padEnd(33)}      ║
+║                                                                ║
+║   Endpoints:                                                   ║
+║   • Health: /health                                            ║
+║   • API Docs: /api                                             ║
+║   • Auth: /api/auth                                            ║
+║   • Listings: /api/listings                                    ║
+║   • Bookings: /api/bookings                                    ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
             `);
         });
 

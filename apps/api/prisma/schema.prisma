@@ -28,7 +28,8 @@ enum CancellationPolicy {
 enum BookingStatus {
   pending    // En attente de confirmation host
   confirmed  // Confirmée
-  cancelled  // Annulée
+  cancelled  // Annulée par le guest
+  rejected   // Refusée par l'hôte
   completed  // Terminée
 }
 
@@ -50,6 +51,12 @@ model User {
   role          UserRole  @default(guest)
   isHost        Boolean   @default(false)
   isVerified    Boolean   @default(false)
+  
+  // Host profile fields
+  isSuperHost     Boolean   @default(false)
+  hostingSince    DateTime?
+  responseRate    Int       @default(100) // Pourcentage 0-100
+  hostDescription String?
   
   // OAuth
   googleId      String?   @unique
@@ -112,6 +119,9 @@ model Listing {
   // Policies
   cancellationPolicy  CancellationPolicy @default(flexible)
   hasFreeCancellation Boolean            @default(true)
+  
+  // Instructions d'arrivée (JSON structuré)
+  instructions        Json?
   
   // Status
   isActive            Boolean            @default(true)
