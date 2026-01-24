@@ -23,7 +23,10 @@ async function setup() {
     }
     
     // Générer un token
-    const secret = process.env.JWT_SECRET || 'airbonbark-dev-secret-key-2026-x7k9m2p4q8r1s5t3';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('❌ JWT_SECRET manquant. Vérifiez votre fichier .env');
+    }
     console.log('🔐 Using secret:', secret.substring(0, 10) + '...');
     
     const token = jwt.sign(
