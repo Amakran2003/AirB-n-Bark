@@ -10,7 +10,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { hostApi } from '../../services/hostApi';
+import { getMyListings } from '../../services/hostApi';
 
 /**
  * ==================== HOST DASHBOARD ====================
@@ -44,11 +44,13 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
         const loadStats = async () => {
             try {
                 setIsLoading(true);
-                const listings = await hostApi.getMyListings();
-                setStats(prev => ({
-                    ...prev,
-                    totalListings: listings.length,
-                }));
+                const result = await getMyListings();
+                if (result.success && result.data) {
+                    setStats(prev => ({
+                        ...prev,
+                        totalListings: result.data!.length,
+                    }));
+                }
             } catch (error) {
                 console.error('Erreur chargement stats:', error);
             } finally {

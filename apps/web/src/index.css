@@ -213,6 +213,14 @@ body {
     background-color: var(--color-error-light);
 }
 
+.bg-error {
+    background-color: var(--color-error);
+}
+
+.bg-error-dark {
+    background-color: color-mix(in srgb, var(--color-error), black 15%);
+}
+
 .bg-error-lighter {
     background-color: var(--color-error-lighter);
 }
