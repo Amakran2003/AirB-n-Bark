@@ -128,6 +128,7 @@ export interface ListingCardData {
     antiCat: AntiCatOption;
     maxDogs: number; // Nombre max de chiens acceptés
     availableDateRanges: DateRange[]; // Plages de dates où l'annonce est disponible
+    instructions?: string; // Instructions d'arrivée (optionnel, visible après réservation)
 }
 
 // Données complètes pour la page détail

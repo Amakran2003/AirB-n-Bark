@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Check, MessageCircle, Key, Calendar, Dog, MapPin, Home, Copy, CheckCircle } from 'lucide-react';
 import type { ListingCardData } from '../data/listings';
 import { MOCK_LISTINGS_FULL } from '../data/listings';
+import { api } from '../services/api';
 
 /**
  * ==================== PAGE BOOKING CONFIRMATION ====================
@@ -17,6 +18,16 @@ import { MOCK_LISTINGS_FULL } from '../data/listings';
  * - GET /api/listings/:id/access → instructions d'acces (code, wifi, parking)
  * - POST /api/bookings/:id/contact-host → envoyer un message a l'hote
  */
+
+interface ListingInstructions {
+    checkInTime?: string;
+    checkOutTime?: string;
+    accessCode?: string;
+    wifiName?: string;
+    wifiPassword?: string;
+    parkingInfo?: string;
+    specialNotes?: string;
+}
 
 interface BookingConfirmationProps {
     listing: ListingCardData;
@@ -45,9 +56,25 @@ export const BookingConfirmation = ({
     const [showConfetti, setShowConfetti] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
+    const [listingInstructions, setListingInstructions] = useState<ListingInstructions | null>(null);
 
     // Récupérer les données complètes de l'annonce
     const fullListing = MOCK_LISTINGS_FULL[listing.id];
+
+    // Récupérer les instructions depuis l'API
+    useEffect(() => {
+        const fetchInstructions = async () => {
+            try {
+                const response = await api.listings.getById(listing.id);
+                if (response.success && response.data?.instructions) {
+                    setListingInstructions(response.data.instructions as ListingInstructions);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des instructions:', error);
+            }
+        };
+        fetchInstructions();
+    }, [listing.id]);
 
     // Animation séquencée
     useEffect(() => {
@@ -93,16 +120,17 @@ export const BookingConfirmation = ({
         }
     };
 
-    // Instructions d'accès (mock pour l'instant)
-    const accessInstructions = fullListing?.host ? {
-        checkInTime: '15h00',
-        checkOutTime: '11h00',
-        accessCode: '1234#',
-        parkingInfo: 'Espace pour garer ta laisse devant la niche 🅿️',
-        wifiName: 'NicheWifi',
-        wifiPassword: 'woofwoof2024',
-        specialNotes: 'Ta gamelle d\'eau fraîche t\'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴',
-    } : null;
+    // Instructions d'accès - priorité aux instructions de l'API, sinon mock
+    const accessInstructions = {
+        checkInTime: listingInstructions?.checkInTime || '15h00',
+        checkOutTime: listingInstructions?.checkOutTime || '11h00',
+        accessCode: listingInstructions?.accessCode || '1234#',
+        parkingInfo: listingInstructions?.parkingInfo || 'Espace pour garer ta laisse devant la niche 🅿️',
+        wifiName: listingInstructions?.wifiName || 'NicheWifi',
+        wifiPassword: listingInstructions?.wifiPassword || 'woofwoof2024',
+        specialNotes: listingInstructions?.specialNotes || 'Ta gamelle d\'eau fraîche t\'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴',
+        hasCustomInstructions: !!listingInstructions,
+    };
 
     return (
         <div className="fixed inset-0 z-200 bg-white flex flex-col overflow-hidden">

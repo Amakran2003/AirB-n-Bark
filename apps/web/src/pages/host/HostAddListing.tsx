@@ -22,13 +22,14 @@ import {
     Star,
     PawPrint,
     Loader2,
-    Calendar
+    Calendar,
+    Bed
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { DatePicker } from '../../components/DatePicker';
+import { createListing, mapFormDataToApiPayload } from '../../services/hostApi';
 import type { 
     ListingType, 
-    ListingFullData,
     ListingAmenity,
     ListingHighlight,
     ListingRoom,
@@ -69,6 +70,7 @@ type Step =
     | 'intro2'
     | 'amenities'
     | 'photos'
+    | 'rooms'
     | 'title'
     | 'highlights'
     | 'description'
@@ -76,6 +78,7 @@ type Step =
     | 'price'
     | 'rules'
     | 'availability'
+    | 'instructions'
     | 'anticat'
     | 'review';
 
@@ -87,6 +90,7 @@ const STEPS: Step[] = [
     'intro2',
     'amenities',
     'photos',
+    'rooms',
     'title',
     'highlights',
     'description',
@@ -94,8 +98,20 @@ const STEPS: Step[] = [
     'price',
     'rules',
     'availability',
+    'instructions',
     'anticat',
     'review'
+];
+
+// Types de pièces disponibles pour "Where you'll sleep"
+const ROOM_TYPES = [
+    { id: 'bedroom', name: 'Chambre', icon: '🛏️' },
+    { id: 'living', name: 'Salon', icon: '🛋️' },
+    { id: 'garden', name: 'Jardin', icon: '🌳' },
+    { id: 'terrace', name: 'Terrasse', icon: '☀️' },
+    { id: 'kitchen', name: 'Cuisine', icon: '🍽️' },
+    { id: 'bathroom', name: 'Salle de bain', icon: '🚿' },
+    { id: 'other', name: 'Autre', icon: '📍' },
 ];
 
 // Types de niche
@@ -159,9 +175,6 @@ const HighlightIcon = ({ icon, className }: { icon: ListingHighlight['icon']; cl
 
 // Génère un ID unique
 const generateId = () => `listing-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-// Clé localStorage pour les annonces
-const LISTINGS_STORAGE_KEY = 'airbnbark_host_listings';
 
 export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     const { user } = useAuth();
@@ -238,6 +251,17 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             allowsPuppies: true,
             minAge: 3
         } as ListingRules,
+        
+        // Instructions d'arrivée (structurées)
+        instructions: {
+            checkInTime: '15h00',
+            checkOutTime: '11h00',
+            accessCode: '',
+            wifiName: '',
+            wifiPassword: '',
+            parkingInfo: '',
+            specialNotes: '',
+        },
         
         // Cancellation
         cancellationPolicy: 'flexible' as 'flexible' | 'moderate' | 'strict'
@@ -339,6 +363,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return formData.amenities.length >= 1;
             case 'photos':
                 return formData.images.length >= 1;
+            case 'rooms':
+                return formData.rooms.length >= 1; // Au moins 1 espace tagué
             case 'title':
                 return formData.title.trim().length >= 10;
             case 'highlights':
@@ -351,6 +377,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return true;
             case 'availability':
                 return formData.availableDateRanges.length >= 1;
+            case 'instructions':
+                return true; // Optionnel
             case 'anticat':
                 return true;
             case 'review':
@@ -496,76 +524,40 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         setIsSubmitting(true);
 
         try {
-            // Construire l'objet ListingFullData complet
-            const listingData: ListingFullData = {
-                id: generateId(),
-                type: formData.type as ListingType,
-                title: formData.title,
-                subtitle: generateSubtitle(),
-                location: formData.location,
-                image: formData.images[0] || '/placeholder-dog.svg',
-                price: formData.price,
-                rating: 0, // Nouvelle annonce, pas encore de note
-                hostName: user.pseudo || 'Hôte',
-                hostAvatar: '/placeholder-dog.svg', // TODO: user.avatar when available
-                antiCat: {
-                    available: formData.antiCatAvailable,
-                    riskScore: formData.antiCatRiskScore,
-                    extraPrice: formData.antiCatExtraPrice
+            // Mapper les données du formulaire vers le format API
+            const apiPayload = mapFormDataToApiPayload(
+                {
+                    type: formData.type,
+                    title: formData.title,
+                    description: formData.description,
+                    price: formData.price,
+                    capacity: formData.capacity,
+                    images: formData.images,
+                    locationDetails: formData.locationDetails,
+                    amenities: formData.amenities,
+                    highlights: formData.highlights,
+                    rooms: formData.rooms,
+                    rules: formData.rules,
+                    availableDateRanges: formData.availableDateRanges,
+                    antiCatAvailable: formData.antiCatAvailable,
+                    antiCatRiskScore: formData.antiCatRiskScore,
+                    antiCatExtraPrice: formData.antiCatExtraPrice,
+                    cancellationPolicy: formData.cancellationPolicy,
                 },
-                maxDogs: formData.capacity.dogs,
-                availableDateRanges: formData.availableDateRanges,
-                capacity: generateCapacityString(),
-                images: formData.images.length > 0 ? formData.images : ['/placeholder-dog.svg'],
-                description: formData.description,
-                host: {
-                    name: user.pseudo || 'Hôte',
-                    avatar: '/placeholder-dog.svg', // TODO: user.avatar when available
-                    isNewHost: true,
-                    isSuperHost: false,
-                    rating: 0,
-                    reviewCount: 0,
-                    responseRate: 100,
-                    yearsHosting: 0
-                },
-                locationDetails: formData.locationDetails,
-                rooms: formData.rooms.length > 0 ? formData.rooms : [
-                    {
-                        name: 'Espace principal',
-                        description: 'Espace de couchage confortable',
-                        image: formData.images[0] || '/placeholder-dog.svg'
-                    }
-                ],
-                amenities: formData.amenities,
-                highlights: formData.highlights,
-                reviews: [], // Nouvelle annonce, pas d'avis
-                pricing: {
-                    amount: formData.price,
-                    currency: '€',
-                    nights: 1,
-                    dateRange: formData.availableDateRanges.length > 0 
-                        ? `${formData.availableDateRanges[0].start} - ${formData.availableDateRanges[0].end}`
-                        : '',
-                    hasFreeCancellation: formData.cancellationPolicy === 'flexible'
-                },
-                rules: formData.rules,
-                reviewsCount: 0,
-                cancellationPolicy: formData.cancellationPolicy
-            };
+                user.pseudo || 'Hôte'
+            );
 
-            // TODO API: POST /api/listings avec listingData
-            // Pour l'instant, sauvegarde en localStorage
-            const existingListings = JSON.parse(localStorage.getItem(LISTINGS_STORAGE_KEY) || '[]');
-            existingListings.push(listingData);
-            localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(existingListings));
+            // Appel API
+            const result = await createListing(apiPayload);
 
-            // Simuler un délai réseau
-            await new Promise(resolve => setTimeout(resolve, 500));
+            if (!result.success) {
+                throw new Error(result.error || 'Erreur lors de la création');
+            }
 
             onSuccess();
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
-            alert('Une erreur est survenue. Veuillez réessayer.');
+            alert(error instanceof Error ? error.message : 'Une erreur est survenue. Veuillez réessayer.');
         } finally {
             setIsSubmitting(false);
         }
@@ -816,6 +808,150 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         
                         <p className="text-xs text-secondary mt-4 text-center">
                             Les annonces avec 5+ photos reçoivent plus de réservations
+                        </p>
+                    </div>
+                );
+
+            case 'rooms':
+                return (
+                    <div className="flex-1 overflow-y-auto p-6">
+                        <h1 className="text-2xl font-bold mb-2">Where you'll sleep 🛏️</h1>
+                        <p className="text-secondary mb-6">
+                            Associe tes photos aux différents espaces pour que les toutous sachent où ils dormiront.
+                        </p>
+                        
+                        {/* Liste des rooms créées */}
+                        {formData.rooms.length > 0 && (
+                            <div className="mb-6">
+                                <p className="text-sm font-medium mb-3">Espaces créés :</p>
+                                <div className="space-y-3">
+                                    {formData.rooms.map((room, index) => (
+                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                                            <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                                                <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium">{room.name}</p>
+                                                <p className="text-sm text-secondary truncate">{room.description}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        rooms: prev.rooms.filter((_, i) => i !== index)
+                                                    }));
+                                                }}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Ajouter un nouvel espace */}
+                        <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4">
+                            <p className="text-sm font-medium mb-3 flex items-center gap-2">
+                                <Bed className="w-4 h-4" />
+                                Ajouter un espace
+                            </p>
+                            
+                            {/* Sélectionner une photo */}
+                            <div className="mb-4">
+                                <p className="text-xs text-secondary mb-2">1. Choisis une photo :</p>
+                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                    {formData.images.map((img, index) => {
+                                        const isUsed = formData.rooms.some(r => r.image === img);
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => setFormData(prev => ({ ...prev, _tempRoomImage: img }))}
+                                                className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                                                    (formData as any)._tempRoomImage === img
+                                                        ? 'border-blue-600 ring-2 ring-blue-200'
+                                                        : isUsed
+                                                            ? 'border-green-400'
+                                                            : 'border-gray-200'
+                                                }`}
+                                            >
+                                                <img src={img} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                                                {isUsed && (
+                                                    <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center pointer-events-none">
+                                                        <Check className="w-4 h-4 text-green-600" />
+                                                    </div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            
+                            {/* Type de pièce */}
+                            <div className="mb-4">
+                                <p className="text-xs text-secondary mb-2">2. Type d'espace :</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {ROOM_TYPES.map(type => (
+                                        <button
+                                            key={type.id}
+                                            onClick={() => setFormData(prev => ({ ...prev, _tempRoomType: type.name }))}
+                                            className={`px-3 py-2 rounded-full text-sm flex items-center gap-1 transition-all ${
+                                                (formData as any)._tempRoomType === type.name
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-100 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <span>{type.icon}</span>
+                                            <span>{type.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Description */}
+                            <div className="mb-4">
+                                <p className="text-xs text-secondary mb-2">3. Description (optionnelle) :</p>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: 1 panier premium, couverture chauffante"
+                                    value={(formData as any)._tempRoomDesc || ''}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, _tempRoomDesc: e.target.value }))}
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none text-sm"
+                                />
+                            </div>
+                            
+                            {/* Bouton ajouter */}
+                            <button
+                                onClick={() => {
+                                    const tempImage = (formData as any)._tempRoomImage;
+                                    const tempType = (formData as any)._tempRoomType;
+                                    const tempDesc = (formData as any)._tempRoomDesc || '';
+                                    
+                                    if (tempImage && tempType) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            rooms: [...prev.rooms, {
+                                                name: tempType,
+                                                description: tempDesc || `Espace ${tempType.toLowerCase()}`,
+                                                image: tempImage
+                                            }],
+                                            _tempRoomImage: undefined,
+                                            _tempRoomType: undefined,
+                                            _tempRoomDesc: undefined
+                                        }));
+                                    }
+                                }}
+                                disabled={!(formData as any)._tempRoomImage || !(formData as any)._tempRoomType}
+                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Ajouter cet espace
+                            </button>
+                        </div>
+                        
+                        <p className="text-xs text-secondary mt-4 text-center">
+                            Les toutous adorent savoir où ils vont dormir !
                         </p>
                     </div>
                 );
@@ -1091,6 +1227,131 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     </div>
                 );
 
+            case 'instructions':
+                return (
+                    <div className="flex-1 overflow-y-auto p-6">
+                        <h1 className="text-2xl font-bold mb-2">Instructions d'arrivée</h1>
+                        <p className="text-secondary mb-6">
+                            Ces infos seront envoyées aux voyageurs après confirmation de leur réservation.
+                        </p>
+                        
+                        <div className="space-y-5">
+                            {/* Horaires */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Arrivée</label>
+                                    <select
+                                        value={formData.instructions.checkInTime}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            instructions: { ...prev.instructions, checkInTime: e.target.value }
+                                        }))}
+                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    >
+                                        {['14h00', '15h00', '16h00', '17h00', '18h00', 'Flexible'].map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Départ</label>
+                                    <select
+                                        value={formData.instructions.checkOutTime}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            instructions: { ...prev.instructions, checkOutTime: e.target.value }
+                                        }))}
+                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    >
+                                        {['10h00', '11h00', '12h00', 'Flexible'].map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Code d'accès */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">🔑 Code d'accès / Digicode</label>
+                                <input
+                                    type="text"
+                                    value={formData.instructions.accessCode}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        instructions: { ...prev.instructions, accessCode: e.target.value }
+                                    }))}
+                                    placeholder="Ex: 1234# ou A123B"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    maxLength={50}
+                                />
+                            </div>
+
+                            {/* WiFi */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">📶 Nom WiFi</label>
+                                    <input
+                                        type="text"
+                                        value={formData.instructions.wifiName}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            instructions: { ...prev.instructions, wifiName: e.target.value }
+                                        }))}
+                                        placeholder="NicheWifi"
+                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        maxLength={50}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Mot de passe</label>
+                                    <input
+                                        type="text"
+                                        value={formData.instructions.wifiPassword}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            instructions: { ...prev.instructions, wifiPassword: e.target.value }
+                                        }))}
+                                        placeholder="••••••••"
+                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        maxLength={50}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Parking */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">🅿️ Parking / Stationnement</label>
+                                <input
+                                    type="text"
+                                    value={formData.instructions.parkingInfo}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        instructions: { ...prev.instructions, parkingInfo: e.target.value }
+                                    }))}
+                                    placeholder="Ex: Place réservée devant le portail"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    maxLength={200}
+                                />
+                            </div>
+
+                            {/* Notes spéciales */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">📝 Notes pour les voyageurs</label>
+                                <textarea
+                                    value={formData.instructions.specialNotes}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        instructions: { ...prev.instructions, specialNotes: e.target.value }
+                                    }))}
+                                    placeholder="Ex: La gamelle d'eau fraîche t'attend ! Les friandises sont dans le placard de gauche 🦴"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none resize-none h-24"
+                                    maxLength={500}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+
             case 'anticat':
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
@@ -1227,6 +1488,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Annulation</span>
                                     <span className="font-medium capitalize">{formData.cancellationPolicy}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-secondary">Instructions</span>
+                                    <span className="font-medium">
+                                        {formData.instructions.accessCode || formData.instructions.specialNotes ? '✓ Ajoutées' : 'Aucune'}
+                                    </span>
                                 </div>
                             </div>
                         </div>

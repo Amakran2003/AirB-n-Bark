@@ -206,12 +206,12 @@ export const AuthModal = () => {
         setIsLoading(true);
         try {
             // TODO API: POST /api/auth/login
-            const success = await login(email, password);
-            if (success) {
+            const result = await login(email, password);
+            if (result.success) {
                 setIsSuccess(true);
                 setTimeout(() => closeAuthModal(), 1500);
             } else {
-                setGeneralError('Email ou mot de passe incorrect');
+                setGeneralError(result.error || 'Email ou mot de passe incorrect');
             }
         } catch {
             setGeneralError('Une erreur est survenue. Réessayez.');
@@ -263,12 +263,13 @@ export const AuthModal = () => {
         setIsLoading(true);
         try {
             // TODO API: POST /api/auth/register
-            const success = await register(pseudo, email, password);
-            if (success) {
+            const result = await register(pseudo, email, password);
+            if (result.success) {
                 setIsSuccess(true);
                 setTimeout(() => closeAuthModal(), 1500);
             } else {
-                setGeneralError('Erreur lors de la création du compte. Réessayez.');
+                // Utiliser le message d'erreur de l'API
+                setGeneralError(result.error || 'Erreur lors de la création du compte. Réessayez.');
             }
         } catch {
             setGeneralError('Une erreur est survenue. Réessayez.');

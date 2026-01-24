@@ -128,13 +128,14 @@ export interface ListingFull extends ListingCard {
 
 // Filtres pour la recherche
 export interface ListingsFilters {
-    location?: string;
+    city?: string;
     startDate?: string;
     endDate?: string;
-    guests?: number;
+    minCapacity?: number;
     type?: ListingType[];
-    priceMin?: number;
-    priceMax?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    minRating?: number;
     antiCat?: boolean;
 }
 
@@ -173,7 +174,7 @@ export interface CreateBookingRequest {
     listingId: string;
     startDate: string;
     endDate: string;
-    guests: number;
+    guestsCount: number;
     antiCatOption?: boolean;
 }
 

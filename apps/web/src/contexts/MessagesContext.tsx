@@ -20,7 +20,8 @@ import type { Conversation as ApiConversation, Message as ApiMessage } from '../
  */
 
 // Toggle pour activer l'API
-const USE_API = import.meta.env.VITE_USE_API === 'true';
+// TODO: Réactiver quand l'endpoint /api/conversations sera prêt
+const USE_API = false; // import.meta.env.VITE_USE_API === 'true';
 
 export interface Message {
     id: string;

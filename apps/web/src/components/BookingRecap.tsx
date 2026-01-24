@@ -139,17 +139,24 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
     const handlePaymentSuccess = async () => {
         // Créer la réservation
         if (checkIn && checkOut) {
-            const booking = await createBooking({
-                listingId: listing.id,
-                startDate: checkIn,
-                endDate: checkOut,
-                dogsCount,
-                totalPrice: total,
-                hasFreeCancellation,
-            });
-            setConfirmedBooking(booking);
-            setShowPayment(false);
-            setShowConfirmation(true);
+            try {
+                const booking = await createBooking({
+                    listingId: listing.id,
+                    startDate: checkIn,
+                    endDate: checkOut,
+                    dogsCount,
+                    totalPrice: total,
+                    hasFreeCancellation,
+                });
+                console.log('Réservation créée:', booking);
+                setConfirmedBooking(booking);
+                setShowPayment(false);
+                setShowConfirmation(true);
+            } catch (error) {
+                console.error('Erreur lors de la création de la réservation:', error);
+                alert(error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.');
+                setShowPayment(false);
+            }
         }
     };
     

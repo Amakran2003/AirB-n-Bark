@@ -274,11 +274,7 @@ export const Payment = ({
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 <button
-                    className={`btn-full py-4 rounded-xl font-medium transition-all ${
-                        isFormValid && !isProcessing
-                            ? 'bg-[#3B82F6] text-white'
-                            : 'bg-gray-200 text-gray-500'
-                    }`}
+                    className={`btn-primary btn-full ${!isFormValid || isProcessing ? 'btn-disabled' : ''}`}
                     onClick={handlePayment}
                     disabled={!isFormValid || isProcessing}
                 >

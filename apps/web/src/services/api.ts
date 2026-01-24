@@ -73,14 +73,16 @@ async function apiFetch<T>(
             return {
                 success: false,
                 error: {
-                    message: data.message || 'Une erreur est survenue',
-                    code: data.code || 'UNKNOWN_ERROR',
+                    message: data.error?.message || data.message || 'Une erreur est survenue',
+                    code: data.error?.code || data.code || 'UNKNOWN_ERROR',
                     status: response.status,
+                    details: data.error?.details,
                 },
             };
         }
 
-        return { success: true, data };
+        // L'API renvoie { success: true, data: {...} } - on extrait data.data
+        return { success: true, data: data.data || data };
     } catch (error) {
         return {
             success: false,
@@ -115,6 +117,17 @@ export const authApi = {
 
     me: () => apiFetch<AuthResponse['user']>('/auth/me'),
 
+    becomeHost: () =>
+        apiFetch<AuthResponse['user']>('/auth/become-host', {
+            method: 'POST',
+        }),
+
+    updateAvatar: (avatarUrl: string) =>
+        apiFetch<AuthResponse['user']>('/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify({ avatar: avatarUrl }),
+        }),
+
     // OAuth
     oauthGoogle: (token: string) =>
         apiFetch<AuthResponse>('/auth/oauth/google', {
@@ -138,13 +151,14 @@ export const listingsApi = {
         params.set('limit', limit.toString());
 
         if (filters) {
-            if (filters.location) params.set('location', filters.location);
+            if (filters.city) params.set('city', filters.city);
             if (filters.startDate) params.set('startDate', filters.startDate);
             if (filters.endDate) params.set('endDate', filters.endDate);
-            if (filters.guests) params.set('guests', filters.guests.toString());
+            if (filters.minCapacity) params.set('minCapacity', filters.minCapacity.toString());
             if (filters.type?.length) params.set('type', filters.type.join(','));
-            if (filters.priceMin) params.set('priceMin', filters.priceMin.toString());
-            if (filters.priceMax) params.set('priceMax', filters.priceMax.toString());
+            if (filters.minPrice) params.set('minPrice', filters.minPrice.toString());
+            if (filters.maxPrice) params.set('maxPrice', filters.maxPrice.toString());
+            if (filters.minRating) params.set('minRating', filters.minRating.toString());
             if (filters.antiCat) params.set('antiCat', 'true');
         }
 

@@ -40,12 +40,12 @@ export const Trips = ({ onTabChange }: TripsProps) => {
 
     const upcomingBookings = bookings.filter((b) => {
         const endDate = new Date(b.endDate);
-        return endDate >= today && b.status !== 'cancelled';
+        return endDate >= today && b.status !== 'cancelled' && b.status !== 'rejected';
     });
 
     const pastBookings = bookings.filter((b) => {
         const endDate = new Date(b.endDate);
-        return endDate < today || b.status === 'cancelled';
+        return endDate < today || b.status === 'cancelled' || b.status === 'rejected';
     });
 
     const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
@@ -109,16 +109,27 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                 ) : (
                     <div className="p-4 space-y-4">
                         {displayedBookings.map((booking) => {
-                            const listing = getListingById(booking.listingId);
+                            // Utiliser les données dénormalisées du booking, sinon fallback sur getListingById
+                            const listing = booking.listingTitle ? {
+                                id: booking.listingId,
+                                title: booking.listingTitle,
+                                subtitle: booking.listingLocation || '',
+                                image: booking.listingImage || '/placeholder-dog.svg',
+                                location: booking.listingLocation || '',
+                                price: booking.listingPrice || (booking.totalPrice / calculateNights(booking.startDate, booking.endDate)),
+                            } : getListingById(booking.listingId);
+                            
                             if (!listing) return null;
 
                             const nights = calculateNights(booking.startDate, booking.endDate);
                             const isCancelled = booking.status === 'cancelled';
+                            const isRejected = booking.status === 'rejected';
+                            const isInactive = isCancelled || isRejected;
 
                             return (
                                 <div
                                     key={booking.id}
-                                    className={`card p-4 ${isCancelled ? 'opacity-60' : ''}`}
+                                    className={`card p-4 ${isInactive ? 'opacity-60' : ''}`}
                                 >
                                     <div className="flex gap-4">
                                         <img
@@ -136,7 +147,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                                         {listing.title}
                                                     </h3>
                                                 </div>
-                                                {!isCancelled && activeTab === 'upcoming' && (
+                                                {!isInactive && activeTab === 'upcoming' && (
                                                     <button
                                                         className="btn-icon shrink-0"
                                                         onClick={() => {
@@ -165,12 +176,17 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                                 <span className="text-body-md font-medium">
                                                     €{listing.price * nights}
                                                 </span>
-                                                {isCancelled && (
+                                                {isRejected && (
                                                     <span className="px-2 py-1 bg-red-100 text-red-700 text-caption rounded-full">
+                                                        Refusée
+                                                    </span>
+                                                )}
+                                                {isCancelled && (
+                                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-caption rounded-full">
                                                         Annulée
                                                     </span>
                                                 )}
-                                                {booking.status === 'confirmed' && !isCancelled && (
+                                                {booking.status === 'confirmed' && !isInactive && (
                                                     <span className="px-2 py-1 bg-green-100 text-green-700 text-caption rounded-full">
                                                         Confirmée
                                                     </span>

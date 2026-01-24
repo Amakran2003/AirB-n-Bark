@@ -64,3 +64,12 @@ Ce premier commit fournit :
 	•	une stack docker-compose exécutable,
 	•	un Caddyfile déjà en place (HTTP pour l’instant),
 	•	un workflow GitHub Actions présent mais à finaliser.
+
+
+Auth backend - Code isolé, tu peux tester sans toucher au front
+HostAddListing → API - Crée des données, ne casse pas le guest
+HostListings → API - Lit les données créées, reste côté host
+Mappers API - Prépare la transformation, sans l'activer
+FilterContext → API - Active l'API guest avec les mappers prêts
+BookingContext → API - Une fois le guest stable
+Messages - En dernier, fonctionnalité bonus

@@ -29,8 +29,15 @@ interface User {
     id: string;
     email: string;
     pseudo: string;
+    avatar?: string;         // URL de la photo de profil
     role: 'guest' | 'host';  // guest = voyageur, host = hote
     isHost: boolean;         // Si l'utilisateur est aussi hote
+}
+
+// Résultat d'auth avec erreur optionnelle
+interface AuthResult {
+    success: boolean;
+    error?: string;
 }
 
 interface AuthContextType {
@@ -41,14 +48,15 @@ interface AuthContextType {
     error: string | null;
     openAuthModal: () => void;
     closeAuthModal: () => void;
-    login: (email: string, password: string) => Promise<boolean>;
-    register: (pseudo: string, email: string, password: string) => Promise<boolean>;
+    login: (email: string, password: string) => Promise<AuthResult>;
+    register: (pseudo: string, email: string, password: string) => Promise<AuthResult>;
     loginWithGoogle: () => Promise<boolean>;
     loginWithApple: () => Promise<boolean>;
     loginWithFacebook: () => Promise<boolean>;
-    becomeHost: () => void;
+    becomeHost: () => Promise<AuthResult>;
     switchToGuest: () => void;
     switchToHost: () => void;
+    updateAvatar: (avatarUrl: string) => Promise<AuthResult>;
     logout: () => void;
 }
 
@@ -57,6 +65,7 @@ const mapApiUser = (apiUser: ApiUser): User => ({
     id: apiUser.id,
     email: apiUser.email,
     pseudo: apiUser.name,
+    avatar: apiUser.avatar,
     role: apiUser.isHost ? 'host' : 'guest',
     isHost: apiUser.isHost,
 });
@@ -108,7 +117,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     // Login - API ou simulation
-    const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
         setIsLoading(true);
         setError(null);
 
@@ -119,10 +128,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             if (response.success) {
                 setAuthToken(response.data.token);
                 setUser(mapApiUser(response.data.user));
-                return true;
+                // Notifier les autres contextes du changement d'auth
+                window.dispatchEvent(new Event('auth-changed'));
+                return { success: true };
             } else {
                 setError(response.error.message);
-                return false;
+                return { success: false, error: response.error.message };
             }
         }
 
@@ -136,12 +147,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             isHost: false,
         });
         setIsLoading(false);
-        return true;
+        return { success: true };
     }, []);
 
     // Register - API ou simulation
     const register = useCallback(
-        async (pseudo: string, email: string, password: string): Promise<boolean> => {
+        async (pseudo: string, email: string, password: string): Promise<AuthResult> => {
             setIsLoading(true);
             setError(null);
 
@@ -152,10 +163,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 if (response.success) {
                     setAuthToken(response.data.token);
                     setUser(mapApiUser(response.data.user));
-                    return true;
+                    // Notifier les autres contextes du changement d'auth
+                    window.dispatchEvent(new Event('auth-changed'));
+                    return { success: true };
                 } else {
                     setError(response.error.message);
-                    return false;
+                    return { success: false, error: response.error.message };
                 }
             }
 
@@ -169,7 +182,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 isHost: false,
             });
             setIsLoading(false);
-            return true;
+            return { success: true };
         },
         []
     );
@@ -205,15 +218,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     // Devenir hote (activation directe)
-    const becomeHost = useCallback(() => {
-        // TODO: PUT /api/users/:id/become-host
-        // Note: La verification d'identite se fait apres, le compte hote est accessible immediatement
+    const becomeHost = useCallback(async (): Promise<AuthResult> => {
+        if (!user) {
+            return { success: false, error: 'Non connecté' };
+        }
+
+        if (USE_API) {
+            setIsLoading(true);
+            const response = await api.auth.becomeHost();
+            setIsLoading(false);
+
+            if (response.success) {
+                setUser((prev) => prev ? {
+                    ...prev,
+                    isHost: true,
+                    role: 'host',
+                } : null);
+                return { success: true };
+            } else {
+                return { success: false, error: response.error.message };
+            }
+        }
+
+        // Simulation locale
         setUser((prev) => prev ? {
             ...prev,
             isHost: true,
             role: 'host',
         } : null);
-    }, []);
+        return { success: true };
+    }, [user]);
 
     // Basculer vers le mode voyageur
     const switchToGuest = useCallback(() => {
@@ -231,12 +265,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } : null);
     }, []);
 
+    // Mettre à jour l'avatar
+    const updateAvatar = useCallback(async (avatarUrl: string): Promise<AuthResult> => {
+        if (!user) {
+            return { success: false, error: 'Non connecté' };
+        }
+
+        if (USE_API) {
+            setIsLoading(true);
+            const response = await api.auth.updateAvatar(avatarUrl);
+            setIsLoading(false);
+
+            if (response.success) {
+                setUser((prev) => prev ? {
+                    ...prev,
+                    avatar: response.data.avatar || avatarUrl,
+                } : null);
+                return { success: true };
+            } else {
+                return { success: false, error: response.error.message };
+            }
+        }
+
+        // Simulation locale - juste mettre à jour le state
+        setUser((prev) => prev ? {
+            ...prev,
+            avatar: avatarUrl,
+        } : null);
+        return { success: true };
+    }, [user]);
+
     const logout = useCallback(async () => {
         if (USE_API) {
             await api.auth.logout();
         }
         setAuthToken(null);
         setUser(null);
+        // Notifier les autres contextes du changement d'auth
+        window.dispatchEvent(new Event('auth-changed'));
     }, []);
 
     return (
@@ -257,6 +323,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 becomeHost,
                 switchToGuest,
                 switchToHost,
+                updateAvatar,
                 logout,
             }}
         >

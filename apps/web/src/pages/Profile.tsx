@@ -24,7 +24,7 @@ interface ProfileProps {
 }
 
 export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHostMode = false, onSwitchToGuest }: ProfileProps) => {
-    const { user, becomeHost, logout, openAuthModal } = useAuth();
+    const { user, becomeHost, logout, openAuthModal, updateAvatar } = useAuth();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     
     const [showLanguages, setShowLanguages] = useState(false);
@@ -76,15 +76,34 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
         const file = event.target.files?.[0];
         if (!file) return;
 
-        // TODO: POST /api/users/:id/avatar avec FormData
-        const nextUrl = URL.createObjectURL(file);
-        setProfileImageUrl((prevUrl) => {
-            if (prevUrl?.startsWith('blob:')) {
-                URL.revokeObjectURL(prevUrl);
+        // Convertir en base64 pour stockage
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Url = e.target?.result as string;
+            
+            // Mettre à jour localement d'abord pour feedback immédiat
+            setProfileImageUrl((prevUrl) => {
+                if (prevUrl?.startsWith('blob:')) {
+                    URL.revokeObjectURL(prevUrl);
+                }
+                return base64Url;
+            });
+            
+            // Sauvegarder via l'API
+            const result = await updateAvatar(base64Url);
+            if (!result.success) {
+                console.error('Erreur lors de la sauvegarde de l\'avatar:', result.error);
             }
-            return nextUrl;
-        });
+        };
+        reader.readAsDataURL(file);
     };
+
+    // Charger l'avatar de l'utilisateur au démarrage
+    useEffect(() => {
+        if (user?.avatar && !profileImageUrl) {
+            setProfileImageUrl(user.avatar);
+        }
+    }, [user?.avatar]);
 
     useEffect(() => {
         return () => {

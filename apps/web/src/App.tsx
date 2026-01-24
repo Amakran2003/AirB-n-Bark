@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Home } from './pages/Home.tsx';
 import { Trips } from './pages/Trips.tsx';
 import { Messages } from './pages/Messages.tsx';
@@ -11,7 +11,7 @@ import {
     HostMessages 
 } from './pages/host';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { FilterProvider } from './contexts/FilterContext';
+import { FilterProvider, useFilters } from './contexts/FilterContext';
 import { BookingProvider } from './contexts/BookingContext';
 import { MessagesProvider } from './contexts/MessagesContext';
 import { OnboardingProvider, useOnboarding } from './contexts/OnboardingContext';
@@ -30,6 +30,7 @@ import { HostBottomNavbar, HostTab } from './components/HostBottomNavbar';
 const AppContent = () => {
     const { currentPhase, completeSplash, completeOnboarding, completeTutorial } = useOnboarding();
     const { user, switchToGuest } = useAuth();
+    const { refetch: refetchListings } = useFilters();
     
     // Étape actuelle du tutoriel (pour animer la carte)
     const [tutorialStep, setTutorialStep] = useState<TutorialStepId | null>(null);
@@ -37,12 +38,27 @@ const AppContent = () => {
     // Onglet actif (pour navigation entre Home et Trips)
     const [activeTab, setActiveTab] = useState<'home' | 'trips' | 'messages' | 'profile'>('home');
     
-    // Mode hote actif
-    const [isHostMode, setIsHostMode] = useState(false);
+    // Mode hote actif - persisté dans localStorage
+    const [isHostMode, setIsHostMode] = useState(() => {
+        const saved = localStorage.getItem('isHostMode');
+        return saved === 'true';
+    });
     const [hostTab, setHostTab] = useState<HostTab>('dashboard');
     
     // Pages hote qui s'ouvrent en overlay (listings, add-listing)
     const [hostOverlay, setHostOverlay] = useState<'listings' | 'add-listing' | null>(null);
+    
+    // Persister isHostMode dans localStorage
+    useEffect(() => {
+        localStorage.setItem('isHostMode', isHostMode.toString());
+    }, [isHostMode]);
+    
+    // Si l'utilisateur n'est plus hôte, revenir en mode guest
+    useEffect(() => {
+        if (isHostMode && user && !user.isHost) {
+            setIsHostMode(false);
+        }
+    }, [user, isHostMode]);
 
     // Callback quand l'étape du tutoriel change
     const handleTutorialStepChange = (stepIndex: number) => {
@@ -80,6 +96,7 @@ const AppContent = () => {
         setActiveTab('home');
         setHostOverlay(null);
         switchToGuest();
+        refetchListings(); // Rafraîchir les annonces pour voir les nouvelles
     };
 
     return (
@@ -132,7 +149,10 @@ const AppContent = () => {
                             {hostOverlay === 'add-listing' && (
                                 <HostAddListing 
                                     onBack={() => setHostOverlay(null)}
-                                    onSuccess={() => setHostOverlay(null)}
+                                    onSuccess={() => {
+                                        refetchListings(); // Rafraîchir les listings pour les guests aussi
+                                        setHostOverlay('listings');
+                                    }}
                                 />
                             )}
                             

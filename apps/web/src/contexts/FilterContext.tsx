@@ -113,23 +113,27 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         setError(null);
 
         const apiFilters: ListingsFilters = {
-            location: filters.city || undefined,
+            city: filters.city || undefined,
             startDate: filters.checkIn || undefined,
             endDate: filters.checkOut || undefined,
-            guests: filters.dogsCount,
+            minCapacity: filters.dogsCount > 1 ? filters.dogsCount : undefined,
             type: filters.listingTypes.length > 0 ? filters.listingTypes : undefined,
-            priceMin: filters.priceMin || undefined,
-            priceMax: filters.priceMax || undefined,
+            minPrice: filters.priceMin || undefined,
+            maxPrice: filters.priceMax || undefined,
+            minRating: filters.minRating || undefined,
             antiCat: filters.antiCatOnly || undefined,
         };
 
         const response = await api.listings.getAll(apiFilters);
 
-        if (response.success) {
+        if (response.success && response.data?.listings) {
             setApiListings(response.data.listings);
+        } else if (response.success) {
+            // L'API peut retourner directement un tableau ou un objet vide
+            setApiListings(Array.isArray(response.data) ? response.data : []);
         } else {
-            setError(response.error.message);
-            console.error('API Error:', response.error);
+            setError(response.error?.message || 'Erreur de chargement');
+            setApiListings([]);
         }
 
         setIsLoading(false);
@@ -199,8 +203,10 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         return result;
     }, [filters]);
 
-    // Choix entre API et local
-    const filteredListings = USE_API ? apiListings as unknown as ListingCardData[] : localFilteredListings;
+    // Choix entre API et local - avec fallback sur tableau vide
+    const filteredListings = USE_API 
+        ? (apiListings as unknown as ListingCardData[]) || [] 
+        : localFilteredListings;
 
     return (
         <FilterContext.Provider
