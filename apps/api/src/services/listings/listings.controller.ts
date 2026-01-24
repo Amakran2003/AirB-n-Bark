@@ -6,6 +6,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../middlewares/auth.js';
 import * as listingsService from './listings.service.js';
+import { cacheGet, cacheSet, cacheDel } from '../../lib/cache.js';
 import {
     CreateListingSchema,
     UpdateListingSchema,
@@ -24,7 +25,7 @@ import {
  */
 function formatListingForFrontend(listing: any) {
     const hostingSince = listing.host?.hostingSince || listing.host?.createdAt;
-    const isNewHost = hostingSince 
+    const isNewHost = hostingSince
         ? (Date.now() - new Date(hostingSince).getTime()) < 90 * 24 * 60 * 60 * 1000 // < 90 jours
         : true;
 
@@ -132,7 +133,7 @@ export async function getListings(
 ) {
     try {
         const result = ListingsQuerySchema.safeParse(req.query);
-        
+
         if (!result.success) {
             return res.status(400).json({
                 success: false,
@@ -144,10 +145,27 @@ export async function getListings(
             });
         }
 
+        // Générer une clé de cache basée sur les paramètres de requête
+        const cacheKey = `listings:${JSON.stringify(result.data)}`;
+
+        // Essayer de récupérer depuis le cache
+        const cached = await cacheGet<{ listings: ReturnType<typeof formatListingForFrontend>[]; pagination: unknown }>(cacheKey);
+        if (cached) {
+            return res.json({
+                success: true,
+                data: { listings: cached.listings },
+                pagination: cached.pagination,
+                _cached: true,
+            });
+        }
+
         const listings = await listingsService.getListings(result.data);
 
         // Formater les listings pour le frontend
         const formattedListings = listings.data.map(formatListingForFrontend);
+
+        // Stocker en cache (TTL 60 secondes)
+        await cacheSet(cacheKey, { listings: formattedListings, pagination: listings.pagination }, 60);
 
         return res.json({
             success: true,
@@ -172,7 +190,7 @@ export async function getListingById(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -183,8 +201,21 @@ export async function getListingById(
             });
         }
 
+        const listingId = paramResult.data.id;
+        const cacheKey = `listing:${listingId}`;
+
+        // Essayer de récupérer depuis le cache
+        const cached = await cacheGet<ReturnType<typeof formatListingForFrontend>>(cacheKey);
+        if (cached) {
+            return res.json({
+                success: true,
+                data: cached,
+                _cached: true,
+            });
+        }
+
         const listing = await listingsService.getListingById(
-            paramResult.data.id,
+            listingId,
             req.user?.id
         );
 
@@ -200,6 +231,9 @@ export async function getListingById(
 
         // Formater pour le frontend
         const formattedListing = formatListingForFrontend(listing);
+
+        // Stocker en cache (TTL 120 secondes pour les détails)
+        await cacheSet(cacheKey, formattedListing, 120);
 
         return res.json({
             success: true,
@@ -221,7 +255,7 @@ export async function getListingReviews(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -262,7 +296,7 @@ export async function getListingAvailability(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -301,7 +335,7 @@ export async function getSimilarListings(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -339,7 +373,7 @@ export async function shareListing(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -351,7 +385,7 @@ export async function shareListing(
         }
 
         const bodyResult = ShareListingSchema.safeParse(req.body);
-        
+
         if (!bodyResult.success) {
             return res.status(400).json({
                 success: false,
@@ -421,7 +455,7 @@ export async function createListing(
 ) {
     try {
         const bodyResult = CreateListingSchema.safeParse(req.body);
-        
+
         if (!bodyResult.success) {
             return res.status(400).json({
                 success: false,
@@ -437,6 +471,9 @@ export async function createListing(
             req.user!.id,
             bodyResult.data
         );
+
+        // Invalider le cache des listings
+        await cacheDel('listings:*');
 
         return res.status(201).json({
             success: true,
@@ -459,7 +496,7 @@ export async function updateListing(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -471,7 +508,7 @@ export async function updateListing(
         }
 
         const bodyResult = UpdateListingSchema.safeParse(req.body);
-        
+
         if (!bodyResult.success) {
             return res.status(400).json({
                 success: false,
@@ -499,6 +536,10 @@ export async function updateListing(
             });
         }
 
+        // Invalider le cache de ce listing et de la liste
+        await cacheDel(`listing:${paramResult.data.id}`);
+        await cacheDel('listings:*');
+
         return res.json({
             success: true,
             data: listing,
@@ -520,7 +561,7 @@ export async function deleteListing(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -546,6 +587,10 @@ export async function deleteListing(
             });
         }
 
+        // Invalider le cache de ce listing et de la liste
+        await cacheDel(`listing:${paramResult.data.id}`);
+        await cacheDel('listings:*');
+
         return res.json({
             success: true,
             message: 'Listing supprimé avec succès',
@@ -566,7 +611,7 @@ export async function toggleListingStatus(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -592,6 +637,10 @@ export async function toggleListingStatus(
             });
         }
 
+        // Invalider le cache de ce listing et de la liste
+        await cacheDel(`listing:${paramResult.data.id}`);
+        await cacheDel('listings:*');
+
         return res.json({
             success: true,
             data: { isActive },
@@ -613,7 +662,7 @@ export async function toggleListingPublished(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -639,6 +688,10 @@ export async function toggleListingPublished(
             });
         }
 
+        // Invalider le cache de ce listing et de la liste
+        await cacheDel(`listing:${paramResult.data.id}`);
+        await cacheDel('listings:*');
+
         return res.json({
             success: true,
             data: { isPublished },
@@ -660,7 +713,7 @@ export async function updateListingAvailability(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -672,7 +725,7 @@ export async function updateListingAvailability(
         }
 
         const bodyResult = UpdateAvailabilitySchema.safeParse(req.body);
-        
+
         if (!bodyResult.success) {
             return res.status(400).json({
                 success: false,
@@ -721,7 +774,7 @@ export async function addListingAmenities(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
@@ -733,7 +786,7 @@ export async function addListingAmenities(
         }
 
         const bodyResult = AddAmenitiesSchema.safeParse(req.body);
-        
+
         if (!bodyResult.success) {
             return res.status(400).json({
                 success: false,
@@ -782,7 +835,7 @@ export async function getListingStats(
 ) {
     try {
         const paramResult = IdParamSchema.safeParse(req.params);
-        
+
         if (!paramResult.success) {
             return res.status(400).json({
                 success: false,
