@@ -174,10 +174,10 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-[#f7f7f7] flex flex-col">
+        <div className="fixed inset-0 bg-page flex flex-col">
             {/* Header */}
             <div 
-                className="shrink-0 px-4 py-4 bg-white border-b border-[#ebebeb]"
+                className="shrink-0 px-4 py-4 bg-white border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <div className="flex items-center justify-between mb-4">
@@ -185,7 +185,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                     <button 
                         onClick={loadBookings}
                         disabled={loading}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary hover:bg-secondary transition-colors"
                     >
                         <RefreshCw className={`w-5 h-5 text-secondary ${loading ? 'animate-spin' : ''}`} />
                     </button>
@@ -202,8 +202,8 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                                     activeTab === tab.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-secondary'
+                                        ? 'bg-brand text-white'
+                                        : 'bg-tertiary text-secondary'
                                 }`}
                             >
                                 <Icon className="w-4 h-4" />
@@ -212,7 +212,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                     <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${
                                         activeTab === tab.id
                                             ? 'bg-white/20 text-white'
-                                            : 'bg-gray-200'
+                                            : 'bg-secondary'
                                     }`}>
                                         {count}
                                     </span>
@@ -230,26 +230,26 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
             >
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
-                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                        <Loader2 className="w-8 h-8 text-brand animate-spin" />
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                            <XCircle className="w-10 h-10 text-red-400" />
+                        <div className="w-20 h-20 bg-error-light rounded-full flex items-center justify-center mb-4">
+                            <XCircle className="w-10 h-10 text-error" />
                         </div>
                         <h2 className="text-h3 mb-2">Erreur</h2>
                         <p className="text-body text-secondary mb-4">{error}</p>
                         <button 
                             onClick={loadBookings}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+                            className="px-4 py-2 bg-brand text-white rounded-lg font-medium"
                         >
                             Réessayer
                         </button>
                     </div>
                 ) : filteredBookings.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <Calendar className="w-10 h-10 text-gray-400" />
+                        <div className="w-20 h-20 bg-tertiary rounded-full flex items-center justify-center mb-4">
+                            <Calendar className="w-10 h-10 text-secondary" />
                         </div>
                         <h2 className="text-h3 mb-2">
                             {activeTab === 'pending' && 'Aucune demande'}
@@ -274,8 +274,8 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                 className="bg-white rounded-2xl shadow-sm overflow-hidden"
                             >
                                 {/* Annonce en header avec image */}
-                                <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-b border-[#ebebeb]">
-                                    <div className="flex items-center gap-2 text-blue-600 mb-1">
+                                <div className="p-4 bg-gradient-to-r from-primary-lighter to-white border-b border-(--color-border-light)">
+                                    <div className="flex items-center gap-2 text-brand mb-1">
                                         <Home className="w-4 h-4" />
                                         <span className="text-caption font-medium">Votre annonce</span>
                                     </div>
@@ -283,7 +283,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                 </div>
 
                                 {/* Guest info */}
-                                <div className="flex items-center gap-3 p-4 border-b border-[#ebebeb]">
+                                <div className="flex items-center gap-3 p-4 border-b border-(--color-border-light)">
                                     <img 
                                         src={booking.guestAvatar} 
                                         alt={booking.guestName}
@@ -297,7 +297,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                     </div>
                                     <button 
                                         onClick={() => onMessage(booking.id)}
-                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100"
+                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary"
                                     >
                                         <MessageCircle className="w-5 h-5 text-secondary" />
                                     </button>
@@ -322,7 +322,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                                 {booking.dogsCount || 1} toutou{(booking.dogsCount || 1) > 1 ? 's' : ''}
                                             </span>
                                         </div>
-                                        <span className="text-body-md font-bold text-green-600">{booking.totalPrice}€</span>
+                                        <span className="text-body-md font-bold text-success">{booking.totalPrice}€</span>
                                     </div>
                                 </div>
 
@@ -332,7 +332,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                         <button 
                                             onClick={() => handleDecline(booking.id)}
                                             disabled={actionLoading === booking.id}
-                                            className="flex-1 py-3 border border-[#ebebeb] rounded-xl font-medium text-secondary disabled:opacity-50"
+                                            className="flex-1 py-3 border border-(--color-border-light) rounded-xl font-medium text-secondary disabled:opacity-50"
                                         >
                                             {actionLoading === booking.id ? (
                                                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -343,7 +343,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                         <button 
                                             onClick={() => handleAccept(booking.id)}
                                             disabled={actionLoading === booking.id}
-                                            className="flex-1 py-3 bg-green-600 text-white rounded-xl font-medium disabled:opacity-50"
+                                            className="flex-1 py-3 bg-success text-white rounded-xl font-medium disabled:opacity-50"
                                         >
                                             {actionLoading === booking.id ? (
                                                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -360,7 +360,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                         <button 
                                             onClick={() => handleCancel(booking.id)}
                                             disabled={actionLoading === booking.id}
-                                            className="w-full py-3 border border-red-200 bg-red-50 rounded-xl font-medium text-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                                            className="w-full py-3 border border-error-light bg-error-lighter rounded-xl font-medium text-error disabled:opacity-50 flex items-center justify-center gap-2"
                                         >
                                             {actionLoading === booking.id ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />

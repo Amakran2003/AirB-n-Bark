@@ -117,7 +117,7 @@ export const Payment = ({
         <div className="fixed inset-0 z-150 bg-white flex flex-col" style={containerStyle}>
             {/* Header */}
             <header
-                className="shrink-0 flex items-center justify-between px-4 py-4 border-b border-[#ebebeb]"
+                className="shrink-0 flex items-center justify-between px-4 py-4 border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <button className="btn-icon" onClick={onBack}>
@@ -131,7 +131,7 @@ export const Payment = ({
             <div className="flex-1 overflow-y-auto">
                 <div className="p-6">
                     {/* Récap réservation */}
-                    <div className="flex gap-4 pb-6 border-b border-[#ebebeb]">
+                    <div className="flex gap-4 pb-6 border-b border-(--color-border-light)">
                         <img
                             src={listing.image}
                             alt={listing.title}
@@ -150,7 +150,7 @@ export const Payment = ({
                     </div>
 
                     {/* Détail prix */}
-                    <div className="py-6 border-b border-[#ebebeb]">
+                    <div className="py-6 border-b border-(--color-border-light)">
                         <h2 className="text-h3 mb-4">Détails du prix</h2>
                         <div className="space-y-2">
                             <div className="flex justify-between text-body">
@@ -161,7 +161,7 @@ export const Payment = ({
                                 <span>Frais de service</span>
                                 <span>€{serviceFee}</span>
                             </div>
-                            <div className="flex justify-between text-body-md font-semibold pt-3 border-t border-[#ebebeb]">
+                            <div className="flex justify-between text-body-md font-semibold pt-3 border-t border-(--color-border-light)">
                                 <span>Total</span>
                                 <span>€{grandTotal}</span>
                             </div>
@@ -187,7 +187,7 @@ export const Payment = ({
                                     placeholder="1234 5678 9012 3456"
                                     value={cardNumber}
                                     onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                                    className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                    className="input-field"
                                 />
                             </div>
 
@@ -203,7 +203,7 @@ export const Payment = ({
                                         placeholder="MM/YY"
                                         value={expiryDate}
                                         onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
-                                        className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                        className="input-field"
                                     />
                                 </div>
                                 <div className="w-24">
@@ -216,7 +216,7 @@ export const Payment = ({
                                         placeholder="123"
                                         value={cvv}
                                         onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                                        className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                        className="input-field"
                                     />
                                 </div>
                             </div>
@@ -231,16 +231,16 @@ export const Payment = ({
                                     placeholder="Nom sur la carte"
                                     value={cardHolder}
                                     onChange={(e) => setCardHolder(e.target.value)}
-                                    className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                    className="input-field"
                                 />
                             </div>
                         </div>
 
                         {/* Message d'erreur */}
                         {error && (
-                            <div className="flex items-center gap-2 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-                                <p className="text-sm text-red-700">{error}</p>
+                            <div className="flex items-center gap-2 mt-4 p-3 alert-error rounded-xl">
+                                <AlertCircle className="w-5 h-5 shrink-0" />
+                                <p className="text-sm">{error}</p>
                             </div>
                         )}
 
@@ -255,10 +255,10 @@ export const Payment = ({
                         <div className="mt-6">
                             <p className="text-caption text-secondary text-center mb-3">ou payer avec</p>
                             <div className="flex gap-3">
-                                <button className="flex-1 py-3 border border-[#ebebeb] rounded-xl flex items-center justify-center gap-2">
+                                <button className="flex-1 py-3 border border-(--color-border-light) rounded-xl flex items-center justify-center gap-2">
                                     Apple Pay
                                 </button>
-                                <button className="flex-1 py-3 border border-[#ebebeb] rounded-xl flex items-center justify-center gap-2">
+                                <button className="flex-1 py-3 border border-(--color-border-light) rounded-xl flex items-center justify-center gap-2">
                                     Google Pay
                                 </button>
                             </div>
@@ -270,7 +270,7 @@ export const Payment = ({
 
             {/* Footer - Bouton payer */}
             <div
-                className="shrink-0 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
+                className="shrink-0 bg-white shadow-md px-6 pt-4 border-t border-(--color-border-light)"
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 <button

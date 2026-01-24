@@ -25,28 +25,28 @@ interface TutorialStep {
 const tutorialSteps: TutorialStep[] = [
     {
         id: 'swipe-right',
-        title: 'Swipez à droite',
-        description: 'Pour réserver directement',
+        title: 'Swipe à droite avec ta patte 🐾',
+        description: 'Cette niche te plaît ? Réserve direct !',
     },
     {
         id: 'swipe-left',
-        title: 'Swipez à gauche',
-        description: 'Pour passer à la suivante',
+        title: 'Swipe à gauche, beurk !',
+        description: 'Pas ton style ? Au suivant !',
     },
     {
         id: 'swipe-up',
-        title: 'Glissez vers le haut ou cliquez',
-        description: 'Pour voir les détails',
+        title: 'Glisse vers le haut ou clique',
+        description: 'Envie de renifler les détails ?',
     },
     {
         id: 'filter',
-        title: 'Filtrez vos recherches',
-        description: 'Dates, prix, type de niche...',
+        title: 'Filtre tes recherches',
+        description: 'Dates, prix, type de niche... fais le difficile !',
     },
     {
         id: 'chat',
-        title: 'Besoin d\'aide ?',
-        description: 'Notre assistant IA répond à vos questions',
+        title: 'Besoin d\'un coup de patte ?',
+        description: 'Notre assistant IA parle couramment le wouf',
     },
 ];
 

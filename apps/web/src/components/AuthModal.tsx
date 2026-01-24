@@ -304,11 +304,11 @@ export const AuthModal = () => {
                     onTouchEnd={handleTouchEnd}
                 >
                     <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        <div className="w-10 h-1 bg-tertiary rounded-full" />
                     </div>
 
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-[#ebebeb]">
+                    <div className="flex items-center justify-between p-4 border-b border-(--color-border-light)">
                         <button className="btn-icon" onClick={closeAuthModal}>
                             <X className="w-4 h-4" />
                         </button>
@@ -322,7 +322,7 @@ export const AuthModal = () => {
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white z-10">
                         <div className="relative">
                             <Dog className="w-16 h-16 icon" strokeWidth={1.5} />
-                            <CheckCircle className="w-6 h-6 absolute -bottom-1 -right-1 text-[#16a34a] bg-white rounded-full" />
+                            <CheckCircle className="w-6 h-6 absolute -bottom-1 -right-1 text-success bg-white rounded-full" />
                         </div>
                         <span className="text-h3">
                             {isNewUser ? 'Compte créé !' : 'Connecté !'}
@@ -346,13 +346,13 @@ export const AuthModal = () => {
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={() => setStep('login')}
-                                    className="w-full py-3 px-6 bg-gray-900 text-white font-semibold rounded-xl"
+                                    className="w-full py-3 px-6 bg-(--color-text-primary) text-white font-semibold rounded-xl"
                                 >
                                     Se connecter
                                 </button>
                                 <button
                                     onClick={() => setStep('register')}
-                                    className="w-full py-3 px-6 bg-white text-gray-900 font-semibold rounded-xl border border-gray-900"
+                                    className="w-full py-3 px-6 bg-white text-primary font-semibold rounded-xl border border-(--color-text-primary)"
                                 >
                                     Créer un compte
                                 </button>
@@ -360,9 +360,9 @@ export const AuthModal = () => {
 
                             {/* Divider */}
                             <div className="flex items-center gap-4">
-                                <div className="flex-1 h-px bg-[#ebebeb]" />
+                                <div className="flex-1 h-px bg-(--color-border-light)" />
                                 <span className="text-caption">ou</span>
-                                <div className="flex-1 h-px bg-[#ebebeb]" />
+                                <div className="flex-1 h-px bg-(--color-border-light)" />
                             </div>
 
                             {/* Social buttons */}
@@ -430,7 +430,7 @@ export const AuthModal = () => {
 
                             {/* Erreur générale */}
                             {generalError && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600">
+                                <div className="p-3 bg-error-light border border-error rounded-xl flex items-center gap-2 text-error">
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     <span className="text-sm">{generalError}</span>
                                 </div>
@@ -442,13 +442,13 @@ export const AuthModal = () => {
                                     type="email"
                                     value={email}
                                     onChange={handleEmailChange}
-                                    className={`input ${emailError ? 'border-red-500' : ''}`}
+                                    className={`input ${emailError ? 'border-error' : ''}`}
                                     autoFocus
                                     autoComplete="email"
                                     placeholder="ton@email.com"
                                 />
                                 {emailError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {emailError}
                                     </p>
@@ -462,20 +462,20 @@ export const AuthModal = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={handlePasswordChange}
-                                        className={`input pr-12 ${passwordError ? 'border-red-500' : ''}`}
+                                        className={`input pr-12 ${passwordError ? 'border-error' : ''}`}
                                         autoComplete="current-password"
                                         placeholder="Ton mot de passe"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tertiary hover:text-secondary"
                                     >
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
                                 {passwordError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {passwordError}
                                     </p>
@@ -504,7 +504,7 @@ export const AuthModal = () => {
                                 <button
                                     type="button"
                                     onClick={() => setStep('register')}
-                                    className="text-blue-600 font-medium"
+                                    className="text-brand font-medium"
                                 >
                                     Créer un compte
                                 </button>
@@ -521,7 +521,7 @@ export const AuthModal = () => {
 
                             {/* Erreur générale */}
                             {generalError && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600">
+                                <div className="p-3 bg-error-light border border-error rounded-xl flex items-center gap-2 text-error">
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     <span className="text-sm">{generalError}</span>
                                 </div>
@@ -533,19 +533,19 @@ export const AuthModal = () => {
                                     type="text"
                                     value={pseudo}
                                     onChange={handlePseudoChange}
-                                    className={`input ${pseudoError ? 'border-red-500' : ''}`}
+                                    className={`input ${pseudoError ? 'border-error' : ''}`}
                                     autoFocus
                                     autoComplete="username"
                                     placeholder="Ton pseudo (3-30 caractères)"
                                     maxLength={30}
                                 />
                                 {pseudoError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {pseudoError}
                                     </p>
                                 )}
-                                <p className="text-xs text-gray-400 mt-1">{pseudo.length}/30 caractères</p>
+                                <p className="text-xs text-tertiary mt-1">{pseudo.length}/30 caractères</p>
                             </div>
 
                             <div>
@@ -554,12 +554,12 @@ export const AuthModal = () => {
                                     type="email"
                                     value={email}
                                     onChange={handleEmailChange}
-                                    className={`input ${emailError ? 'border-red-500' : ''}`}
+                                    className={`input ${emailError ? 'border-error' : ''}`}
                                     autoComplete="email"
                                     placeholder="ton@email.com"
                                 />
                                 {emailError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {emailError}
                                     </p>
@@ -573,26 +573,26 @@ export const AuthModal = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={handlePasswordChange}
-                                        className={`input pr-12 ${passwordError ? 'border-red-500' : ''}`}
+                                        className={`input pr-12 ${passwordError ? 'border-error' : ''}`}
                                         autoComplete="new-password"
                                         placeholder="Min. 8 caractères"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tertiary hover:text-secondary"
                                     >
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
                                 {passwordError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {passwordError}
                                     </p>
                                 )}
                                 {!passwordError && (
-                                    <p className="text-xs text-gray-400 mt-1">
+                                    <p className="text-xs text-tertiary mt-1">
                                         8+ caractères, 1 majuscule, 1 minuscule, 1 chiffre
                                     </p>
                                 )}
@@ -605,26 +605,26 @@ export const AuthModal = () => {
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         value={confirmPassword}
                                         onChange={handleConfirmPasswordChange}
-                                        className={`input pr-12 ${confirmPasswordError ? 'border-red-500' : ''}`}
+                                        className={`input pr-12 ${confirmPasswordError ? 'border-error' : ''}`}
                                         autoComplete="new-password"
                                         placeholder="Retape ton mot de passe"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tertiary hover:text-secondary"
                                     >
                                         {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
                                 {confirmPasswordError && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-error text-sm mt-1 flex items-center gap-1">
                                         <AlertCircle className="w-4 h-4" />
                                         {confirmPasswordError}
                                     </p>
                                 )}
                                 {!confirmPasswordError && confirmPassword && password === confirmPassword && (
-                                    <p className="text-green-500 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-success text-sm mt-1 flex items-center gap-1">
                                         <CheckCircle className="w-4 h-4" />
                                         Les mots de passe correspondent
                                     </p>
@@ -653,7 +653,7 @@ export const AuthModal = () => {
                                 <button
                                     type="button"
                                     onClick={() => setStep('login')}
-                                    className="text-blue-600 font-medium"
+                                    className="text-brand font-medium"
                                 >
                                     Se connecter
                                 </button>

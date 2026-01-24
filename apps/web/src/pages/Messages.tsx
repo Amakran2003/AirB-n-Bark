@@ -124,11 +124,11 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
             alt={selectedConversation.hostName}
             className="w-8 h-8 rounded-full object-cover"
         />
-    ) : <div className="w-8 h-8 rounded-full bg-gray-200" />;
+    ) : <div className="w-8 h-8 rounded-full bg-tertiary" />;
 
     // Avatar utilisateur
     const userAvatar = (
-        <div className="w-8 h-8 rounded-full bg-[#3B82F6] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center">
             <Dog className="w-4 h-4 text-white" />
         </div>
     );
@@ -148,11 +148,11 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
                         description="Reserve une niche et tu pourras discuter avec ton hote ici"
                     />
                 ) : (
-                    <div className="divide-y divide-[#ebebeb]">
+                    <div className="divide-y divide-(--color-border-light)">
                         {conversations.map((conversation: Conversation) => (
                             <button
                                 key={conversation.id}
-                                className="w-full p-4 flex gap-4 hover:bg-gray-50 transition-colors text-left"
+                                className="w-full p-4 flex gap-4 hover:bg-secondary transition-colors text-left"
                                 onClick={() => openConversation(conversation)}
                             >
                                 {/* Avatar hôte */}
@@ -163,7 +163,7 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
                                         className="w-14 h-14 rounded-full object-cover"
                                     />
                                     {conversation.unreadCount > 0 && (
-                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#3B82F6] rounded-full flex items-center justify-center">
+                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-brand rounded-full flex items-center justify-center">
                                             <span className="text-white text-xs font-medium">
                                                 {conversation.unreadCount}
                                             </span>

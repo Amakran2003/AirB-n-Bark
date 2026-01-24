@@ -249,7 +249,7 @@ export const DatePicker = ({
                     onTouchEnd={handleTouchEnd}
                 >
                     <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        <div className="w-10 h-1 bg-tertiary rounded-full" />
                     </div>
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-(--color-border-light)">
@@ -373,7 +373,7 @@ export const DatePicker = ({
 
                 {/* Footer */}
                 <div
-                    className="p-4 border-t border-[#ebebeb]"
+                    className="p-4 border-t border-(--color-border-light)"
                     style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
                     <button className="btn-primary btn-full" onClick={handleConfirm}>

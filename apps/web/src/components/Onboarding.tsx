@@ -17,11 +17,11 @@ interface OnboardingProps {
 }
 
 const quotes = [
-    "Des niches uniques pour votre toutou",
-    "Swipez, craquez, réservez",
-    "Le Airbnb des chiens",
-    "Trouvez l'hébergement parfait",
-    "Voyagez l'esprit tranquille",
+    "Trouve ta niche de rêve, boule de poils !",
+    "Swipe, craque, réserve... WOUF !",
+    "Le Airbnb des toutous, par les toutous",
+    "Fini les chenils moches, bienvenue au luxe canin",
+    "Voyage la truffe au vent 🐾",
 ];
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
@@ -114,8 +114,8 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                             key={index}
                             className={`w-2 h-2 rounded-full transition-all duration-300 ${
                                 index === currentQuote
-                                    ? 'bg-[#3B82F6] w-6'
-                                    : 'bg-gray-300'
+                                    ? 'bg-brand w-6'
+                                    : 'bg-tertiary'
                             }`}
                         />
                     ))}

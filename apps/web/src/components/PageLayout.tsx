@@ -88,7 +88,7 @@ export const PageLayout = ({
             {/* Header */}
             {showHeader && (
                 <div
-                    className="shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-[#ebebeb]"
+                    className="shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-(--color-border-light)"
                     style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))' }}
                 >
                     {headerLeft ?? <div className="w-10" />}
@@ -122,7 +122,7 @@ export const PageLayout = ({
             {/* Footer */}
             {footer && (
                 <div 
-                    className="shrink-0 bg-white border-t border-[#ebebeb]"
+                    className="shrink-0 bg-white border-t border-(--color-border-light)"
                     style={{ 
                         paddingBottom: showNavbar 
                             ? 'calc(80px + env(safe-area-inset-bottom))'

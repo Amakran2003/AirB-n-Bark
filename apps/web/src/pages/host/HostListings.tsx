@@ -155,10 +155,10 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
     };
 
     return (
-        <div className="fixed inset-0 bg-[#f7f7f7] flex flex-col">
+        <div className="fixed inset-0 bg-page flex flex-col">
             {/* Header */}
             <div 
-                className="shrink-0 px-4 py-4 bg-white border-b border-[#ebebeb]"
+                className="shrink-0 px-4 py-4 bg-white border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <div className="flex items-center gap-4">
@@ -171,7 +171,7 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                     <h1 className="text-h2 flex-1">Mes annonces</h1>
                     <button 
                         onClick={onAddListing}
-                        className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center"
+                        className="w-10 h-10 bg-brand rounded-full flex items-center justify-center"
                     >
                         <Plus className="w-5 h-5 text-white" />
                     </button>
@@ -185,7 +185,7 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
             >
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                        <Loader2 className="w-8 h-8 animate-spin text-brand" />
                     </div>
                 ) : error ? (
                     <EmptyState
@@ -223,7 +223,7 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                                             </h3>
                                             <button 
                                                 onClick={() => openActionSheet(listing)}
-                                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 shrink-0"
+                                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-tertiary shrink-0"
                                             >
                                                 <MoreVertical className="w-5 h-5 text-secondary" />
                                             </button>
@@ -235,7 +235,7 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                                         
                                         <div className="flex items-center gap-3 mt-2 text-caption text-secondary flex-wrap">
                                             <span className="flex items-center gap-1">
-                                                <Star className="w-3.5 h-3.5 text-amber-500" />
+                                                <Star className="w-3.5 h-3.5 text-warning" />
                                                 {listing.averageRating > 0 
                                                     ? `${listing.averageRating.toFixed(1)} (${listing.reviewCount})`
                                                     : 'Nouveau'}
@@ -245,8 +245,8 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                                         
                                         <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${
                                             listing.isActive 
-                                                ? 'bg-green-100 text-green-700' 
-                                                : 'bg-gray-100 text-gray-600'
+                                                ? 'bg-success-light text-success' 
+                                                : 'bg-tertiary text-secondary'
                                         }`}>
                                             {listing.isActive ? 'Active' : 'Inactive'}
                                         </span>
@@ -275,12 +275,12 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                     >
                         {/* Handle */}
                         <div className="flex justify-center py-3">
-                            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                            <div className="w-10 h-1 bg-tertiary rounded-full" />
                         </div>
                         
                         {/* Listing Info */}
                         {selectedListing && (
-                            <div className="px-4 pb-4 border-b border-gray-100">
+                            <div className="px-4 pb-4 border-b border-(--color-border-light)">
                                 <div className="flex items-center gap-3">
                                     <img 
                                         src={selectedListing.image} 
@@ -299,10 +299,10 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                         <div className="p-2">
                             <button 
                                 onClick={handleEdit}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-secondary active:bg-tertiary transition-colors"
                             >
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <Pencil className="w-5 h-5 text-blue-600" />
+                                <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center">
+                                    <Pencil className="w-5 h-5 text-brand" />
                                 </div>
                                 <div className="text-left">
                                     <p className="font-medium">Modifier</p>
@@ -312,15 +312,15 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                             
                             <button 
                                 onClick={handleToggleStatus}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-secondary active:bg-tertiary transition-colors"
                             >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                    selectedListing?.isActive ? 'bg-orange-100' : 'bg-green-100'
+                                    selectedListing?.isActive ? 'bg-warning-light' : 'bg-success-light'
                                 }`}>
                                     {selectedListing?.isActive ? (
-                                        <EyeOff className="w-5 h-5 text-orange-600" />
+                                        <EyeOff className="w-5 h-5 text-warning" />
                                     ) : (
-                                        <Eye className="w-5 h-5 text-green-600" />
+                                        <Eye className="w-5 h-5 text-success" />
                                     )}
                                 </div>
                                 <div className="text-left">
@@ -337,14 +337,14 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                             
                             <button 
                                 onClick={openDeleteModal}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-red-50 active:bg-red-100 transition-colors"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-error-light active:bg-error-lighter transition-colors"
                             >
-                                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                    <Trash2 className="w-5 h-5 text-red-600" />
+                                <div className="w-10 h-10 bg-error-light rounded-full flex items-center justify-center">
+                                    <Trash2 className="w-5 h-5 text-error" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="font-medium text-red-600">Supprimer</p>
-                                    <p className="text-sm text-red-400">Action irréversible</p>
+                                    <p className="font-medium text-error">Supprimer</p>
+                                    <p className="text-sm text-error">Action irréversible</p>
                                 </div>
                             </button>
                         </div>
@@ -353,7 +353,7 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                         <div className="p-4 pt-0">
                             <button 
                                 onClick={closeActionSheet}
-                                className="w-full py-3 rounded-xl bg-gray-100 font-medium hover:bg-gray-200 transition-colors"
+                                className="w-full py-3 rounded-xl bg-tertiary font-medium hover:bg-secondary transition-colors"
                             >
                                 Annuler
                             </button>
@@ -378,8 +378,8 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                     >
                         {/* Icon */}
                         <div className="flex justify-center mb-4">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                                <AlertTriangle className="w-8 h-8 text-red-600" />
+                            <div className="w-16 h-16 bg-error-light rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-8 h-8 text-error" />
                             </div>
                         </div>
                         
@@ -399,14 +399,14 @@ export const HostListings = ({ onBack, onAddListing, onEditListing }: HostListin
                             <button 
                                 onClick={closeDeleteModal}
                                 disabled={isDeleting}
-                                className="flex-1 py-3 rounded-xl bg-gray-100 font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                className="flex-1 py-3 rounded-xl bg-tertiary font-medium hover:bg-secondary transition-colors disabled:opacity-50"
                             >
                                 Annuler
                             </button>
                             <button 
                                 onClick={handleDelete}
                                 disabled={isDeleting}
-                                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 py-3 rounded-xl bg-error text-white font-medium hover:bg-error-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isDeleting ? (
                                     <>

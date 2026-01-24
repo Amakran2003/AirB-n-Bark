@@ -63,18 +63,18 @@ export const Trips = ({ onTabChange }: TripsProps) => {
         <div className="fixed inset-0 bg-white flex flex-col">
             {/* Header */}
             <header
-                className="shrink-0 flex items-center justify-center px-4 py-4 border-b border-[#ebebeb]"
+                className="shrink-0 flex items-center justify-center px-4 py-4 border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <h1 className="text-h2">Mes voyages</h1>
             </header>
 
             {/* Tabs */}
-            <div className="shrink-0 flex border-b border-[#ebebeb]">
+            <div className="shrink-0 flex border-b border-(--color-border-light)">
                 <button
                     className={`flex-1 py-4 text-center text-body-md transition-colors ${
                         activeTab === 'upcoming'
-                            ? 'text-[#222222] border-b-2 border-[#222222] font-medium'
+                            ? 'text-(--color-text-primary) border-b-2 border-(--color-secondary) font-medium'
                             : 'text-secondary'
                     }`}
                     onClick={() => setActiveTab('upcoming')}
@@ -84,7 +84,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                 <button
                     className={`flex-1 py-4 text-center text-body-md transition-colors ${
                         activeTab === 'past'
-                            ? 'text-[#222222] border-b-2 border-[#222222] font-medium'
+                            ? 'text-(--color-text-primary) border-b-2 border-(--color-secondary) font-medium'
                             : 'text-secondary'
                     }`}
                     onClick={() => setActiveTab('past')}
@@ -177,22 +177,22 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                                     €{listing.price * nights}
                                                 </span>
                                                 {isRejected && (
-                                                    <span className="px-2 py-1 bg-red-100 text-red-700 text-caption rounded-full">
+                                                    <span className="px-2 py-1 status-rejected text-caption rounded-full">
                                                         Refusée
                                                     </span>
                                                 )}
                                                 {isCancelled && (
-                                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-caption rounded-full">
+                                                    <span className="px-2 py-1 status-cancelled text-caption rounded-full">
                                                         Annulée
                                                     </span>
                                                 )}
                                                 {booking.status === 'confirmed' && !isInactive && (
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 text-caption rounded-full">
+                                                    <span className="px-2 py-1 status-confirmed text-caption rounded-full">
                                                         Confirmée
                                                     </span>
                                                 )}
                                                 {booking.status === 'pending' && (
-                                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-caption rounded-full">
+                                                    <span className="px-2 py-1 status-pending text-caption rounded-full">
                                                         En attente
                                                     </span>
                                                 )}
@@ -232,7 +232,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
 
                             <div className="space-y-3">
                                 <button
-                                    className="w-full py-4 px-4 text-left text-body-md border border-[#ebebeb] rounded-xl hover:bg-gray-50 transition-colors"
+                                    className="w-full py-4 px-4 text-left text-body-md border border-(--color-border-light) rounded-xl hover:bg-secondary transition-colors"
                                     onClick={() => {
                                         // TODO: Implémenter la modification des dates
                                         setShowModifyModal(false);
@@ -243,7 +243,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                 </button>
 
                                 <button
-                                    className="w-full py-4 px-4 text-left text-red-600 text-body-md border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+                                    className="w-full py-4 px-4 text-left text-error text-body-md border border-(--color-error-light) rounded-xl hover:bg-error-lighter transition-colors"
                                     onClick={() => {
                                         setShowModifyModal(false);
                                         setShowCancelModal(true);
@@ -270,12 +270,12 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                         <div className="w-full max-w-sm bg-white rounded-2xl p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                    hasFreeCancellation ? 'bg-green-100' : 'bg-red-100'
+                                    hasFreeCancellation ? 'bg-success-light' : 'bg-error-light'
                                 }`}>
                                     {hasFreeCancellation ? (
-                                        <Check className="w-6 h-6 text-green-600" />
+                                        <Check className="w-6 h-6 text-success" />
                                     ) : (
-                                        <AlertTriangle className="w-6 h-6 text-red-600" />
+                                        <AlertTriangle className="w-6 h-6 text-error" />
                                     )}
                                 </div>
                                 <h2 className="text-h2">Annuler ton séjour ?</h2>
@@ -283,25 +283,25 @@ export const Trips = ({ onTabChange }: TripsProps) => {
 
                             {hasFreeCancellation ? (
                                 <div className="mb-6">
-                                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl mb-3">
-                                        <Check className="w-5 h-5 text-green-600 shrink-0" />
-                                        <p className="text-sm text-green-700">
+                                    <div className="flex items-center gap-2 p-3 bg-success-lighter border border-(--color-success-light) rounded-xl mb-3">
+                                        <Check className="w-5 h-5 text-success shrink-0" />
+                                        <p className="text-sm text-(--color-success-dark)">
                                             Annulation gratuite ! Tu seras rembourse integralement
                                         </p>
                                     </div>
                                     <p className="text-body text-secondary">
-                                        Montant remboursé : <span className="font-semibold text-green-600">€{refundAmount}</span>
+                                        Montant remboursé : <span className="font-semibold text-success">€{refundAmount}</span>
                                     </p>
                                 </div>
                             ) : (
                                 <div className="mb-6">
-                                    <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl mb-3">
-                                        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                    <div className="flex items-start gap-2 p-3 bg-warning-lighter border border-(--color-warning-light) rounded-xl mb-3">
+                                        <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="text-sm text-amber-700 font-medium">
+                                            <p className="text-sm text-(--color-warning-dark) font-medium">
                                                 Aie, des frais s'appliquent
                                             </p>
-                                            <p className="text-sm text-amber-600 mt-1">
+                                            <p className="text-sm text-warning mt-1">
                                                 Cette niche n'offre pas l'annulation gratuite.
                                                 {Math.round(CANCELLATION_FEE_PERCENT * 100)}% de frais seront prélevés sur tes croquettes.
                                             </p>
@@ -312,13 +312,13 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                             <span className="text-secondary">Montant payé</span>
                                             <span>€{selectedBooking.totalPrice}</span>
                                         </div>
-                                        <div className="flex justify-between text-red-600">
+                                        <div className="flex justify-between text-error">
                                             <span>Frais d'annulation</span>
                                             <span>-€{cancellationFee}</span>
                                         </div>
-                                        <div className="flex justify-between font-semibold pt-2 border-t border-[#ebebeb]">
+                                        <div className="flex justify-between font-semibold pt-2 border-t border-(--color-border-light)">
                                             <span>Montant remboursé</span>
-                                            <span className="text-green-600">€{refundAmount}</span>
+                                            <span className="text-success">€{refundAmount}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -335,7 +335,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                     Retour
                                 </button>
                                 <button
-                                    className="flex-1 py-3 px-4 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
+                                    className="flex-1 py-3 px-4 bg-(--color-error) text-white rounded-xl font-medium hover:bg-(--color-error-dark) transition-colors"
                                     onClick={handleCancel}
                                 >
                                     {hasFreeCancellation ? 'Annuler' : `Annuler (-€${cancellationFee})`}

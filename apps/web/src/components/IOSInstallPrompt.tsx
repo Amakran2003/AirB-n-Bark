@@ -46,10 +46,10 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
             >
                 {/* Close button */}
                 <button
-                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100"
+                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-tertiary"
                     onClick={handleClose}
                 >
-                    <X className="w-5 h-5 text-gray-600" />
+                    <X className="w-5 h-5 text-secondary" />
                 </button>
 
                 {/* Title */}
@@ -60,35 +60,35 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
                 {/* Instructions */}
                 <div className="space-y-4">
                     {/* Step 1 */}
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                        <div className="w-12 h-12 bg-[#3B82F6] rounded-xl flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl">
+                        <div className="w-12 h-12 bg-brand rounded-xl flex items-center justify-center shrink-0">
                             <Share className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p className="font-medium text-gray-900">1. Appuyez sur Partager</p>
-                            <p className="text-sm text-gray-500">En bas de Safari</p>
+                            <p className="font-medium text-primary">1. Appuie sur Partager</p>
+                            <p className="text-sm text-secondary">Avec ta patte, en bas de Safari</p>
                         </div>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                        <div className="w-12 h-12 bg-[#3B82F6] rounded-xl flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl">
+                        <div className="w-12 h-12 bg-brand rounded-xl flex items-center justify-center shrink-0">
                             <Plus className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p className="font-medium text-gray-900">2. Sur l'écran d'accueil</p>
-                            <p className="text-sm text-gray-500">Faites défiler et appuyez</p>
+                            <p className="font-medium text-primary">2. Sur l'écran d'accueil</p>
+                            <p className="text-sm text-secondary">Fais défiler et appuie, c'est pas sorcier !</p>
                         </div>
                     </div>
 
                     {/* Step 3 - App icon preview */}
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                        <div className="w-12 h-12 bg-[#3B82F6] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl">
+                        <div className="w-12 h-12 bg-brand rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                             <img src="/logo-white.svg" alt="AirbnBark" className="w-8 h-8" />
                         </div>
                         <div>
-                            <p className="font-medium text-gray-900">3. Appuyez sur Ajouter</p>
-                            <p className="text-sm text-gray-500">En haut à droite</p>
+                            <p className="font-medium text-primary">3. Appuie sur Ajouter</p>
+                            <p className="text-sm text-secondary">Et voilà, t'es un pro du téléphone 🐾</p>
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Heart, X, Star, MapPin, ChevronUp, RotateCcw } from 'lucide-react';
 import { ListingCardData } from '../data/listings';
 import type { TutorialStepId } from './TutorialOverlay';
+import { optimizeImageUrl } from '../utils/imageOptimizer';
 
 /**
  * ==================== PROPS DU COMPOSANT ====================
@@ -288,11 +289,12 @@ export const SwipeCard = ({
             {/* ==================== IMAGE DE FOND ==================== */}
             <div className="swipe-card-image">
                 <img
-                    src={listing.image}
+                    src={optimizeImageUrl(listing.image)}
                     alt={listing.title}
                     className="absolute inset-0 w-full h-full object-cover"
                     loading={isTop ? 'eager' : 'lazy'}
                     decoding="async"
+                    fetchPriority={isTop ? 'high' : 'auto'}
                 />
                 {/* Overlay gradient pour le texte */}
                 <div
@@ -389,6 +391,7 @@ export const SwipeCard = ({
                     <button
                         className={`swipe-btn swipe-btn-undo ${!canUndo ? 'opacity-30' : ''}`}
                         disabled={!canUndo}
+                        aria-label="Annuler le dernier swipe"
                         onClick={(e) => {
                             e.stopPropagation();
                             if (canUndo && onUndo) onUndo();
@@ -400,6 +403,7 @@ export const SwipeCard = ({
                     {/* Bouton Passer (X) */}
                     <button
                         className="swipe-btn swipe-btn-nope"
+                        aria-label="Passer cette annonce"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleQuickSwipe('left');
@@ -411,6 +415,7 @@ export const SwipeCard = ({
                     {/* Bouton Favori (Coeur) */}
                     <button
                         className="swipe-btn swipe-btn-like"
+                        aria-label="Aimer cette annonce"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleQuickSwipe('right');

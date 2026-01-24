@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Camera, Dog, Home, Check, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { BottomNavbar } from '../components/BottomNavbar';
+import { api } from '../services/api';
 
 /**
  * ==================== PAGE PROFIL ====================
@@ -33,7 +34,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [email, setEmail] = useState(user?.email ?? '');
     const [tempEmail, setTempEmail] = useState(user?.email ?? '');
+    const [currentPassword, setCurrentPassword] = useState('');
     const [tempPassword, setTempPassword] = useState('');
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
     const languages = ['Français', 'English', 'Español', 'Deutsch'];
@@ -56,15 +59,23 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     };
 
     const handleSavePassword = async () => {
-        if (tempPassword.length >= 6) {
-            // TODO: PUT /api/users/:id/password { password: tempPassword }
-            setTempPassword('');
-            setIsEditingPassword(false);
+        if (tempPassword.length >= 6 && currentPassword.length > 0) {
+            setPasswordError(null);
+            const response = await api.auth.changePassword(currentPassword, tempPassword);
+            if (response.success) {
+                setCurrentPassword('');
+                setTempPassword('');
+                setIsEditingPassword(false);
+            } else {
+                setPasswordError(response.error.message);
+            }
         }
     };
 
     const handleCancelPassword = () => {
+        setCurrentPassword('');
         setTempPassword('');
+        setPasswordError(null);
         setIsEditingPassword(false);
     };
 
@@ -98,12 +109,15 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
         reader.readAsDataURL(file);
     };
 
-    // Charger l'avatar de l'utilisateur au démarrage
+    // Charger l'avatar de l'utilisateur au démarrage ou reset si déconnexion
     useEffect(() => {
-        if (user?.avatar && !profileImageUrl) {
+        if (user?.avatar) {
             setProfileImageUrl(user.avatar);
+        } else if (!user) {
+            // Reset quand l'utilisateur se déconnecte
+            setProfileImageUrl(null);
         }
-    }, [user?.avatar]);
+    }, [user, user?.avatar]);
 
     useEffect(() => {
         return () => {
@@ -123,9 +137,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     const displayName = user?.pseudo ?? 'Mon Toutou';
 
     return (
-        <div className="fixed inset-0 bg-[#f7f7f7] flex flex-col">
+        <div className="fixed inset-0 bg-page flex flex-col">
             <div
-                className="shrink-0 flex items-center justify-center px-4 py-4 bg-white border-b border-[#ebebeb]"
+                className="shrink-0 flex items-center justify-center px-4 py-4 bg-white border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <h1 className="text-h2">Mon Profil</h1>
@@ -145,8 +159,8 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                     className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
                                 />
                             ) : (
-                                <div className="w-28 h-28 rounded-full bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center">
-                                    <Dog className="w-12 h-12 text-gray-400" />
+                                <div className="w-28 h-28 rounded-full bg-tertiary border-4 border-white shadow-lg flex items-center justify-center">
+                                    <Dog className="w-12 h-12 text-tertiary" />
                                 </div>
                             )}
                             <input
@@ -158,7 +172,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             />
                             <button
                                 onClick={handlePhotoClick}
-                                className="absolute bottom-0 right-0 w-9 h-9 bg-[#3B82F6] rounded-full flex items-center justify-center border-3 border-white shadow-md"
+                                className="absolute bottom-0 right-0 w-9 h-9 bg-brand rounded-full flex items-center justify-center border-3 border-white shadow-md"
                             >
                                 <Camera className="w-4 h-4 text-white" />
                             </button>
@@ -168,19 +182,19 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                         <span className="text-secondary text-sm">Toutou voyageur</span>
                     </div>
 
-                    <div className="flex items-center justify-center gap-8 pt-4 border-t border-[#ebebeb]">
+                    <div className="flex items-center justify-center gap-8 pt-4 border-t border-(--color-border-light)">
                         <div className="text-center">
-                            <p className="text-xl font-semibold">0</p>
+                            <p className="text-h3 font-semibold">0</p>
                             <p className="text-caption text-secondary">voyages</p>
                         </div>
-                        <div className="w-px h-8 bg-[#ebebeb]" />
+                        <div className="w-px h-8 bg-(--color-border-light)" />
                         <div className="text-center">
-                            <p className="text-xl font-semibold">0</p>
+                            <p className="text-h3 font-semibold">0</p>
                             <p className="text-caption text-secondary">avis</p>
                         </div>
-                        <div className="w-px h-8 bg-[#ebebeb]" />
+                        <div className="w-px h-8 bg-(--color-border-light)" />
                         <div className="text-center">
-                            <p className="text-xl font-semibold">2026</p>
+                            <p className="text-h3 font-semibold">2026</p>
                             <p className="text-caption text-secondary">membre depuis</p>
                         </div>
                     </div>
@@ -195,7 +209,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             </div>
                             <button
                                 onClick={() => setIsEditingEmail(true)}
-                                className="text-sm text-[#3B82F6] font-medium"
+                                className="text-sm text-brand font-medium"
                             >
                                 Modifier
                             </button>
@@ -207,7 +221,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 type="email"
                                 value={tempEmail}
                                 onChange={(e) => setTempEmail(e.target.value)}
-                                className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
+                                className="input-field"
                                 placeholder="ton@email.com"
                             />
                             <div className="flex justify-end gap-2">
@@ -219,7 +233,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 </button>
                                 <button
                                     onClick={handleSaveEmail}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-[#3B82F6] rounded-lg"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg"
                                 >
                                     Enregistrer
                                 </button>
@@ -237,21 +251,36 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             </div>
                             <button
                                 onClick={() => setIsEditingPassword(true)}
-                                className="text-sm text-[#3B82F6] font-medium"
+                                className="text-sm text-brand font-medium"
                             >
                                 Modifier
                             </button>
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            <label className="text-sm text-secondary">Nouveau mot de passe</label>
-                            <input
-                                type="password"
-                                value={tempPassword}
-                                onChange={(e) => setTempPassword(e.target.value)}
-                                className="w-full px-4 py-3 border border-[#ebebeb] rounded-xl text-body focus:outline-none focus:border-[#3B82F6]"
-                                placeholder="Minimum 6 caractères"
-                            />
+                            <div>
+                                <label className="text-sm text-secondary">Mot de passe actuel</label>
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="input-field"
+                                    placeholder="Votre mot de passe actuel"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm text-secondary">Nouveau mot de passe</label>
+                                <input
+                                    type="password"
+                                    value={tempPassword}
+                                    onChange={(e) => setTempPassword(e.target.value)}
+                                    className="input-field"
+                                    placeholder="Minimum 6 caractères"
+                                />
+                            </div>
+                            {passwordError && (
+                                <p className="text-sm text-error">{passwordError}</p>
+                            )}
                             <div className="flex justify-end gap-2">
                                 <button
                                     onClick={handleCancelPassword}
@@ -261,8 +290,8 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 </button>
                                 <button
                                     onClick={handleSavePassword}
-                                    disabled={tempPassword.length < 6}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-[#3B82F6] rounded-lg disabled:opacity-50"
+                                    disabled={tempPassword.length < 6 || currentPassword.length === 0}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg disabled:opacity-50"
                                 >
                                     Enregistrer
                                 </button>
@@ -288,18 +317,18 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                     </button>
 
                     {showLanguages && (
-                        <div className="mt-4 pt-4 border-t border-[#ebebeb] space-y-1">
+                        <div className="mt-4 pt-4 border-t border-(--color-border-light) space-y-1">
                             {languages.map((language) => (
                                 <button
                                     key={language}
                                     onClick={() => selectLanguage(language)}
                                     className={`w-full flex items-center justify-between py-3 px-2 rounded-lg ${
-                                        selectedLanguage === language ? 'bg-blue-50' : ''
+                                        selectedLanguage === language ? 'bg-brand-lighter' : ''
                                     }`}
                                 >
                                     <span className="text-body">{language}</span>
                                     {selectedLanguage === language && (
-                                        <Check className="w-5 h-5 text-blue-600" />
+                                        <Check className="w-5 h-5 text-brand" />
                                     )}
                                 </button>
                             ))}
@@ -309,7 +338,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
 
                 {/* Section Devenir Hote - toujours affiché si pas hôte */}
                 {!user?.isHost && (
-                    <div className="mx-4 mt-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl shadow-sm p-4 border border-amber-200">
+                    <div className="mx-4 mt-4 bg-warning-lighter rounded-2xl shadow-sm p-4 border border-(--color-warning-light)">
                         <button
                             onClick={() => {
                                 if (!user) {
@@ -323,8 +352,8 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             }}
                             className="w-full flex items-center gap-4"
                         >
-                            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                                <Home className="w-6 h-6 text-amber-600" />
+                            <div className="w-12 h-12 bg-warning-light rounded-xl flex items-center justify-center">
+                                <Home className="w-6 h-6 text-warning" />
                             </div>
                             <div className="flex-1 text-left">
                                 <p className="text-body-md font-semibold">Devenir un hote</p>
@@ -337,21 +366,21 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
 
                 {/* Badge Hote si deja hote */}
                 {user?.isHost && (
-                    <div className="mx-4 mt-4 bg-green-50 rounded-2xl shadow-sm p-4 border border-green-200">
+                    <div className="mx-4 mt-4 bg-success-lighter rounded-2xl shadow-sm p-4 border border-(--color-success-light)">
                         {isHostMode ? (
                             /* En mode hôte → bouton pour passer en mode voyageur */
                             <button
                                 onClick={onSwitchToGuest}
                                 className="w-full flex items-center gap-4"
                             >
-                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                    <Dog className="w-6 h-6 text-blue-600" />
+                                <div className="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center">
+                                    <Dog className="w-6 h-6 text-brand" />
                                 </div>
                                 <div className="flex-1 text-left">
-                                    <p className="text-body-md font-semibold text-blue-700">Mode voyageur</p>
-                                    <p className="text-sm text-blue-600">Trouve une niche pour ton toutou</p>
+                                    <p className="text-body-md font-semibold text-(--color-primary-dark)">Mode voyageur</p>
+                                    <p className="text-sm text-brand">Retourne renifler des niches !</p>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-blue-600" />
+                                <ChevronRight className="w-5 h-5 text-brand" />
                             </button>
                         ) : (
                             /* En mode voyageur → bouton pour passer en mode hôte */
@@ -359,14 +388,14 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 onClick={onGoToHostDashboard}
                                 className="w-full flex items-center gap-4"
                             >
-                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                    <Check className="w-6 h-6 text-green-600" />
+                                <div className="w-12 h-12 bg-success-light rounded-xl flex items-center justify-center">
+                                    <Check className="w-6 h-6 text-success" />
                                 </div>
                                 <div className="flex-1 text-left">
-                                    <p className="text-body-md font-semibold text-green-700">Tu es hote</p>
-                                    <p className="text-sm text-green-600">Accede a ton espace hote</p>
+                                    <p className="text-body-md font-semibold text-(--color-success-dark)">Tu es hote</p>
+                                    <p className="text-sm text-success">Accede a ton espace hote</p>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-green-600" />
+                                <ChevronRight className="w-5 h-5 text-success" />
                             </button>
                         )}
                     </div>
@@ -378,7 +407,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             onClick={() => {
                                 logout();
                             }}
-                            className="w-full py-3 text-red-500 font-medium text-center"
+                            className="w-full py-3 text-error font-medium text-center"
                         >
                             Se deconnecter
                         </button>

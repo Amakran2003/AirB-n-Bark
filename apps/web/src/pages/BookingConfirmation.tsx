@@ -163,7 +163,7 @@ export const BookingConfirmation = ({
                 <div className="flex flex-col items-center justify-center py-12 px-6">
                     {/* Animated check circle */}
                     <div
-                        className={`w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center mb-6 transition-all duration-500 ${
+                        className={`w-24 h-24 rounded-full bg-(--color-success) flex items-center justify-center mb-6 transition-all duration-500 ${
                             showCheck ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
                         }`}
                     >
@@ -194,18 +194,18 @@ export const BookingConfirmation = ({
                     }`}
                 >
                     {/* Booking number */}
-                    <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                    <div className="bg-secondary rounded-2xl p-4 mb-6">
                         <p className="text-caption text-secondary mb-1">Numéro de réservation</p>
                         <div className="flex items-center justify-between">
-                            <span className="text-xl font-mono font-semibold tracking-wider">
+                            <span className="text-h3 font-mono font-semibold tracking-wider">
                                 {bookingNumber}
                             </span>
                             <button
                                 onClick={copyBookingNumber}
-                                className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+                                className="p-2 rounded-full hover:bg-tertiary transition-colors"
                             >
                                 {copied ? (
-                                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                                    <CheckCircle className="w-5 h-5 text-success" />
                                 ) : (
                                     <Copy className="w-5 h-5 text-secondary" />
                                 )}
@@ -214,7 +214,7 @@ export const BookingConfirmation = ({
                     </div>
 
                     {/* Listing preview */}
-                    <div className="flex gap-4 p-4 bg-gray-50 rounded-2xl mb-6">
+                    <div className="flex gap-4 p-4 bg-secondary rounded-2xl mb-6">
                         <img
                             src={listing.image}
                             alt={listing.title}
@@ -235,7 +235,7 @@ export const BookingConfirmation = ({
                         <h2 className="text-h3">Ton séjour</h2>
 
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center">
                                 <Calendar className="w-5 h-5 text-secondary" />
                             </div>
                             <div>
@@ -247,7 +247,7 @@ export const BookingConfirmation = ({
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center">
                                 <Dog className="w-5 h-5 text-secondary" />
                             </div>
                             <div>
@@ -259,7 +259,7 @@ export const BookingConfirmation = ({
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center">
                                 <span className="text-secondary font-medium">🦴</span>
                             </div>
                             <div>
@@ -273,7 +273,7 @@ export const BookingConfirmation = ({
 
                     {/* Host contact */}
                     {fullListing?.host && (
-                        <div className="border border-[#ebebeb] rounded-2xl p-4 mb-6">
+                        <div className="border border-(--color-border-light) rounded-2xl p-4 mb-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <img
                                     src={fullListing.host.avatar}
@@ -294,14 +294,14 @@ export const BookingConfirmation = ({
 
                     {/* Access instructions */}
                     {accessInstructions && (
-                        <div className="border border-[#ebebeb] rounded-2xl overflow-hidden mb-6">
+                        <div className="border border-(--color-border-light) rounded-2xl overflow-hidden mb-6">
                             <button
                                 onClick={() => setShowInstructions(!showInstructions)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                className="w-full flex items-center justify-between p-4 hover:bg-secondary transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                                        <Key className="w-5 h-5 text-amber-600" />
+                                    <div className="w-10 h-10 rounded-full bg-warning-light flex items-center justify-center">
+                                        <Key className="w-5 h-5 text-warning" />
                                     </div>
                                     <div className="text-left">
                                         <p className="text-body-md font-medium">Instructions d'accès</p>
@@ -323,7 +323,7 @@ export const BookingConfirmation = ({
                             </button>
 
                             {showInstructions && (
-                                <div className="px-4 pb-4 space-y-4 border-t border-[#ebebeb] pt-4">
+                                <div className="px-4 pb-4 space-y-4 border-t border-(--color-border-light) pt-4">
                                     <div>
                                         <p className="text-caption text-secondary mb-1">Horaires</p>
                                         <p className="text-body-sm">
@@ -333,7 +333,7 @@ export const BookingConfirmation = ({
 
                                     <div>
                                         <p className="text-caption text-secondary mb-1">Code d'accès</p>
-                                        <p className="text-body-sm font-mono bg-gray-100 px-3 py-2 rounded-lg">
+                                        <p className="text-body-sm font-mono bg-tertiary px-3 py-2 rounded-lg">
                                             {accessInstructions.accessCode}
                                         </p>
                                     </div>
@@ -364,7 +364,7 @@ export const BookingConfirmation = ({
 
             {/* Bottom buttons */}
             <div
-                className="shrink-0 bg-white border-t border-[#ebebeb] px-4 sm:px-6 py-4"
+                className="shrink-0 bg-white border-t border-(--color-border-light) px-4 sm:px-6 py-4"
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 <div className="flex gap-2 sm:gap-3">

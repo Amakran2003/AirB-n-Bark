@@ -248,11 +248,11 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
             alt={selectedConversation.guestName}
             className="w-8 h-8 rounded-full object-cover"
         />
-    ) : <div className="w-8 h-8 rounded-full bg-gray-200" />;
+    ) : <div className="w-8 h-8 rounded-full bg-secondary" />;
 
     // Avatar host (moi)
     const hostAvatar = (
-        <div className="w-8 h-8 rounded-full bg-[#3B82F6] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center">
             <Home className="w-4 h-4 text-white" />
         </div>
     );
@@ -260,10 +260,10 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
     return (
         <>
             {/* Liste des conversations */}
-            <div className="fixed inset-0 bg-[#f7f7f7] flex flex-col">
+            <div className="fixed inset-0 bg-page flex flex-col">
                 {/* Header */}
                 <div
-                    className="shrink-0 px-4 py-4 bg-white border-b border-[#ebebeb]"
+                    className="shrink-0 px-4 py-4 bg-white border-b border-(--color-border-light)"
                     style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
                 >
                     <h1 className="text-h2">Messages</h1>
@@ -281,12 +281,12 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                             description="Les messages de tes locataires apparaitront ici"
                         />
                     ) : (
-                        <div className="divide-y divide-[#ebebeb]">
+                        <div className="divide-y divide-(--color-border-light)">
                             {conversations.map(conversation => (
                                 <button
                                     key={conversation.id}
                                     onClick={() => openConversation(conversation)}
-                                    className="w-full flex items-center gap-3 p-4 bg-white hover:bg-gray-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 p-4 bg-white hover:bg-secondary transition-colors text-left"
                                 >
                                     {/* Avatar guest */}
                                     <div className="relative shrink-0">
@@ -296,7 +296,7 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                                             className="w-14 h-14 rounded-full object-cover"
                                         />
                                         {conversation.unreadCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#3B82F6] text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand text-white text-xs font-bold rounded-full flex items-center justify-center">
                                                 {conversation.unreadCount}
                                             </span>
                                         )}
@@ -312,7 +312,7 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                                                 {formatMessageTime(conversation.lastMessageTime)}
                                             </span>
                                         </div>
-                                        <p className="text-caption text-[#3B82F6] truncate">
+                                        <p className="text-caption text-brand truncate">
                                             🐕 {conversation.dogName} • {conversation.dates}
                                         </p>
                                         <p className={`text-body-sm truncate ${

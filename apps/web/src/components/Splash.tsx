@@ -42,7 +42,7 @@ export const Splash = ({ onComplete }: SplashProps) => {
 
     return (
         <div
-            className={`fixed inset-0 z-999 bg-[#3B82F6] flex flex-col items-center justify-center transition-opacity duration-500 ${
+            className={`fixed inset-0 z-999 bg-brand flex flex-col items-center justify-center transition-opacity duration-500 ${
                 phase === 'fadeOut' ? 'opacity-0' : 'opacity-100'
             }`}
             style={{

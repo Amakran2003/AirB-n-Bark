@@ -103,7 +103,7 @@ const STEPS: Step[] = [
     'review'
 ];
 
-// Types de pièces disponibles pour "Where you'll sleep"
+// Types de pièces disponibles pour "Où tu vas roupiller"
 const ROOM_TYPES = [
     { id: 'bedroom', name: 'Chambre', icon: '🛏️' },
     { id: 'living', name: 'Salon', icon: '🛋️' },
@@ -139,7 +139,7 @@ const AVAILABLE_AMENITIES: { name: string; icon: ListingAmenity['icon'] }[] = [
 const AVAILABLE_HIGHLIGHTS: { title: string; description: string; icon: ListingHighlight['icon'] }[] = [
     { title: 'Check-in au museau facile', description: 'Sniff QR rapide et fluide', icon: 'search' },
     { title: 'Tout équipé', description: 'Gamelles, jouets, couchage inclus', icon: 'check' },
-    { title: 'Ami des chiens', description: 'Espace 100% dog-friendly', icon: 'paw' },
+    { title: 'Ami des chiens', description: 'Espace 100% canin', icon: 'paw' },
     { title: 'Sécurité maximale', description: 'Clôtures et surveillance', icon: 'shield' }
 ];
 
@@ -584,10 +584,10 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
         return (
             <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+                <div className="w-20 h-20 bg-brand rounded-3xl flex items-center justify-center mb-6 shadow-lg">
                     <PawPrint className="w-10 h-10 text-white" />
                 </div>
-                <p className="text-blue-600 font-semibold mb-2">{intro.step}</p>
+                <p className="text-brand font-semibold mb-2">{intro.step}</p>
                 <h1 className="text-3xl font-bold mb-4">{intro.title}</h1>
                 <p className="text-secondary text-lg max-w-sm">{intro.description}</p>
             </div>
@@ -614,8 +614,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     onClick={() => setFormData(prev => ({ ...prev, type: type.id }))}
                                     className={`w-full p-4 rounded-2xl border-2 text-left transition-all ${
                                         formData.type === type.id
-                                            ? 'border-blue-600 bg-blue-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-brand bg-primary-light'
+                                            : 'border-secondary hover:border-tertiary'
                                     }`}
                                 >
                                     <p className="font-semibold text-lg">{type.title}</p>
@@ -634,28 +634,28 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         
                         <div className="relative">
                             <div className="relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary" />
                                 <input
                                     type="text"
                                     value={addressQuery}
                                     onChange={(e) => setAddressQuery(e.target.value)}
                                     placeholder="Rechercher une adresse..."
-                                    className="w-full pl-12 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none text-lg"
+                                    className="w-full pl-12 pr-10 py-4 border-2 border-secondary rounded-2xl focus:border-brand focus:outline-none text-lg"
                                 />
                                 {isSearchingAddress && (
-                                    <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+                                    <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary animate-spin" />
                                 )}
                             </div>
 
                             {addressSuggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-lg z-10 max-h-60 overflow-y-auto">
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-secondary rounded-2xl shadow-lg z-10 max-h-60 overflow-y-auto">
                                     {addressSuggestions.map((suggestion, index) => (
                                         <button
                                             key={index}
                                             onClick={() => selectAddress(suggestion)}
-                                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-gray-100 last:border-0"
+                                            className="w-full px-4 py-3 text-left hover:bg-secondary flex items-start gap-3 border-b border-(--color-border-light) last:border-0"
                                         >
-                                            <MapPin className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+                                            <MapPin className="w-5 h-5 text-tertiary mt-0.5 shrink-0" />
                                             <span className="text-sm">{suggestion.display_name}</span>
                                         </button>
                                     ))}
@@ -664,13 +664,13 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         </div>
 
                         {formData.locationDetails.city && (
-                            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-2xl">
-                                <div className="flex items-center gap-2 text-green-700 mb-2">
+                            <div className="mt-6 p-4 bg-success-light border border-success-light rounded-2xl">
+                                <div className="flex items-center gap-2 text-success mb-2">
                                     <Check className="w-5 h-5" />
                                     <span className="font-medium">Adresse sélectionnée</span>
                                 </div>
-                                <p className="text-sm text-green-800">{formData.locationDetails.address}</p>
-                                <p className="text-sm text-green-600 mt-1">
+                                <p className="text-sm text-success">{formData.locationDetails.address}</p>
+                                <p className="text-sm text-success mt-1">
                                     {formData.locationDetails.city}, {formData.locationDetails.country}
                                 </p>
                             </div>
@@ -691,7 +691,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 { key: 'beds', label: 'Couchages', sublabel: 'Paniers, coussins, etc.' },
                                 { key: 'bowls', label: 'Coins gamelle', sublabel: 'Points d\'eau et nourriture' }
                             ].map(item => (
-                                <div key={item.key} className="flex items-center justify-between py-4 border-b border-gray-100">
+                                <div key={item.key} className="flex items-center justify-between py-4 border-b border-(--color-border-light)">
                                     <div>
                                         <p className="font-medium">{item.label}</p>
                                         <p className="text-sm text-secondary">{item.sublabel}</p>
@@ -705,7 +705,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                     [item.key]: Math.max(0, prev.capacity[item.key as keyof typeof prev.capacity] - 1)
                                                 }
                                             }))}
-                                            className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400 disabled:opacity-50"
+                                            className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary disabled:opacity-50"
                                             disabled={formData.capacity[item.key as keyof typeof formData.capacity] <= 0}
                                         >
                                             <Minus className="w-4 h-4" />
@@ -721,7 +721,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                     [item.key]: prev.capacity[item.key as keyof typeof prev.capacity] + 1
                                                 }
                                             }))}
-                                            className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400"
+                                            className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                                         >
                                             <Plus className="w-4 h-4" />
                                         </button>
@@ -747,11 +747,11 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         onClick={() => toggleAmenity(amenity)}
                                         className={`p-4 rounded-2xl border-2 text-left transition-all ${
                                             isSelected
-                                                ? 'border-blue-600 bg-blue-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-brand bg-primary-light'
+                                                : 'border-secondary hover:border-tertiary'
                                         }`}
                                     >
-                                        <AmenityIcon icon={amenity.icon} className={`w-6 h-6 mb-2 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`} />
+                                        <AmenityIcon icon={amenity.icon} className={`w-6 h-6 mb-2 ${isSelected ? 'text-brand' : 'text-secondary'}`} />
                                         <p className="text-sm font-medium">{amenity.name}</p>
                                     </button>
                                 );
@@ -778,7 +778,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         
                         <div className="grid grid-cols-2 gap-3">
                             {formData.images.map((img, index) => (
-                                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100">
+                                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-tertiary">
                                     <img src={img} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
                                     <button
                                         onClick={() => removePhoto(index)}
@@ -796,9 +796,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             
                             <button
                                 onClick={openFilePicker}
-                                className="aspect-square rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 hover:border-gray-400 transition-colors"
+                                className="aspect-square rounded-2xl border-2 border-dashed border-tertiary flex flex-col items-center justify-center gap-2 hover:border-secondary transition-colors"
                             >
-                                <Camera className="w-8 h-8 text-gray-400" />
+                                <Camera className="w-8 h-8 text-tertiary" />
                                 <span className="text-sm text-secondary">Ajouter</span>
                             </button>
                         </div>
@@ -812,7 +812,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             case 'rooms':
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
-                        <h1 className="text-2xl font-bold mb-2">Where you'll sleep 🛏️</h1>
+                        <h1 className="text-2xl font-bold mb-2">Où tu vas roupiller 🛏️</h1>
                         <p className="text-secondary mb-6">
                             Associe tes photos aux différents espaces pour que les toutous sachent où ils dormiront.
                         </p>
@@ -823,7 +823,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <p className="text-sm font-medium mb-3">Espaces créés :</p>
                                 <div className="space-y-3">
                                     {formData.rooms.map((room, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                                        <div key={index} className="flex items-center gap-3 p-3 bg-secondary rounded-xl">
                                             <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
                                                 <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
                                             </div>
@@ -838,7 +838,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                         rooms: prev.rooms.filter((_, i) => i !== index)
                                                     }));
                                                 }}
-                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full"
+                                                className="p-2 text-error hover:bg-error-light rounded-full"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -849,7 +849,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         )}
                         
                         {/* Ajouter un nouvel espace */}
-                        <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4">
+                        <div className="border-2 border-dashed border-secondary rounded-2xl p-4">
                             <p className="text-sm font-medium mb-3 flex items-center gap-2">
                                 <Bed className="w-4 h-4" />
                                 Ajouter un espace
@@ -867,16 +867,16 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                 onClick={() => setFormData(prev => ({ ...prev, _tempRoomImage: img }))}
                                                 className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                                                     (formData as any)._tempRoomImage === img
-                                                        ? 'border-blue-600 ring-2 ring-blue-200'
+                                                        ? 'border-brand ring-2 ring-primary-light'
                                                         : isUsed
-                                                            ? 'border-green-400'
-                                                            : 'border-gray-200'
+                                                            ? 'border-success'
+                                                            : 'border-secondary'
                                                 }`}
                                             >
                                                 <img src={img} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
                                                 {isUsed && (
-                                                    <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center pointer-events-none">
-                                                        <Check className="w-4 h-4 text-green-600" />
+                                                    <div className="absolute inset-0 bg-success/30 flex items-center justify-center pointer-events-none">
+                                                        <Check className="w-4 h-4 text-success" />
                                                     </div>
                                                 )}
                                             </button>
@@ -895,8 +895,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             onClick={() => setFormData(prev => ({ ...prev, _tempRoomType: type.name }))}
                                             className={`px-3 py-2 rounded-full text-sm flex items-center gap-1 transition-all ${
                                                 (formData as any)._tempRoomType === type.name
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-100 hover:bg-gray-200'
+                                                    ? 'bg-brand text-white'
+                                                    : 'bg-tertiary hover:bg-secondary'
                                             }`}
                                         >
                                             <span>{type.icon}</span>
@@ -914,7 +914,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     placeholder="Ex: 1 panier premium, couverture chauffante"
                                     value={(formData as any)._tempRoomDesc || ''}
                                     onChange={(e) => setFormData(prev => ({ ...prev, _tempRoomDesc: e.target.value }))}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none text-sm"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none text-sm"
                                 />
                             </div>
                             
@@ -940,7 +940,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     }
                                 }}
                                 disabled={!(formData as any)._tempRoomImage || !(formData as any)._tempRoomType}
-                                className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-brand text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-4 h-4" />
                                 Ajouter cet espace
@@ -962,18 +962,18 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         <textarea
                             value={formData.title}
                             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value.slice(0, 50) }))}
-                            placeholder="Ex: Luxury Niche 10min du Parc · Plaid chauffant"
-                            className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none text-lg resize-none"
+                            placeholder="Ex: Niche de luxe à 10min du Parc · Plaid chauffant"
+                            className="w-full p-4 border-2 border-secondary rounded-2xl focus:border-brand focus:outline-none text-lg resize-none"
                             rows={3}
                         />
                         <p className="text-right text-sm text-secondary mt-2">{formData.title.length}/50</p>
                         
-                        <div className="mt-6 p-4 bg-gray-50 rounded-2xl">
+                        <div className="mt-6 p-4 bg-secondary rounded-2xl">
                             <p className="text-sm font-medium mb-2">Exemples de bons titres :</p>
                             <ul className="text-sm text-secondary space-y-1">
-                                <li>• Luxury Niche 10min du Parc · Plaid chauffant</li>
-                                <li>• Nicholoc cosy · Coloc 3 toutous max</li>
-                                <li>• Beach Niche · Plage dog-friendly à 50m</li>
+                                <li>• Niche de luxe à 10min du Parc · Plaid chauffant</li>
+                                <li>• Nicholoc sympa · Coloc canine chill</li>
+                                <li>• Niche Plage · Plage toutou-friendly à 50m</li>
                             </ul>
                         </div>
                     </div>
@@ -994,14 +994,14 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         onClick={() => toggleHighlight(highlight)}
                                         className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-start gap-4 ${
                                             isSelected
-                                                ? 'border-blue-600 bg-blue-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-brand bg-primary-light'
+                                                : 'border-secondary hover:border-tertiary'
                                         }`}
                                     >
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                                            isSelected ? 'bg-blue-600' : 'bg-gray-100'
+                                            isSelected ? 'bg-brand' : 'bg-tertiary'
                                         }`}>
-                                            <HighlightIcon icon={highlight.icon} className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
+                                            <HighlightIcon icon={highlight.icon} className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-secondary'}`} />
                                         </div>
                                         <div>
                                             <p className="font-semibold">{highlight.title}</p>
@@ -1024,10 +1024,10 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             placeholder="Cette niche cosy est située dans un quartier calme, à 10 minutes du parc le plus proche..."
-                            className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none resize-none"
+                            className="w-full p-4 border-2 border-secondary rounded-2xl focus:border-brand focus:outline-none resize-none"
                             rows={8}
                         />
-                        <p className={`text-right text-sm mt-2 ${formData.description.length < 50 ? 'text-amber-600' : 'text-green-600'}`}>
+                        <p className={`text-right text-sm mt-2 ${formData.description.length < 50 ? 'text-warning' : 'text-success'}`}>
                             {formData.description.length}/50 minimum
                         </p>
                     </div>
@@ -1042,7 +1042,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         <div className="flex items-center justify-center gap-4 my-8">
                             <button
                                 onClick={() => setFormData(prev => ({ ...prev, price: Math.max(5, prev.price - 5) }))}
-                                className="w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400"
+                                className="w-12 h-12 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                             >
                                 <Minus className="w-5 h-5" />
                             </button>
@@ -1052,7 +1052,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             </div>
                             <button
                                 onClick={() => setFormData(prev => ({ ...prev, price: prev.price + 5 }))}
-                                className="w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400"
+                                className="w-12 h-12 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                             >
                                 <Plus className="w-5 h-5" />
                             </button>
@@ -1075,8 +1075,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             }))}
                                             className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                                                 formData.cancellationPolicy === policy.id
-                                                    ? 'border-blue-600 bg-blue-50'
-                                                    : 'border-gray-200'
+                                                    ? 'border-brand bg-primary-light'
+                                                    : 'border-secondary'
                                             }`}
                                         >
                                             <p className="font-medium">{policy.label}</p>
@@ -1104,7 +1104,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         ...prev,
                                         rules: { ...prev.rules, maxBarkHour: e.target.value }
                                     }))}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                 >
                                     <option value="20h00">20h00</option>
                                     <option value="21h00">21h00</option>
@@ -1122,7 +1122,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         ...prev,
                                         rules: { ...prev.rules, minAge: parseInt(e.target.value) || 0 }
                                     }))}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     min={0}
                                 />
                             </div>
@@ -1132,7 +1132,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 { key: 'mustBeNeutered', label: 'Stérilisation obligatoire' },
                                 { key: 'allowsPuppies', label: 'Chiots acceptés' }
                             ].map(rule => (
-                                <div key={rule.key} className="flex items-center justify-between py-3 border-b border-gray-100">
+                                <div key={rule.key} className="flex items-center justify-between py-3 border-b border-(--color-border-light)">
                                     <span className="font-medium">{rule.label}</span>
                                     <button
                                         onClick={() => setFormData(prev => ({
@@ -1144,8 +1144,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         }))}
                                         className={`w-12 h-7 rounded-full transition-colors ${
                                             formData.rules[rule.key as keyof typeof formData.rules]
-                                                ? 'bg-blue-600'
-                                                : 'bg-gray-300'
+                                                ? 'bg-brand'
+                                                : 'bg-tertiary'
                                         }`}
                                     >
                                         <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -1169,25 +1169,25 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         {/* Bouton pour ouvrir le DatePicker */}
                         <button
                             onClick={() => setIsDatePickerOpen(true)}
-                            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center gap-3 hover:border-gray-400 transition-colors mb-6"
+                            className="w-full p-4 border-2 border-dashed border-tertiary rounded-2xl flex items-center justify-center gap-3 hover:border-secondary transition-colors mb-6"
                         >
-                            <Calendar className="w-6 h-6 text-gray-400" />
+                            <Calendar className="w-6 h-6 text-tertiary" />
                             <span className="text-secondary font-medium">Sélectionner une période</span>
                         </button>
 
                         {/* Afficher la sélection temporaire */}
                         {tempCheckIn && tempCheckOut && (
-                            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+                            <div className="mb-6 p-4 bg-primary-light border border-primary-light rounded-2xl">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm text-blue-600 font-medium">Période sélectionnée</p>
-                                        <p className="text-blue-800">
+                                        <p className="text-sm text-brand font-medium">Période sélectionnée</p>
+                                        <p className="text-brand">
                                             {new Date(tempCheckIn).toLocaleDateString('fr-FR')} → {new Date(tempCheckOut).toLocaleDateString('fr-FR')}
                                         </p>
                                     </div>
                                     <button
                                         onClick={addDateRangeFromPicker}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium"
+                                        className="px-4 py-2 bg-brand text-white rounded-xl font-medium"
                                     >
                                         Ajouter
                                     </button>
@@ -1199,13 +1199,13 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             <div className="space-y-2">
                                 <p className="font-medium mb-2">Périodes ajoutées ({formData.availableDateRanges.length})</p>
                                 {formData.availableDateRanges.map((range, index) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
+                                    <div key={index} className="flex items-center justify-between p-3 bg-success-light border border-success-light rounded-xl">
                                         <span className="text-sm">
                                             {new Date(range.start).toLocaleDateString('fr-FR')} → {new Date(range.end).toLocaleDateString('fr-FR')}
                                         </span>
                                         <button
                                             onClick={() => removeDateRange(index)}
-                                            className="text-red-500 p-1"
+                                            className="text-error p-1"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -1216,7 +1216,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
                         {formData.availableDateRanges.length === 0 && !tempCheckIn && (
                             <div className="text-center py-8 text-secondary">
-                                <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                <Calendar className="w-12 h-12 mx-auto mb-3 text-tertiary" />
                                 <p>Aucune période ajoutée</p>
                                 <p className="text-sm">Clique sur le bouton ci-dessus pour ajouter des disponibilités</p>
                             </div>
@@ -1229,7 +1229,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Instructions d'arrivée</h1>
                         <p className="text-secondary mb-6">
-                            Ces infos seront envoyées aux voyageurs après confirmation de leur réservation.
+                            Ces infos seront envoyées aux toutous après confirmation de leur réservation. Wouf !
                         </p>
                         
                         <div className="space-y-5">
@@ -1243,7 +1243,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             ...prev,
                                             instructions: { ...prev.instructions, checkInTime: e.target.value }
                                         }))}
-                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     >
                                         {['14h00', '15h00', '16h00', '17h00', '18h00', 'Flexible'].map(t => (
                                             <option key={t} value={t}>{t}</option>
@@ -1258,7 +1258,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             ...prev,
                                             instructions: { ...prev.instructions, checkOutTime: e.target.value }
                                         }))}
-                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     >
                                         {['10h00', '11h00', '12h00', 'Flexible'].map(t => (
                                             <option key={t} value={t}>{t}</option>
@@ -1278,7 +1278,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         instructions: { ...prev.instructions, accessCode: e.target.value }
                                     }))}
                                     placeholder="Ex: 1234# ou A123B"
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     maxLength={50}
                                 />
                             </div>
@@ -1295,7 +1295,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             instructions: { ...prev.instructions, wifiName: e.target.value }
                                         }))}
                                         placeholder="NicheWifi"
-                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                         maxLength={50}
                                     />
                                 </div>
@@ -1309,7 +1309,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             instructions: { ...prev.instructions, wifiPassword: e.target.value }
                                         }))}
                                         placeholder="••••••••"
-                                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                        className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                         maxLength={50}
                                     />
                                 </div>
@@ -1326,14 +1326,14 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         instructions: { ...prev.instructions, parkingInfo: e.target.value }
                                     }))}
                                     placeholder="Ex: Place réservée devant le portail"
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     maxLength={200}
                                 />
                             </div>
 
                             {/* Notes spéciales */}
                             <div>
-                                <label className="block text-sm font-medium mb-2">📝 Notes pour les voyageurs</label>
+                                <label className="block text-sm font-medium mb-2">📝 Notes pour les toutous</label>
                                 <textarea
                                     value={formData.instructions.specialNotes}
                                     onChange={(e) => setFormData(prev => ({
@@ -1341,7 +1341,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         instructions: { ...prev.instructions, specialNotes: e.target.value }
                                     }))}
                                     placeholder="Ex: La gamelle d'eau fraîche t'attend ! Les friandises sont dans le placard de gauche 🦴"
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-600 focus:outline-none resize-none h-24"
+                                    className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none resize-none h-24"
                                     maxLength={500}
                                 />
                             </div>
@@ -1356,7 +1356,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         <p className="text-secondary mb-6">Certains toutous préfèrent une zone 100% sans félin !</p>
                         
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div className="flex items-center justify-between py-4 border-b border-(--color-border-light)">
                                 <div>
                                     <p className="font-medium">Option Anti-Chat disponible</p>
                                     <p className="text-sm text-secondary">Propose cette option aux toutous</p>
@@ -1367,7 +1367,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                         antiCatAvailable: !prev.antiCatAvailable
                                     }))}
                                     className={`w-12 h-7 rounded-full transition-colors ${
-                                        formData.antiCatAvailable ? 'bg-blue-600' : 'bg-gray-300'
+                                        formData.antiCatAvailable ? 'bg-brand' : 'bg-tertiary'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -1410,7 +1410,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                     ...prev,
                                                     antiCatExtraPrice: Math.max(0, prev.antiCatExtraPrice - 1)
                                                 }))}
-                                                className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                                                className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center"
                                             >
                                                 <Minus className="w-4 h-4" />
                                             </button>
@@ -1420,7 +1420,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                     ...prev,
                                                     antiCatExtraPrice: prev.antiCatExtraPrice + 1
                                                 }))}
-                                                className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                                                className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center"
                                             >
                                                 <Plus className="w-4 h-4" />
                                             </button>
@@ -1440,8 +1440,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         
                         <div className="space-y-4">
                             {/* Aperçu carte */}
-                            <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-                                <div className="aspect-video bg-gray-100 relative">
+                            <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-(--color-border-light)">
+                                <div className="aspect-video bg-tertiary relative">
                                     <img 
                                         src={formData.images[0] || '/placeholder-dog.svg'} 
                                         alt="Aperçu" 
@@ -1459,7 +1459,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             </div>
 
                             {/* Détails */}
-                            <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                            <div className="bg-secondary rounded-2xl p-4 space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Capacité</span>
                                     <span className="font-medium">{generateCapacityString()}</span>
@@ -1508,12 +1508,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         <div className="fixed inset-0 bg-white flex flex-col">
             {/* Header */}
             <div 
-                className="shrink-0 px-4 py-3 border-b border-gray-200 flex items-center gap-4"
+                className="shrink-0 px-4 py-3 border-b border-secondary flex items-center gap-4"
                 style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))' }}
             >
                 <button 
                     onClick={() => setShowExitConfirm(true)}
-                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100"
+                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-tertiary"
                 >
                     <X className="w-6 h-6" />
                 </button>
@@ -1523,9 +1523,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         <div className="flex items-center gap-2 mb-1">
                             <span className="text-xs font-medium text-secondary">Étape {phase}/3</span>
                         </div>
-                        <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-1 bg-secondary rounded-full overflow-hidden">
                             <div 
-                                className="h-full bg-blue-600 transition-all duration-300"
+                                className="h-full bg-brand transition-all duration-300"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
@@ -1538,7 +1538,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
             {/* Footer */}
             <div 
-                className="shrink-0 px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-white"
+                className="shrink-0 px-6 py-4 border-t border-secondary flex items-center justify-between bg-white"
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 {!isIntroStep && currentStepIndex > 0 ? (
@@ -1556,7 +1556,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-xl disabled:opacity-50 flex items-center gap-2"
+                        className="px-8 py-3 bg-brand text-white font-semibold rounded-xl disabled:opacity-50 flex items-center gap-2"
                     >
                         {isSubmitting ? (
                             <>
@@ -1571,7 +1571,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <button
                         onClick={goNext}
                         disabled={!canProceed()}
-                        className="px-8 py-3 bg-gray-900 text-white font-semibold rounded-xl disabled:opacity-50 disabled:bg-gray-300 flex items-center gap-2"
+                        className="px-8 py-3 bg-(--color-text-primary) text-white font-semibold rounded-xl disabled:opacity-50 disabled:bg-tertiary flex items-center gap-2"
                     >
                         {isIntroStep ? 'C\'est parti !' : 'Suivant'}
                         <ChevronRight className="w-5 h-5" />
@@ -1599,7 +1599,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowExitConfirm(false)}
-                                className="flex-1 py-3 px-4 bg-gray-100 rounded-xl font-medium"
+                                className="flex-1 py-3 px-4 bg-tertiary rounded-xl font-medium"
                             >
                                 Annuler
                             </button>
@@ -1608,7 +1608,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     setShowExitConfirm(false);
                                     onBack();
                                 }}
-                                className="flex-1 py-3 px-4 bg-red-500 text-white rounded-xl font-medium"
+                                className="flex-1 py-3 px-4 bg-error text-white rounded-xl font-medium"
                             >
                                 Quitter
                             </button>

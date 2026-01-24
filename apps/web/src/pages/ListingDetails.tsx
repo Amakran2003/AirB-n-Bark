@@ -171,7 +171,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
 
             {/* Footer réservation */}
             <div
-                className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
+                className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 border-t border-(--color-border-light)"
                 style={{ ...containerStyle, paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
             >
                 <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                         </p>
                         {listing.pricing.hasFreeCancellation && (
                             <div className="flex items-center gap-1 text-success mt-1">
-                                <Check className="w-3 h-3 text-green-600" strokeWidth={2} />
+                                <Check className="w-3 h-3 text-success" strokeWidth={2} />
                                 <span className="text-caption text-success">
                                     Annulation gratuite
                                 </span>
@@ -391,7 +391,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     )}
 
                     {/* Chambres */}
-                    <h2 className="text-h2 mb-4">Where you'll sleep</h2>
+                    <h2 className="text-h2 mb-4">Où tu vas roupiller</h2>
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4">
                         {listing.rooms.map((room, index) => (
                             <div key={index} className="shrink-0 w-44">
@@ -426,7 +426,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     <div className="divider" />
 
                     {/* Carte */}
-                    <h2 className="text-h2 mb-4">Where you'll be</h2>
+                    <h2 className="text-h2 mb-4">Où tu seras</h2>
                     <a
                         href={`https://www.google.com/maps/search/?api=1&query=${listing.locationDetails.lat},${listing.locationDetails.lng}`}
                         target="_blank"

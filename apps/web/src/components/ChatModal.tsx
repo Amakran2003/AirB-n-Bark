@@ -67,8 +67,8 @@ export const ChatModal = ({
     emptyMessage = "Commence la conversation !",
     showReadStatus = false,
     isLoading = false,
-    userBubbleColor = 'bg-[#3B82F6]',
-    otherBubbleColor = 'bg-gray-100',
+    userBubbleColor = 'bg-brand',
+    otherBubbleColor = 'bg-tertiary',
 }: ChatModalProps) => {
     const [input, setInput] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -150,11 +150,11 @@ export const ChatModal = ({
                 {/* Swipe indicator + Header */}
                 <div className="touch-auto" {...handlers}>
                     <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        <div className="w-10 h-1 bg-tertiary rounded-full" />
                     </div>
 
                     {/* Header personnalisé */}
-                    <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+                    <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-(--color-border-light)">
                         <button className="btn-icon" onClick={onClose}>
                             <X className="w-4 h-4" />
                         </button>
@@ -225,9 +225,9 @@ export const ChatModal = ({
                             <div className="shrink-0">{otherAvatar}</div>
                             <div className={`${otherBubbleColor} px-4 py-3 rounded-2xl rounded-bl-md`}>
                                 <div className="flex gap-1">
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    <span className="w-2 h-2 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-2 h-2 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-2 h-2 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                 </div>
                             </div>
                         </div>
@@ -238,7 +238,7 @@ export const ChatModal = ({
 
                 {/* Input */}
                 <div 
-                    className="shrink-0 p-4 border-t border-gray-200 bg-white"
+                    className="shrink-0 p-4 border-t border-(--color-border-light) bg-white"
                     style={{ paddingBottom: isKeyboardOpen ? '16px' : 'calc(24px + env(safe-area-inset-bottom))' }}
                 >
                     <div className="flex items-center gap-3">
@@ -249,7 +249,7 @@ export const ChatModal = ({
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={handleKeyPress}
                             placeholder={placeholder}
-                            className="flex-1 px-4 py-3 rounded-full border border-gray-300 text-sm text-primary placeholder:text-gray-400 focus:outline-none focus:border-[#3B82F6]"
+                            className="flex-1 px-4 py-3 rounded-full border border-(--color-border-light) text-sm text-primary placeholder:text-tertiary focus:outline-none focus:border-brand"
                             disabled={isSending}
                         />
                         <button
@@ -260,8 +260,8 @@ export const ChatModal = ({
                             disabled={!input.trim() || isSending}
                             className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
                                 input.trim() && !isSending
-                                    ? 'bg-[#3B82F6] text-white'
-                                    : 'bg-gray-100 text-gray-400'
+                                    ? 'bg-brand text-white'
+                                    : 'bg-tertiary text-tertiary'
                             }`}
                         >
                             <Send className="w-5 h-5" />

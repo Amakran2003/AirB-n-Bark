@@ -194,7 +194,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
             >
                 {/* Header */}
                 <div
-                    className="shrink-0 flex items-center justify-between p-4 border-b border-[#ebebeb] bg-white"
+                    className="shrink-0 flex items-center justify-between p-4 border-b border-(--color-border-light) bg-white"
                     style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
                 >
                     <button className="btn-icon" onClick={onBack}>
@@ -211,7 +211,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                 >
                     <div className="p-6">
                         {/* Listing preview */}
-                        <div className="flex gap-4 pb-6 border-b border-[#ebebeb]">
+                        <div className="flex gap-4 pb-6 border-b border-(--color-border-light)">
                         <img
                             src={listing.image}
                             alt={listing.title}
@@ -228,7 +228,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                     </div>
 
                     {/* Dates */}
-                    <div className="py-6 border-b border-[#ebebeb]">
+                    <div className="py-6 border-b border-(--color-border-light)">
                         <h2 className="text-h3 mb-4">Ton séjour 🐕</h2>
 
                         <div className="flex flex-col gap-4">
@@ -265,8 +265,8 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                                     <button
                                         className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                             dogsCount <= 1
-                                                ? 'border-gray-200 text-gray-300'
-                                                : 'border-[#222222] text-[#222222]'
+                                                ? 'border-tertiary text-tertiary'
+                                                : 'border-(--color-text-primary) text-primary'
                                         }`}
                                         onClick={() => setDogsCount(Math.max(1, dogsCount - 1))}
                                         disabled={dogsCount <= 1}
@@ -277,8 +277,8 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                                     <button
                                         className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                             dogsCount >= maxDogs
-                                                ? 'border-gray-200 text-gray-300'
-                                                : 'border-[#222222] text-[#222222]'
+                                                ? 'border-tertiary text-tertiary'
+                                                : 'border-(--color-text-primary) text-primary'
                                         }`}
                                         onClick={() => setDogsCount(Math.min(maxDogs, dogsCount + 1))}
                                         disabled={dogsCount >= maxDogs}
@@ -294,22 +294,22 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                     {(!datesValidation.isValid && datesValidation.error) || (!dogsValidation.isValid && dogsValidation.error) ? (
                         <div className="py-4">
                             {!datesValidation.isValid && datesValidation.error && (
-                                <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-3">
-                                    <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                                    <p className="text-sm text-red-700">{datesValidation.error}</p>
+                                <div className="flex items-start gap-3 p-4 bg-error-light border border-error-light rounded-xl mb-3">
+                                    <AlertTriangle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+                                    <p className="text-sm text-error">{datesValidation.error}</p>
                                 </div>
                             )}
                             {!dogsValidation.isValid && dogsValidation.error && (
-                                <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                                    <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                                    <p className="text-sm text-red-700">{dogsValidation.error}</p>
+                                <div className="flex items-start gap-3 p-4 bg-error-light border border-error-light rounded-xl">
+                                    <AlertTriangle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+                                    <p className="text-sm text-error">{dogsValidation.error}</p>
                                 </div>
                             )}
                         </div>
                     ) : null}
 
                     {/* Price details */}
-                    <div className="py-6 border-b border-[#ebebeb]">
+                    <div className="py-6 border-b border-(--color-border-light)">
                         <h2 className="text-h3 mb-4">Détails du prix</h2>
 
                         <div className="flex flex-col gap-3">
@@ -338,7 +338,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                     <div className="card flex flex-col gap-3">
                         {hasFreeCancellation && (
                             <div className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-[#16a34a] shrink-0 mt-0.5" />
+                                <Check className="w-5 h-5 text-success shrink-0 mt-0.5" />
                                 <p className="text-body-sm">Annulation gratuite sous 24h</p>
                             </div>
                         )}
@@ -356,7 +356,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
 
                 {/* Footer - Inside the main container */}
                 <div
-                    className="shrink-0 bg-white shadow-md px-6 pt-4 border-t border-gray-200"
+                    className="shrink-0 bg-white shadow-md px-6 pt-4 border-t border-(--color-border-light)"
                     style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
                     <button
@@ -374,7 +374,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                             ? 'Choisir les dates'
                             : !isBookingValid
                                 ? 'Réservation impossible'
-                                : 'Next'}
+                                : 'Continuer'}
                     </button>
                 </div>
             </div>

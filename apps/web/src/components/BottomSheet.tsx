@@ -109,12 +109,12 @@ export const BottomSheet = ({
                     {/* Swipe indicator */}
                     {showSwipeIndicator && (
                         <div className="flex justify-center pt-3 pb-1">
-                            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                            <div className="w-10 h-1 bg-tertiary rounded-full" />
                         </div>
                     )}
 
                     {/* Header */}
-                    <div className="shrink-0 flex items-center justify-between p-4 border-b border-gray-200">
+                    <div className="shrink-0 flex items-center justify-between p-4 border-b border-(--color-border-light)">
                         {showCloseButton ? (
                             <button className="btn-icon" onClick={onClose}>
                                 <X className="w-4 h-4" />
@@ -147,7 +147,7 @@ export const BottomSheet = ({
                 {/* Footer */}
                 {footer && (
                     <div
-                        className="shrink-0 border-t border-gray-200 bg-white"
+                        className="shrink-0 border-t border-(--color-border-light) bg-white"
                         style={{ 
                             paddingBottom: isKeyboardOpen ? '16px' : 'calc(16px + env(safe-area-inset-bottom))'
                         }}

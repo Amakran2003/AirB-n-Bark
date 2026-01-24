@@ -216,14 +216,14 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                         <SlidersHorizontal className="w-4 h-4" />
                         Filtre
                         {activeFiltersCount > 0 && (
-                            <span className="w-5 h-5 flex items-center justify-center bg-[#222222] text-white text-xs rounded-full">
+                            <span className="w-5 h-5 flex items-center justify-center bg-(--color-text-primary) text-white text-xs rounded-full">
                                 {activeFiltersCount}
                             </span>
                         )}
                     </button>
 
                     {/* Icône Bot - sans bordure, taille augmentée */}
-                    <button className="btn-icon" onClick={() => setIsChatBotOpen(true)}>
+                    <button className="btn-icon" onClick={() => setIsChatBotOpen(true)} aria-label="Ouvrir l'assistant">
                         <Bot className="w-8 h-8 text-black" strokeWidth={1.5} />
                     </button>
                 </header>

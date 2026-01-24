@@ -30,9 +30,9 @@ interface AddressSuggestion {
 
 // Types de logement disponibles
 const LISTING_TYPES: { value: ListingType; label: string; description: string }[] = [
-    { value: 'niche', label: 'Niche entière', description: 'Un logement rien que pour ton chien' },
-    { value: 'nicholoc', label: 'Nicholoc', description: 'Une chambre dans une coloc canine' },
-    { value: 'nichortoir', label: 'Nichortoir', description: 'Un lit dans un dortoir de chiens' },
+    { value: 'niche', label: 'Niche entière', description: 'Un palace rien que pour toi, boule de poils' },
+    { value: 'nicholoc', label: 'Nicholoc', description: 'Une chambre en coloc avec d\'autres toutous cool' },
+    { value: 'nichortoir', label: 'Nichortoir', description: 'Un lit dans un dortoir... ambiance meute !' },
 ];
 
 // Fourchettes de prix prédéfinies
@@ -229,10 +229,10 @@ export const FilterModal = () => {
                     onTouchEnd={handleTouchEnd}
                 >
                     <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        <div className="w-10 h-1 bg-tertiary rounded-full" />
                     </div>
                     {/* Header */}
-                    <div className="flex items-center justify-between p-3 border-b border-[#ebebeb]">
+                    <div className="flex items-center justify-between p-3 border-b border-(--color-border-light)">
                         <button className="btn-icon" onClick={handleClose}>
                             <X className="w-4 h-4" />
                         </button>
@@ -249,7 +249,7 @@ export const FilterModal = () => {
                     <section className="mb-8">
                         <h3 className="text-h3 mb-4">Quand ?</h3>
                         <button
-                            className="w-full flex items-center gap-3 p-4 rounded-xl border border-[#dddddd]"
+                            className="w-full flex items-center gap-3 p-4 rounded-xl border border-(--color-border-light)"
                             onClick={() => setIsDatePickerOpen(true)}
                         >
                             <Calendar className="w-5 h-5 icon-secondary" />
@@ -292,16 +292,16 @@ export const FilterModal = () => {
 
                         {/* Champ de recherche */}
                         <div className="relative mb-4">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary" />
                             <input
                                 type="text"
                                 value={citySearch}
                                 onChange={(e) => setCitySearch(e.target.value)}
                                 placeholder="Rechercher une ville..."
-                                className="w-full pl-12 pr-10 py-3 rounded-xl border border-[#dddddd] text-body focus:border-[#222222] focus:outline-none"
+                                className="w-full pl-12 pr-10 py-3 rounded-xl border border-(--color-border-light) text-body focus:border-(--color-text-primary) focus:outline-none"
                             />
                             {isSearchingCity ? (
-                                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+                                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary animate-spin" />
                             ) : citySearch ? (
                                 <button
                                     onClick={() => {
@@ -310,16 +310,16 @@ export const FilterModal = () => {
                                     }}
                                     className="absolute right-4 top-1/2 -translate-y-1/2"
                                 >
-                                    <X className="w-4 h-4 text-gray-400" />
+                                    <X className="w-4 h-4 text-tertiary" />
                                 </button>
                             ) : null}
                         </div>
 
                         {/* Ville sélectionnée */}
                         {localFilters.city && !citySearch && (
-                            <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 rounded-xl">
-                                <MapPin className="w-4 h-4 text-blue-600" />
-                                <span className="text-body-md font-medium text-blue-600">{localFilters.city}</span>
+                            <div className="flex items-center gap-2 mb-4 p-3 bg-primary-light rounded-xl">
+                                <MapPin className="w-4 h-4 text-brand" />
+                                <span className="text-body-md font-medium text-brand">{localFilters.city}</span>
                                 <button
                                     onClick={() => {
                                         setLocalFilters({ ...localFilters, city: null });
@@ -327,14 +327,14 @@ export const FilterModal = () => {
                                     }}
                                     className="ml-auto"
                                 >
-                                    <X className="w-4 h-4 text-blue-600" />
+                                    <X className="w-4 h-4 text-brand" />
                                 </button>
                             </div>
                         )}
 
                         {/* Suggestions de l'API */}
                         {citySuggestions.length > 0 && (
-                            <div className="mb-4 rounded-xl border border-[#dddddd] overflow-hidden">
+                            <div className="mb-4 rounded-xl border border-(--color-border-light) overflow-hidden">
                                 {citySuggestions.map((suggestion, index) => {
                                     const cityName = suggestion.address?.city ||
                                                      suggestion.address?.town ||
@@ -345,11 +345,11 @@ export const FilterModal = () => {
                                         <button
                                             key={suggestion.place_id}
                                             onClick={() => selectCity(suggestion)}
-                                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors ${
-                                                index < citySuggestions.length - 1 ? 'border-b border-gray-100' : ''
+                                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-secondary transition-colors ${
+                                                index < citySuggestions.length - 1 ? 'border-b border-(--color-border-light)' : ''
                                             }`}
                                         >
-                                            <MapPin className="w-5 h-5 text-gray-400 shrink-0" />
+                                            <MapPin className="w-5 h-5 text-tertiary shrink-0" />
                                             <div className="min-w-0">
                                                 <p className="text-body-md font-medium truncate">{cityName}</p>
                                                 <p className="text-caption text-secondary truncate">{suggestion.display_name}</p>
@@ -373,8 +373,8 @@ export const FilterModal = () => {
                                             }}
                                             className={`px-4 py-2 rounded-full text-body-sm transition-colors ${
                                                 localFilters.city === city
-                                                    ? 'bg-[#222222] text-white'
-                                                    : 'bg-gray-100 text-secondary hover:bg-gray-200'
+                                                    ? 'bg-(--color-text-primary) text-white'
+                                                    : 'bg-tertiary text-secondary hover:bg-secondary'
                                             }`}
                                         >
                                             {city}
@@ -390,7 +390,7 @@ export const FilterModal = () => {
                     {/* ===== NOMBRE DE VOYAGEURS ===== */}
                     <section className="mb-8">
                         <h3 className="text-h3 mb-4">Voyageurs</h3>
-                        <div className="flex items-center justify-between p-4 rounded-xl border border-[#dddddd]">
+                        <div className="flex items-center justify-between p-4 rounded-xl border border-(--color-border-light)">
                             <div className="flex items-center gap-3">
                                 <Dog className="w-5 h-5 icon-secondary" />
                                 <div>
@@ -404,8 +404,8 @@ export const FilterModal = () => {
                                 <button
                                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                         localFilters.dogsCount <= 1
-                                            ? 'border-gray-200 text-gray-300'
-                                            : 'border-[#222222] text-[#222222]'
+                                            ? 'border-tertiary text-tertiary'
+                                            : 'border-(--color-text-primary) text-primary'
                                     }`}
                                     onClick={() => setLocalFilters({ ...localFilters, dogsCount: Math.max(1, localFilters.dogsCount - 1) })}
                                     disabled={localFilters.dogsCount <= 1}
@@ -416,8 +416,8 @@ export const FilterModal = () => {
                                 <button
                                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                         localFilters.dogsCount >= 10
-                                            ? 'border-gray-200 text-gray-300'
-                                            : 'border-[#222222] text-[#222222]'
+                                            ? 'border-tertiary text-tertiary'
+                                            : 'border-(--color-text-primary) text-primary'
                                     }`}
                                     onClick={() => setLocalFilters({ ...localFilters, dogsCount: Math.min(10, localFilters.dogsCount + 1) })}
                                     disabled={localFilters.dogsCount >= 10}
@@ -441,8 +441,8 @@ export const FilterModal = () => {
                                         key={type.value}
                                         className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
                                             isSelected
-                                                ? 'border-[#222222] bg-[#f7f7f7]'
-                                                : 'border-[#dddddd]'
+                                                ? 'border-(--color-text-primary) bg-page'
+                                                : 'border-(--color-border-light)'
                                         }`}
                                         onClick={() => toggleListingType(type.value)}
                                     >
@@ -456,8 +456,8 @@ export const FilterModal = () => {
                                         <div
                                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                                                 isSelected
-                                                    ? 'border-[#222222] bg-[#222222]'
-                                                    : 'border-[#dddddd]'
+                                                    ? 'border-(--color-text-primary) bg-(--color-text-primary)'
+                                                    : 'border-(--color-border-light)'
                                             }`}
                                         >
                                             {isSelected && (
@@ -494,8 +494,8 @@ export const FilterModal = () => {
                                         key={range.label}
                                         className={`px-4 py-2 rounded-full border transition-colors ${
                                             isSelected
-                                                ? 'border-[#222222] bg-[#222222] text-white'
-                                                : 'border-[#dddddd] text-[#222222]'
+                                                ? 'border-(--color-text-primary) bg-(--color-text-primary) text-white'
+                                                : 'border-(--color-border-light) text-primary'
                                         }`}
                                         onClick={() => setPriceRange(range.min, range.max)}
                                     >
@@ -530,7 +530,7 @@ export const FilterModal = () => {
                             </div>
                             <div
                                 className={`w-12 h-7 rounded-full transition-colors ${
-                                    localFilters.antiCatOnly ? 'bg-[#222222]' : 'bg-[#e5e5e5]'
+                                    localFilters.antiCatOnly ? 'bg-(--color-text-primary)' : 'bg-tertiary'
                                 }`}
                             >
                                 <div
@@ -555,13 +555,13 @@ export const FilterModal = () => {
                                         key={rating}
                                         className={`flex items-center gap-1 px-4 py-2 rounded-full border transition-colors ${
                                             isSelected
-                                                ? 'border-[#222222] bg-[#222222] text-white'
-                                                : 'border-[#dddddd] text-[#222222]'
+                                                ? 'border-(--color-text-primary) bg-(--color-text-primary) text-white'
+                                                : 'border-(--color-border-light) text-primary'
                                         }`}
                                         onClick={() => setRating(rating)}
                                     >
                                         <Star
-                                            className={`w-4 h-4 ${isSelected ? 'fill-white' : 'fill-[#222222]'}`}
+                                            className={`w-4 h-4 ${isSelected ? 'fill-white' : 'fill-(--color-text-primary)'}`}
                                         />
                                         <span>{rating}+</span>
                                     </button>
@@ -573,7 +573,7 @@ export const FilterModal = () => {
 
                 {/* Footer */}
                 <div
-                    className="p-4 border-t border-[#ebebeb] bg-white"
+                    className="p-4 border-t border-(--color-border-light) bg-white"
                     style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
                 >
                     <button className="btn-primary btn-full" onClick={handleApply}>

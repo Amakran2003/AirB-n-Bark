@@ -128,6 +128,12 @@ export const authApi = {
             body: JSON.stringify({ avatar: avatarUrl }),
         }),
 
+    changePassword: (currentPassword: string, newPassword: string) =>
+        apiFetch<{ message: string }>('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword }),
+        }),
+
     // OAuth
     oauthGoogle: (token: string) =>
         apiFetch<AuthResponse>('/auth/oauth/google', {

@@ -109,7 +109,7 @@ const AppContent = () => {
 
             {/* Main App (always rendered for background) */}
             {(currentPhase === 'tutorial' || currentPhase === 'app') && (
-                <>
+                <main>
                     {/* Mode Hote */}
                     {isHostMode && user?.isHost ? (
                         <>
@@ -190,7 +190,7 @@ const AppContent = () => {
                     )}
                     <AuthModal />
                     <FilterModal />
-                </>
+                </main>
             )}
 
             {/* Tutorial Overlay (on top of Home) */}
