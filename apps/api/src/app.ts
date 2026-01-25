@@ -18,6 +18,7 @@ import {
 import { listingsRoutes } from './services/listings/index.js';
 import { bookingRoutes } from './services/booking/index.js';
 import { authRoutes } from './services/auth/index.js';
+import { paymentRoutes } from './services/payments/index.js';
 
 // ==================== APP INITIALIZATION ====================
 
@@ -107,6 +108,9 @@ app.use('/api/listings', listingsRoutes);
 
 // Bookings microservice
 app.use('/api/bookings', bookingRoutes);
+
+// Payments microservice
+app.use('/api/payments', paymentRoutes);
 
 // ==================== API DOCUMENTATION ====================
 

@@ -22,9 +22,9 @@ export const config = {
     // CORS
     corsOrigins: (process.env.CORS_ORIGINS || '').split(',').filter(Boolean),
     
-    // Rate limiting
-    rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
-    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+    // Rate limiting (plus permissif en dev)
+    rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000', 10), // 1 min
+    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '1000', 10), // 1000 requetes/min en dev
     
     // Pagination
     defaultPageSize: 20,
@@ -37,6 +37,9 @@ export const config = {
     // Feature flags
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
+
+    // Stripe
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
 } as const;
 
 // Validation au démarrage
