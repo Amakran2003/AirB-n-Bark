@@ -28,6 +28,7 @@ interface ProfileProps {
 export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHostMode = false, onSwitchToGuest }: ProfileProps) => {
     const { user, becomeHost, logout, openAuthModal, updateAvatar, updateLanguage } = useAuth();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const LANGUAGE_STORAGE_KEY = 'preferredLanguage';
 
     const [showLanguages, setShowLanguages] = useState(false);
     const [languages, setLanguages] = useState<Language[]>([]);
@@ -46,15 +47,13 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
         setSelectedLanguageCode(languageCode);
         setLanguageError(null);
         setShowLanguages(false);
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, languageCode);
 
-        if (!user) {
-            openAuthModal();
-            return;
-        }
-
-        const result = await updateLanguage(languageCode);
-        if (!result.success) {
-            setLanguageError(result.error || 'Erreur lors de la mise a jour de la langue');
+        if (user) {
+            const result = await updateLanguage(languageCode);
+            if (!result.success) {
+                setLanguageError(result.error || 'Erreur lors de la mise a jour de la langue');
+            }
         }
     };
 
@@ -148,6 +147,13 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     useEffect(() => {
         if (user?.language) {
             setSelectedLanguageCode(user.language);
+            localStorage.setItem(LANGUAGE_STORAGE_KEY, user.language);
+            return;
+        }
+
+        const storedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (storedLanguage) {
+            setSelectedLanguageCode(storedLanguage);
         }
     }, [user?.language]);
 

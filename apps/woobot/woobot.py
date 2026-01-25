@@ -1,6 +1,6 @@
 import random
 
-lang = 'french'
+lang = 'english'
 
 def woobot():
     word = choose_main_word()
