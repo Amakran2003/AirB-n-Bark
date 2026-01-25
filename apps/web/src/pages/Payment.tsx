@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { ChevronLeft, CreditCard, Lock, AlertCircle, Shield, CheckCircle2 } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, CreditCard, Lock, AlertCircle, Shield, CheckCircle2, Smartphone, Info, X } from 'lucide-react';
+import { loadStripe, PaymentRequest } from '@stripe/stripe-js';
 import {
     Elements,
     CardNumberElement,
     CardExpiryElement,
     CardCvcElement,
+    PaymentRequestButtonElement,
     useStripe,
     useElements,
 } from '@stripe/react-stripe-js';
@@ -15,6 +16,7 @@ import { useSwipeBack } from '../hooks/useSwipeBack';
 /**
  * ==================== PAGE PAYMENT ====================
  * Page de paiement avec integration Stripe
+ * Supporte: Carte, Apple Pay, Google Pay
  */
 
 // Charger Stripe avec la cle publique
@@ -91,11 +93,91 @@ const PaymentForm = ({
     const [cardExpiryComplete, setCardExpiryComplete] = useState(false);
     const [cardCvcComplete, setCardCvcComplete] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
+    const [showTestCards, setShowTestCards] = useState(false);
+
+    // Apple Pay / Google Pay
+    const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
+    const [canMakePayment, setCanMakePayment] = useState(false);
 
     const cardComplete = cardNumberComplete && cardExpiryComplete && cardCvcComplete;
+    const grandTotal = totalPrice + serviceFee;
 
     // Swipe retour avec le hook
     const { containerStyle } = useSwipeBack(onBack);
+
+    // Initialiser Payment Request pour Apple Pay / Google Pay
+    useEffect(() => {
+        if (!stripe) return;
+
+        const pr = stripe.paymentRequest({
+            country: 'FR',
+            currency: 'eur',
+            total: {
+                label: `AirB-n-Bark - ${listing.title}`,
+                amount: Math.round(grandTotal * 100), // En centimes
+            },
+            requestPayerName: true,
+            requestPayerEmail: true,
+        });
+
+        // Verifier si Apple Pay / Google Pay est disponible
+        pr.canMakePayment().then((result) => {
+            if (result) {
+                setPaymentRequest(pr);
+                setCanMakePayment(true);
+            }
+        });
+
+        // Gerer le paiement
+        pr.on('paymentmethod', async (event) => {
+            setIsProcessing(true);
+            setError(null);
+
+            try {
+                const API_URL = import.meta.env.VITE_API_URL || '/api';
+                const response = await fetch(`${API_URL}/payments/create-intent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: grandTotal, currency: 'eur' }),
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    event.complete('fail');
+                    throw new Error(result.error?.message || 'Erreur');
+                }
+
+                const { clientSecret } = result.data;
+                const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+                    clientSecret,
+                    { payment_method: event.paymentMethod.id },
+                    { handleActions: false }
+                );
+
+                if (confirmError) {
+                    event.complete('fail');
+                    throw new Error(confirmError.message || 'Erreur');
+                }
+
+                event.complete('success');
+
+                if (paymentIntent?.status === 'succeeded') {
+                    onSuccess();
+                } else if (paymentIntent?.status === 'requires_action') {
+                    const { error } = await stripe.confirmCardPayment(clientSecret);
+                    if (error) {
+                        throw new Error(error.message || 'Erreur');
+                    }
+                    onSuccess();
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+            } finally {
+                setIsProcessing(false);
+            }
+        });
+    }, [stripe, grandTotal, listing.title, onSuccess]);
 
     // Calculer le nombre de nuits
     const nights = Math.ceil(
@@ -111,9 +193,7 @@ const PaymentForm = ({
         });
     };
 
-    const grandTotal = totalPrice + serviceFee;
-
-    // Traiter le paiement avec Stripe
+    // Traiter le paiement par carte
     const handlePayment = async () => {
         if (!stripe || !elements || !cardComplete) return;
 
@@ -234,42 +314,94 @@ const PaymentForm = ({
                         </div>
                     </div>
 
-                    {/* Formulaire de paiement */}
+                    {/* Apple Pay / Google Pay Section */}
                     <div className="bg-white rounded-xl p-4 shadow-sm">
-                        {/* Card brands header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-gray-700" />
-                                <span className="font-medium text-gray-900 text-sm">Carte bancaire</span>
+                        <div className="flex items-center gap-2 mb-3">
+                            <Smartphone className="w-5 h-5 text-gray-700" />
+                            <span className="font-medium text-gray-900 text-sm">Paiement express</span>
+                        </div>
+
+                        {canMakePayment && paymentRequest ? (
+                            <PaymentRequestButtonElement
+                                options={{
+                                    paymentRequest,
+                                    style: {
+                                        paymentRequestButton: {
+                                            type: 'default',
+                                            theme: 'dark',
+                                            height: '48px',
+                                        },
+                                    },
+                                }}
+                            />
+                        ) : (
+                            <div className="space-y-2">
+                                {/* Apple Pay button placeholder */}
+                                <button
+                                    className="w-full py-3 bg-black text-white rounded-lg font-medium flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                                    disabled
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                                    </svg>
+                                    Apple Pay
+                                </button>
+                                {/* Google Pay button placeholder */}
+                                <button
+                                    className="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                                    disabled
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                    Google Pay
+                                </button>
+                                <p className="text-[10px] text-gray-400 text-center mt-1">
+                                    Disponible sur Safari (iOS/Mac) et Chrome (Android)
+                                </p>
                             </div>
-                            <div className="flex items-center gap-1.5">
+                        )}
+
+                        <div className="flex items-center gap-3 my-4">
+                            <div className="flex-1 h-px bg-gray-200" />
+                            <span className="text-xs text-gray-400">ou payer par carte</span>
+                            <div className="flex-1 h-px bg-gray-200" />
+                        </div>
+
+                        {/* Card brands header */}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <CreditCard className="w-4 h-4 text-gray-600" />
+                                <span className="font-medium text-gray-700 text-xs">Carte bancaire</span>
+                            </div>
+                            <div className="flex items-center gap-1">
                                 {/* Visa */}
-                                <div className="w-10 h-6 bg-white border border-gray-200 rounded flex items-center justify-center">
-                                    <svg viewBox="0 0 48 32" className="h-4">
+                                <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                                    <svg viewBox="0 0 48 32" className="h-3">
                                         <path fill="#1434CB" d="M19.5 24.3l1.8-11h2.9l-1.8 11h-2.9zm12-11l-2.8 7.5-.3-1.6-1-5.1s-.1-.8-1.2-.8h-4.5l-.1.3s1.3.3 2.8 1.2l2.3 9h3l4.6-11.5h-2.8zm5.8 7.5c0-.7.6-1.1 1.8-1.2.6 0 1.2.1 1.8.4l.3-2s-.7-.3-1.8-.3c-2 0-3.4 1.1-3.4 2.6 0 1.2 1 1.8 1.8 2.2.8.4 1.1.7 1.1 1.1 0 .6-.7.9-1.3.9-.9 0-1.7-.2-2.3-.5l-.3 2c.5.2 1.4.4 2.4.4 2.2 0 3.6-1.1 3.6-2.7 0-2.1-2.9-2.2-2.9-3.2l.2.3zm-26.5-7.5L7.6 24.3h3l.5-2.3h3.6l.3 2.3h2.7l-2.4-11h-3.6zm.5 6.8l1.5-4.1.8 4.1h-2.3z"/>
                                     </svg>
                                 </div>
                                 {/* Mastercard */}
-                                <div className="w-10 h-6 bg-white border border-gray-200 rounded flex items-center justify-center">
-                                    <svg viewBox="0 0 48 32" className="h-4">
+                                <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                                    <svg viewBox="0 0 48 32" className="h-3">
                                         <circle cx="18" cy="16" r="10" fill="#EB001B"/>
                                         <circle cx="30" cy="16" r="10" fill="#F79E1B"/>
                                         <path d="M24 8.5a10 10 0 000 15 10 10 0 000-15z" fill="#FF5F00"/>
                                     </svg>
                                 </div>
                                 {/* Amex */}
-                                <div className="w-10 h-6 bg-[#006FCF] border border-gray-200 rounded flex items-center justify-center">
-                                    <span className="text-white text-[8px] font-bold">AMEX</span>
+                                <div className="w-8 h-5 bg-[#006FCF] border border-gray-200 rounded flex items-center justify-center">
+                                    <span className="text-white text-[6px] font-bold">AMEX</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Card fields */}
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    Numero de carte
-                                </label>
                                 <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('number', cardNumberComplete)}`}>
                                     <CardNumberElement
                                         options={cardNumberOptions}
@@ -281,31 +413,21 @@ const PaymentForm = ({
                             </div>
 
                             <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Expiration
-                                    </label>
-                                    <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('expiry', cardExpiryComplete)}`}>
-                                        <CardExpiryElement
-                                            options={cardExpiryOptions}
-                                            onChange={(e) => setCardExpiryComplete(e.complete)}
-                                            onFocus={() => setFocusedField('expiry')}
-                                            onBlur={() => setFocusedField(null)}
-                                        />
-                                    </div>
+                                <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('expiry', cardExpiryComplete)}`}>
+                                    <CardExpiryElement
+                                        options={cardExpiryOptions}
+                                        onChange={(e) => setCardExpiryComplete(e.complete)}
+                                        onFocus={() => setFocusedField('expiry')}
+                                        onBlur={() => setFocusedField(null)}
+                                    />
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Code CVC
-                                    </label>
-                                    <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('cvc', cardCvcComplete)}`}>
-                                        <CardCvcElement
-                                            options={cardCvcOptions}
-                                            onChange={(e) => setCardCvcComplete(e.complete)}
-                                            onFocus={() => setFocusedField('cvc')}
-                                            onBlur={() => setFocusedField(null)}
-                                        />
-                                    </div>
+                                <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('cvc', cardCvcComplete)}`}>
+                                    <CardCvcElement
+                                        options={cardCvcOptions}
+                                        onChange={(e) => setCardCvcComplete(e.complete)}
+                                        onFocus={() => setFocusedField('cvc')}
+                                        onBlur={() => setFocusedField(null)}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -319,33 +441,68 @@ const PaymentForm = ({
                         )}
                     </div>
 
-                    {/* Test cards info */}
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Cartes de test Stripe</p>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium text-green-800">Visa (succes)</p>
-                                    <p className="text-xs text-green-600 font-mono">4242 4242 4242 4242</p>
+                    {/* Test cards tooltip */}
+                    <div className="relative flex justify-center">
+                        <button
+                            onClick={() => setShowTestCards(!showTestCards)}
+                            className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 transition-colors py-1"
+                        >
+                            <Info className="w-3.5 h-3.5" />
+                            <span className="underline underline-offset-2">Cliquez ici pour les cartes de test</span>
+                        </button>
+
+                        {/* Tooltip popup */}
+                        {showTestCards && (
+                            <>
+                                {/* Backdrop */}
+                                <div
+                                    className="fixed inset-0 z-50"
+                                    onClick={() => setShowTestCards(false)}
+                                />
+                                {/* Tooltip content */}
+                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 p-3 animate-in fade-in zoom-in-95 duration-200">
+                                    {/* Arrow */}
+                                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r border-b border-gray-200 rotate-45" />
+
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between mb-2">
+                                        <p className="text-xs font-semibold text-gray-800">Cartes de test Stripe</p>
+                                        <button
+                                            onClick={() => setShowTestCards(false)}
+                                            className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100"
+                                        >
+                                            <X className="w-3 h-3 text-gray-500" />
+                                        </button>
+                                    </div>
+
+                                    {/* Cards list */}
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                            <div className="flex-1">
+                                                <p className="text-[11px] font-medium text-green-800">Visa (succes)</p>
+                                                <p className="text-[11px] text-green-600 font-mono">4242 4242 4242 4242</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                            <div className="flex-1">
+                                                <p className="text-[11px] font-medium text-green-800">Mastercard (succes)</p>
+                                                <p className="text-[11px] text-green-600 font-mono">5555 5555 5555 4444</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
+                                            <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                                            <div className="flex-1">
+                                                <p className="text-[11px] font-medium text-red-700">Carte refusee</p>
+                                                <p className="text-[11px] text-red-500 font-mono">4000 0000 0000 0002</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-2 text-center">Date: futur · CVC: 3 chiffres</p>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium text-green-800">Mastercard (succes)</p>
-                                    <p className="text-xs text-green-600 font-mono">5555 5555 5555 4444</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
-                                <AlertCircle className="w-4 h-4 text-red-500" />
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium text-red-700">Carte refusee</p>
-                                    <p className="text-xs text-red-500 font-mono">4000 0000 0000 0002</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-[10px] text-gray-400 mt-2">Date: futur · CVC: 3 chiffres</p>
+                            </>
+                        )}
                     </div>
 
                     {/* Security footer */}
@@ -390,7 +547,7 @@ const PaymentForm = ({
                     ) : (
                         <>
                             <Lock className="w-4 h-4" />
-                            <span>Payer {grandTotal} € en securite</span>
+                            <span>Payer {grandTotal} € par carte</span>
                         </>
                     )}
                 </button>
