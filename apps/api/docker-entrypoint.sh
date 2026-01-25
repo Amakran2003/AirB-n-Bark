@@ -7,6 +7,16 @@ until nc -z db 5432; do
 done
 echo "Database is ready"
 
+# If REDIS_URL is provided, wait for Redis to be reachable before continuing
+if [ -n "$REDIS_URL" ]; then
+  echo "Waiting for Redis..."
+  # Default to hostname 'redis' and port 6379 if REDIS_URL is not a simple host:port
+  # We use nc for a simple TCP check (installed in the Dockerfile)
+  until nc -z redis 6379; do
+    sleep 1
+  done
+  echo "Redis is ready"
+fi
 echo "Running Prisma migrations..."
 npx --no prisma db push
 
