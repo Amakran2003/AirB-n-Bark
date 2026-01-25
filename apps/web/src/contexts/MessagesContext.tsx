@@ -7,11 +7,11 @@ import type { Conversation as ApiConversation, Message as ApiMessage } from '../
 /**
  * ==================== MESSAGES CONTEXT ====================
  * Gestion centralisée des messages et conversations
- * 
+ *
  * Architecture API-Ready:
  * - USE_API = true  → appels API réels + WebSocket
  * - USE_API = false → localStorage (par défaut)
- * 
+ *
  * Endpoints API:
  * - GET /api/conversations → récupérer les conversations
  * - GET /api/conversations/:id/messages → récupérer les messages
@@ -64,9 +64,10 @@ const STORAGE_KEY = 'airbarkMessages';
 const mapApiConversation = (apiConv: ApiConversation): Conversation => ({
     id: apiConv.id,
     bookingId: apiConv.id,
-    hostId: apiConv.participants.find(p => p.id !== 'user')?.id || 'host',
-    hostName: apiConv.participants.find(p => p.id !== 'user')?.name || 'Hôte',
-    hostAvatar: apiConv.participants.find(p => p.id !== 'user')?.avatar || '/placeholder-avatar.jpg',
+    hostId: apiConv.participants.find((p) => p.id !== 'user')?.id || 'host',
+    hostName: apiConv.participants.find((p) => p.id !== 'user')?.name || 'Hôte',
+    hostAvatar:
+        apiConv.participants.find((p) => p.id !== 'user')?.avatar || '/placeholder-avatar.jpg',
     listingTitle: apiConv.listingTitle,
     listingImage: apiConv.listingImage,
     lastMessage: apiConv.lastMessage,
@@ -94,17 +95,17 @@ export const MessagesProvider = ({ children }: { children: ReactNode }) => {
     // Rafraîchir les conversations depuis l'API
     const refreshConversations = useCallback(async () => {
         if (!USE_API) return;
-        
+
         setIsLoading(true);
         setError(null);
-        
+
         const response = await api.messages.getConversations();
         if (response.success) {
             setConversations(response.data.conversations.map(mapApiConversation));
         } else {
             setError(response.error.message);
         }
-        
+
         setIsLoading(false);
     }, []);
 
@@ -147,13 +148,13 @@ export const MessagesProvider = ({ children }: { children: ReactNode }) => {
 
         const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
         const existingConvIds = new Set(conversations.map((c) => c.id));
-        
+
         const newConvs: Conversation[] = [];
-        
+
         for (const booking of confirmedBookings) {
             const convId = `conv-${booking.id}`;
             if (existingConvIds.has(convId)) continue;
-            
+
             const listing = MOCK_LISTINGS_FULL[booking.listingId];
             if (!listing) continue;
 
@@ -220,7 +221,8 @@ export const MessagesProvider = ({ children }: { children: ReactNode }) => {
         setConversations((prev) =>
             prev.map((c) => {
                 if (c.id === conversationId) {
-                    const newUnreadCount = message.senderId === 'host' ? c.unreadCount + 1 : c.unreadCount;
+                    const newUnreadCount =
+                        message.senderId === 'host' ? c.unreadCount + 1 : c.unreadCount;
                     return {
                         ...c,
                         messages: [...c.messages, message],
@@ -235,26 +237,29 @@ export const MessagesProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     // Envoyer un message via API
-    const sendMessage = useCallback(async (conversationId: string, content: string) => {
-        if (USE_API) {
-            const response = await api.messages.sendMessage({ conversationId, content });
-            if (response.success) {
-                addMessage(conversationId, mapApiMessage(response.data));
+    const sendMessage = useCallback(
+        async (conversationId: string, content: string) => {
+            if (USE_API) {
+                const response = await api.messages.sendMessage({ conversationId, content });
+                if (response.success) {
+                    addMessage(conversationId, mapApiMessage(response.data));
+                } else {
+                    setError(response.error.message);
+                }
             } else {
-                setError(response.error.message);
+                // Mode local: juste ajouter le message
+                const newMessage: Message = {
+                    id: Date.now().toString(),
+                    senderId: 'user',
+                    content,
+                    timestamp: new Date(),
+                    isRead: true,
+                };
+                addMessage(conversationId, newMessage);
             }
-        } else {
-            // Mode local: juste ajouter le message
-            const newMessage: Message = {
-                id: Date.now().toString(),
-                senderId: 'user',
-                content,
-                timestamp: new Date(),
-                isRead: true,
-            };
-            addMessage(conversationId, newMessage);
-        }
-    }, [addMessage]);
+        },
+        [addMessage]
+    );
 
     return (
         <MessagesContext.Provider

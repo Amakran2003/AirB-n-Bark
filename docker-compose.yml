@@ -43,6 +43,7 @@ services:
         VITE_API_URL: ${VITE_API_URL}
         VITE_USE_API: ${VITE_USE_API}
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+        VITE_WOOBOT_URL: ${VITE_WOOBOT_URL}
     restart: unless-stopped
     ports:
       - "${WEB_PORT}:5173"

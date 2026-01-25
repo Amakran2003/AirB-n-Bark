@@ -45,7 +45,7 @@ const tutorialSteps: TutorialStep[] = [
     },
     {
         id: 'chat',
-        title: 'Besoin d\'un coup de patte ?',
+        title: "Besoin d'un coup de patte ?",
         description: 'Notre assistant IA parle couramment le wouf',
     },
 ];
@@ -119,10 +119,7 @@ export const TutorialOverlay = ({ onComplete, onStepChange }: TutorialOverlayPro
             }`}
         >
             {/* Overlay très léger - cliquable pour quitter */}
-            <div 
-                className="absolute inset-0 bg-black/20"
-                onClick={handleComplete}
-            />
+            <div className="absolute inset-0 bg-black/20" onClick={handleComplete} />
 
             {/* Skip button - centré */}
             <button
@@ -136,7 +133,7 @@ export const TutorialOverlay = ({ onComplete, onStepChange }: TutorialOverlayPro
 
             {/* Flèche pour filtre pointant vers le haut */}
             {step.id === 'filter' && (
-                <div 
+                <div
                     className="absolute"
                     style={{ top: 'calc(60px + env(safe-area-inset-top))', left: '45px' }}
                 >
@@ -146,7 +143,7 @@ export const TutorialOverlay = ({ onComplete, onStepChange }: TutorialOverlayPro
 
             {/* Flèche pour chat pointant vers le haut */}
             {step.id === 'chat' && (
-                <div 
+                <div
                     className="absolute"
                     style={{ top: 'calc(60px + env(safe-area-inset-top))', right: '30px' }}
                 >
@@ -162,21 +159,17 @@ export const TutorialOverlay = ({ onComplete, onStepChange }: TutorialOverlayPro
             >
                 <div className="bg-black/85 backdrop-blur-sm rounded-2xl px-6 py-4 max-w-xs shadow-2xl">
                     {/* Flèche pour les swipes */}
-                    {(step.id === 'swipe-right' || step.id === 'swipe-left' || step.id === 'swipe-up') && (
-                        <div className="flex justify-center mb-3">
-                            {renderArrow()}
-                        </div>
+                    {(step.id === 'swipe-right' ||
+                        step.id === 'swipe-left' ||
+                        step.id === 'swipe-up') && (
+                        <div className="flex justify-center mb-3">{renderArrow()}</div>
                     )}
 
                     {/* Title */}
-                    <h2 className="text-lg font-bold text-white text-center mb-1">
-                        {step.title}
-                    </h2>
+                    <h2 className="text-lg font-bold text-white text-center mb-1">{step.title}</h2>
 
                     {/* Description */}
-                    <p className="text-white/70 text-center text-sm">
-                        {step.description}
-                    </p>
+                    <p className="text-white/70 text-center text-sm">{step.description}</p>
 
                     {/* Progress dots */}
                     <div className="flex justify-center gap-1.5 mt-4">
@@ -187,8 +180,8 @@ export const TutorialOverlay = ({ onComplete, onStepChange }: TutorialOverlayPro
                                     index === currentStep
                                         ? 'bg-white w-4'
                                         : index < currentStep
-                                        ? 'bg-white/60 w-1.5'
-                                        : 'bg-white/30 w-1.5'
+                                          ? 'bg-white/60 w-1.5'
+                                          : 'bg-white/30 w-1.5'
                                 }`}
                             />
                         ))}

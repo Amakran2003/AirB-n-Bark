@@ -5,7 +5,13 @@
  */
 
 import { getAuthToken } from './api';
-import type { ListingFullData, ListingAmenity, ListingHighlight, ListingRules, DateRange } from '../data/listings';
+import type {
+    ListingFullData,
+    ListingAmenity,
+    ListingHighlight,
+    ListingRules,
+    DateRange,
+} from '../data/listings';
 
 // ==================== TYPES API ====================
 
@@ -114,7 +120,13 @@ export function mapFormDataToApiPayload(
         price: number;
         capacity: { dogs: number; niches: number; beds: number; bowls: number };
         images: string[];
-        locationDetails: { lat: number; lng: number; address: string; city: string; country: string };
+        locationDetails: {
+            lat: number;
+            lng: number;
+            address: string;
+            city: string;
+            country: string;
+        };
         amenities: ListingAmenity[];
         highlights: ListingHighlight[];
         rooms: Array<{ name: string; description: string; image: string }>;
@@ -138,17 +150,29 @@ export function mapFormDataToApiPayload(
 ): CreateListingPayload {
     // Générer la capacité string
     const capacityParts = [];
-    if (formData.capacity.dogs > 0) capacityParts.push(`${formData.capacity.dogs} chien${formData.capacity.dogs > 1 ? 's' : ''}`);
-    if (formData.capacity.niches > 0) capacityParts.push(`${formData.capacity.niches} niche${formData.capacity.niches > 1 ? 's' : ''}`);
-    if (formData.capacity.beds > 0) capacityParts.push(`${formData.capacity.beds} couchage${formData.capacity.beds > 1 ? 's' : ''}`);
-    if (formData.capacity.bowls > 0) capacityParts.push(`${formData.capacity.bowls} coin${formData.capacity.bowls > 1 ? 's' : ''} gamelle`);
+    if (formData.capacity.dogs > 0)
+        capacityParts.push(
+            `${formData.capacity.dogs} chien${formData.capacity.dogs > 1 ? 's' : ''}`
+        );
+    if (formData.capacity.niches > 0)
+        capacityParts.push(
+            `${formData.capacity.niches} niche${formData.capacity.niches > 1 ? 's' : ''}`
+        );
+    if (formData.capacity.beds > 0)
+        capacityParts.push(
+            `${formData.capacity.beds} couchage${formData.capacity.beds > 1 ? 's' : ''}`
+        );
+    if (formData.capacity.bowls > 0)
+        capacityParts.push(
+            `${formData.capacity.bowls} coin${formData.capacity.bowls > 1 ? 's' : ''} gamelle`
+        );
     const capacityString = capacityParts.join(' · ');
 
     // Générer le subtitle
     const typeLabels: Record<string, string> = {
         niche: 'Niche entière',
         nicholoc: 'Chambre en coloc canine',
-        nichortoir: 'Lit en dortoir canin'
+        nichortoir: 'Lit en dortoir canin',
     };
     const subtitle = `${typeLabels[formData.type] || formData.type} à ${formData.locationDetails.city}, ${formData.locationDetails.country}`;
 
@@ -173,9 +197,17 @@ export function mapFormDataToApiPayload(
         antiCatAvailable: formData.antiCatAvailable,
         antiCatRiskScore: formData.antiCatRiskScore,
         antiCatExtraPrice: formData.antiCatExtraPrice,
-        amenities: formData.amenities.map(a => ({ name: a.name, icon: a.icon })),
-        highlights: formData.highlights.map(h => ({ title: h.title, description: h.description, icon: h.icon })),
-        rooms: formData.rooms.map(r => ({ name: r.name, description: r.description, image: r.image })),
+        amenities: formData.amenities.map((a) => ({ name: a.name, icon: a.icon })),
+        highlights: formData.highlights.map((h) => ({
+            title: h.title,
+            description: h.description,
+            icon: h.icon,
+        })),
+        rooms: formData.rooms.map((r) => ({
+            name: r.name,
+            description: r.description,
+            image: r.image,
+        })),
         rules: {
             maxBarkHour: formData.rules.maxBarkHour,
             mustBeVaccinated: formData.rules.mustBeVaccinated,
@@ -183,20 +215,22 @@ export function mapFormDataToApiPayload(
             allowsPuppies: formData.rules.allowsPuppies,
             minAge: formData.rules.minAge,
         },
-        availableDateRanges: formData.availableDateRanges.map(r => ({
+        availableDateRanges: formData.availableDateRanges.map((r) => ({
             startDate: r.start,
             endDate: r.end,
             isBlocked: false,
         })),
-        instructions: formData.instructions ? {
-            checkInTime: formData.instructions.checkInTime,
-            checkOutTime: formData.instructions.checkOutTime,
-            accessCode: formData.instructions.accessCode || undefined,
-            wifiName: formData.instructions.wifiName || undefined,
-            wifiPassword: formData.instructions.wifiPassword || undefined,
-            parkingInfo: formData.instructions.parkingInfo || undefined,
-            specialNotes: formData.instructions.specialNotes || undefined,
-        } : undefined,
+        instructions: formData.instructions
+            ? {
+                  checkInTime: formData.instructions.checkInTime,
+                  checkOutTime: formData.instructions.checkOutTime,
+                  accessCode: formData.instructions.accessCode || undefined,
+                  wifiName: formData.instructions.wifiName || undefined,
+                  wifiPassword: formData.instructions.wifiPassword || undefined,
+                  parkingInfo: formData.instructions.parkingInfo || undefined,
+                  specialNotes: formData.instructions.specialNotes || undefined,
+              }
+            : undefined,
         isPublished: true, // Publié directement
     };
 }
@@ -204,7 +238,10 @@ export function mapFormDataToApiPayload(
 /**
  * Convertit la réponse API vers le format ListingFullData du frontend
  */
-export function mapApiResponseToListingData(apiResponse: ListingApiResponse, hostName: string): ListingFullData {
+export function mapApiResponseToListingData(
+    apiResponse: ListingApiResponse,
+    hostName: string
+): ListingFullData {
     return {
         id: apiResponse.id,
         type: apiResponse.type as 'niche' | 'nicholoc' | 'nichortoir',
@@ -222,10 +259,11 @@ export function mapApiResponseToListingData(apiResponse: ListingApiResponse, hos
             extraPrice: apiResponse.antiCatExtraPrice,
         },
         maxDogs: apiResponse.maxDogs,
-        availableDateRanges: apiResponse.availability?.map(a => ({
-            start: a.startDate.split('T')[0],
-            end: a.endDate.split('T')[0],
-        })) || [],
+        availableDateRanges:
+            apiResponse.availability?.map((a) => ({
+                start: a.startDate.split('T')[0],
+                end: a.endDate.split('T')[0],
+            })) || [],
         capacity: apiResponse.capacity,
         images: apiResponse.images.length > 0 ? apiResponse.images : [apiResponse.mainImage],
         description: apiResponse.description,
@@ -246,16 +284,17 @@ export function mapApiResponseToListingData(apiResponse: ListingApiResponse, hos
             city: apiResponse.city,
             country: apiResponse.country,
         },
-        rooms: apiResponse.rooms?.map(r => ({
-            name: r.name,
-            description: r.description,
-            image: r.image,
-        })) || [],
-        amenities: apiResponse.amenities.map(a => ({
+        rooms:
+            apiResponse.rooms?.map((r) => ({
+                name: r.name,
+                description: r.description,
+                image: r.image,
+            })) || [],
+        amenities: apiResponse.amenities.map((a) => ({
             name: a.name,
             icon: a.icon as ListingAmenity['icon'],
         })),
-        highlights: apiResponse.highlights.map(h => ({
+        highlights: apiResponse.highlights.map((h) => ({
             title: h.title,
             description: h.description,
             icon: h.icon as ListingHighlight['icon'],
@@ -287,9 +326,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 /**
  * Crée un nouveau listing via l'API
  */
-export async function createListing(payload: CreateListingPayload): Promise<{ success: boolean; data?: ListingApiResponse; error?: string }> {
+export async function createListing(
+    payload: CreateListingPayload
+): Promise<{ success: boolean; data?: ListingApiResponse; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -299,7 +340,7 @@ export async function createListing(payload: CreateListingPayload): Promise<{ su
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(payload),
         });
@@ -307,9 +348,9 @@ export async function createListing(payload: CreateListingPayload): Promise<{ su
         const data = await response.json();
 
         if (!response.ok) {
-            return { 
-                success: false, 
-                error: data.error?.message || data.message || 'Erreur lors de la création' 
+            return {
+                success: false,
+                error: data.error?.message || data.message || 'Erreur lors de la création',
             };
         }
 
@@ -323,9 +364,13 @@ export async function createListing(payload: CreateListingPayload): Promise<{ su
 /**
  * Récupère les listings de l'hôte connecté
  */
-export async function getMyListings(): Promise<{ success: boolean; data?: ListingApiResponse[]; error?: string }> {
+export async function getMyListings(): Promise<{
+    success: boolean;
+    data?: ListingApiResponse[];
+    error?: string;
+}> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -333,7 +378,7 @@ export async function getMyListings(): Promise<{ success: boolean; data?: Listin
     try {
         const response = await fetch(`${API_BASE_URL}/listings/host/my-listings`, {
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -354,11 +399,11 @@ export async function getMyListings(): Promise<{ success: boolean; data?: Listin
  * Active/Désactive un listing
  */
 export async function toggleListingStatus(
-    listingId: string, 
+    listingId: string,
     isActive: boolean
 ): Promise<{ success: boolean; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -368,7 +413,7 @@ export async function toggleListingStatus(
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ isActive }),
         });
@@ -388,9 +433,11 @@ export async function toggleListingStatus(
 /**
  * Supprime un listing
  */
-export async function deleteListing(listingId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteListing(
+    listingId: string
+): Promise<{ success: boolean; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -399,7 +446,7 @@ export async function deleteListing(listingId: string): Promise<{ success: boole
         const response = await fetch(`${API_BASE_URL}/listings/host/${listingId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -419,11 +466,11 @@ export async function deleteListing(listingId: string): Promise<{ success: boole
  * Met à jour un listing
  */
 export async function updateListing(
-    listingId: string, 
+    listingId: string,
     payload: Partial<CreateListingPayload>
 ): Promise<{ success: boolean; data?: ListingApiResponse; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -433,7 +480,7 @@ export async function updateListing(
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(payload),
         });
@@ -477,7 +524,7 @@ export async function getHostBookings(
     status?: string
 ): Promise<{ success: boolean; bookings?: HostBooking[]; total?: number; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -489,7 +536,7 @@ export async function getHostBookings(
 
         const response = await fetch(`${API_BASE_URL}/bookings/host?${params.toString()}`, {
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -513,7 +560,7 @@ export async function confirmBooking(
     bookingId: string
 ): Promise<{ success: boolean; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -523,7 +570,7 @@ export async function confirmBooking(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -547,7 +594,7 @@ export async function rejectBooking(
     reason?: string
 ): Promise<{ success: boolean; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -557,9 +604,9 @@ export async function rejectBooking(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ reason: reason || 'Refusé par l\'hôte' }),
+            body: JSON.stringify({ reason: reason || "Refusé par l'hôte" }),
         });
 
         if (!response.ok) {
@@ -582,7 +629,7 @@ export async function cancelBookingAsHost(
     reason?: string
 ): Promise<{ success: boolean; error?: string }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -592,9 +639,9 @@ export async function cancelBookingAsHost(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ reason: reason || 'Annulé par l\'hôte' }),
+            body: JSON.stringify({ reason: reason || "Annulé par l'hôte" }),
         });
 
         if (!response.ok) {
@@ -612,19 +659,19 @@ export async function cancelBookingAsHost(
 /**
  * Récupère les statistiques de l'hôte
  */
-export async function getHostStats(): Promise<{ 
-    success: boolean; 
+export async function getHostStats(): Promise<{
+    success: boolean;
     stats?: {
         pendingCount: number;
         confirmedCount: number;
         completedCount: number;
         cancelledCount: number;
         totalRevenue: number;
-    }; 
-    error?: string 
+    };
+    error?: string;
 }> {
     const token = getAuthToken();
-    
+
     if (!token) {
         return { success: false, error: 'Non authentifié' };
     }
@@ -632,7 +679,7 @@ export async function getHostStats(): Promise<{
     try {
         const response = await fetch(`${API_BASE_URL}/bookings/host/stats`, {
             headers: {
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
         });
 

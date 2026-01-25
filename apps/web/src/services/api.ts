@@ -1,7 +1,7 @@
 /**
  * ==================== API SERVICE ====================
  * Service centralisé pour tous les appels API
- * 
+ *
  * Configuration:
  * - Base URL configuré via env
  * - Gestion automatique des tokens
@@ -50,10 +50,7 @@ export const getAuthToken = () => authToken;
 
 // ==================== BASE FETCH ====================
 
-async function apiFetch<T>(
-    endpoint: string,
-    options: RequestInit = {}
-): Promise<ApiResponse<T>> {
+async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${API_BASE_URL}${endpoint}`;
 
     const headers: HeadersInit = {
@@ -241,10 +238,13 @@ export const messagesApi = {
         apiFetch<MessagesResponse>(`/conversations/${conversationId}/messages`),
 
     sendMessage: (data: SendMessageRequest) =>
-        apiFetch<MessagesResponse['messages'][0]>(`/conversations/${data.conversationId}/messages`, {
-            method: 'POST',
-            body: JSON.stringify({ content: data.content }),
-        }),
+        apiFetch<MessagesResponse['messages'][0]>(
+            `/conversations/${data.conversationId}/messages`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ content: data.content }),
+            }
+        ),
 
     markAsRead: (conversationId: string) =>
         apiFetch<void>(`/conversations/${conversationId}/read`, {

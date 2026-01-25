@@ -35,9 +35,10 @@ export const usePWAInstall = () => {
 
     useEffect(() => {
         // Vérifier si l'app est déjà installée (standalone mode)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-            || (window.navigator as any).standalone === true;
-        
+        const isStandalone =
+            window.matchMedia('(display-mode: standalone)').matches ||
+            (window.navigator as any).standalone === true;
+
         if (isStandalone) {
             setIsInstalled(true);
             return;
@@ -78,17 +79,17 @@ export const usePWAInstall = () => {
         try {
             await deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            
+
             // Reset le prompt après utilisation
             setDeferredPrompt(null);
-            
+
             if (outcome === 'accepted') {
                 setIsInstalled(true);
                 return true;
             }
             return false;
         } catch (error) {
-            console.error('Erreur lors du prompt d\'installation:', error);
+            console.error("Erreur lors du prompt d'installation:", error);
             return false;
         }
     };

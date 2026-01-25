@@ -30,7 +30,9 @@ export const NavItem = ({ icon, label, isActive = false, onClick, badge }: NavIt
                 </span>
             )}
         </div>
-        <span className={`text-xs mt-1 ${isActive ? 'text-brand font-semibold' : 'text-secondary'}`}>
+        <span
+            className={`text-xs mt-1 ${isActive ? 'text-brand font-semibold' : 'text-secondary'}`}
+        >
             {label}
         </span>
     </button>

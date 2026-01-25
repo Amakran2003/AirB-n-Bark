@@ -22,13 +22,56 @@ interface ChatBotProps {
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 const WOOBOT_BASE_URL = import.meta.env.VITE_WOOBOT_URL || 'http://localhost:3002';
 const LANGUAGE_STORAGE_KEY = 'preferredLanguage';
-const DEFAULT_BARKBOT_MESSAGE = 'Wouf ! 🐕 Je suis BarkBot, ton assistant AirB\'n\'Bark. Comment puis-je t\'aider aujourd\'hui ?';
+const DEFAULT_BARKBOT_MESSAGE = "Wouf ! 🐕 Je suis BarkBot, ton assistant AirB'n'Bark. Comment puis-je t'aider aujourd'hui ?";
 
 export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
     const { user } = useAuth();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isWoobotMode, setIsWoobotMode] = useState(true);
+    const [hasInitialized, setHasInitialized] = useState(false);
+
+    // Charger le message initial selon le mode
+    useEffect(() => {
+        if (isOpen && !hasInitialized) {
+            const loadInitialMessage = async () => {
+                if (isWoobotMode) {
+                    try {
+                        const preferredLanguage =
+                            user?.language ?? localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? 'english';
+                        const response = await fetch(`${WOOBOT_BASE_URL}/woobot`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ language: preferredLanguage }),
+                        });
+                        const data = await response.json();
+                        setMessages([{
+                            id: '1',
+                            senderId: 'other',
+                            content: data.message || 'Woof woof! 🐕',
+                            timestamp: new Date(),
+                        }]);
+                    } catch {
+                        setMessages([{
+                            id: '1',
+                            senderId: 'other',
+                            content: 'Woof woof! 🐕',
+                            timestamp: new Date(),
+                        }]);
+                    }
+                } else {
+                    setMessages([{
+                        id: '1',
+                        senderId: 'other',
+                        content: DEFAULT_BARKBOT_MESSAGE,
+                        timestamp: new Date(),
+                    }]);
+                }
+                setHasInitialized(true);
+            };
+            loadInitialMessage();
+        }
+    }, [isOpen, hasInitialized, isWoobotMode, user?.language]);
 
     const handleSendMessage = useCallback(async (content: string) => {
         // Ajouter le message utilisateur
@@ -43,9 +86,9 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
 
         try {
             if (isWoobotMode) {
-                const preferredLanguage = user?.language
-                    ?? localStorage.getItem(LANGUAGE_STORAGE_KEY)
-                    ?? 'english';
+                // WooBot mode
+                const preferredLanguage =
+                    user?.language ?? localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? 'english';
                 const response = await fetch(`${WOOBOT_BASE_URL}/woobot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -55,33 +98,31 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
                 const botMessage: ChatMessage = {
                     id: (Date.now() + 1).toString(),
                     senderId: 'other',
-                    content: data.message || 'Je n\'ai pas compris, peux-tu reformuler ?',
+                    content: data.message || "Je n'ai pas compris, peux-tu reformuler ?",
                     timestamp: new Date(),
                 };
                 setMessages((prev) => [...prev, botMessage]);
             } else if (N8N_WEBHOOK_URL) {
-                // Appel au webhook n8n
+                // n8n mode
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: content,
-                        sessionId: 'user-session-id', // TODO: utiliser l'ID user réel
+                        sessionId: 'user-session-id',
                         timestamp: new Date().toISOString(),
                     }),
                 });
-
                 const data = await response.json();
-
                 const botMessage: ChatMessage = {
                     id: (Date.now() + 1).toString(),
                     senderId: 'other',
-                    content: data.response || data.message || 'Je n\'ai pas compris, peux-tu reformuler ?',
+                    content: data.response || data.message || "Je n'ai pas compris, peux-tu reformuler ?",
                     timestamp: new Date(),
                 };
                 setMessages((prev) => [...prev, botMessage]);
             } else {
-                // Mode demo sans n8n
+                // Mode demo
                 await new Promise((resolve) => setTimeout(resolve, 800));
                 const botMessage: ChatMessage = {
                     id: (Date.now() + 1).toString(),
@@ -96,7 +137,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             const errorMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 senderId: 'other',
-                content: 'Oups ! J\'ai eu un problème. Réessaie dans quelques instants. 🐕',
+                content: "Oups ! J'ai eu un problème. Réessaie dans quelques instants. 🐕",
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMessage]);
@@ -105,7 +146,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         }
     }, [isWoobotMode, user?.language]);
 
-    // Header du ChatBot
+    // Header du ChatBot avec toggle
     const headerContent = (
         <div className="flex flex-col items-center gap-2 flex-1 justify-center">
             <div className="flex items-center gap-2">
@@ -115,7 +156,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             <button
                 type="button"
                 onClick={() => setIsWoobotMode((prev) => !prev)}
-                className="px-3 py-1 rounded-full text-xs font-medium border border-(--color-border-light) text-secondary"
+                className="px-3 py-1 rounded-full text-xs font-medium border border-gray-300 text-gray-600"
             >
                 {isWoobotMode ? 'Mode WooBot 🤖' : 'Mode BarkBot 🐶'}
             </button>
@@ -131,61 +172,10 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
 
     // Avatar utilisateur
     const userAvatar = (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-brand">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500">
             <User className="w-4 h-4 text-white" />
         </div>
     );
-
-    const setInitialMessage = useCallback(async () => {
-        if (messages.length > 0) return;
-
-        if (isWoobotMode) {
-            const preferredLanguage = user?.language
-                ?? localStorage.getItem(LANGUAGE_STORAGE_KEY)
-                ?? 'english';
-            try {
-                const response = await fetch(`${WOOBOT_BASE_URL}/woobot`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: preferredLanguage }),
-                });
-                const data = await response.json();
-                setMessages([
-                    {
-                        id: '1',
-                        senderId: 'other',
-                        content: data.message || DEFAULT_BARKBOT_MESSAGE,
-                        timestamp: new Date(),
-                    },
-                ]);
-            } catch {
-                setMessages([
-                    {
-                        id: '1',
-                        senderId: 'other',
-                        content: DEFAULT_BARKBOT_MESSAGE,
-                        timestamp: new Date(),
-                    },
-                ]);
-            }
-            return;
-        }
-
-        setMessages([
-            {
-                id: '1',
-                senderId: 'other',
-                content: DEFAULT_BARKBOT_MESSAGE,
-                timestamp: new Date(),
-            },
-        ]);
-    }, [isWoobotMode, messages.length, user?.language]);
-
-    useEffect(() => {
-        if (isOpen && messages.length === 0) {
-            setInitialMessage();
-        }
-    }, [isOpen, messages.length, setInitialMessage]);
 
     return (
         <ChatModal
@@ -210,29 +200,42 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
 function getDemoResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.includes('réservation') || lowerMessage.includes('reservation') || lowerMessage.includes('voyage')) {
-        return 'Pour voir tes voyages, va dans l\'onglet "Voyages" en bas de l\'écran. Tu peux aussi me demander d\'annuler un séjour ! 📅🐕';
+    if (
+        lowerMessage.includes('réservation') ||
+        lowerMessage.includes('reservation') ||
+        lowerMessage.includes('voyage')
+    ) {
+        return "Pour voir tes voyages, va dans l'onglet \"Voyages\" en bas de l'écran. Tu peux aussi me demander d'annuler un séjour ! 📅🐕";
     }
 
     if (lowerMessage.includes('annuler')) {
-        return 'Pour annuler un séjour, j\'ai besoin de l\'identifiant ou de la date. Dis-moi en plus ! 🐶';
+        return "Pour annuler un séjour, j'ai besoin de l'identifiant ou de la date. Dis-moi en plus ! 🐶";
     }
 
-    if (lowerMessage.includes('prix') || lowerMessage.includes('tarif') || lowerMessage.includes('croquette')) {
+    if (
+        lowerMessage.includes('prix') ||
+        lowerMessage.includes('tarif') ||
+        lowerMessage.includes('croquette')
+    ) {
         return 'Les prix varient selon les niches. Tu peux filtrer par prix avec le bouton "Filtre" en haut à gauche. Les prix affichés sont par nuit (en croquettes 🦴) !';
     }
 
     if (lowerMessage.includes('anti-chat') || lowerMessage.includes('chat')) {
-        return 'L\'option Anti-Chat garantit que la niche n\'a jamais accueilli de ces félins suspects 😼🚫. Parfait pour toi si t\'es sensible ! Active ce filtre dans les options.';
+        return "L'option Anti-Chat garantit que la niche n'a jamais accueilli de ces félins suspects 😼🚫. Parfait pour toi si t'es sensible ! Active ce filtre dans les options.";
     }
 
-    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('hello') || lowerMessage.includes('woof')) {
-        return 'Wouf wouf ! 🐕 Salut toi ! Qu\'est-ce que je peux faire pour toi aujourd\'hui ?';
+    if (
+        lowerMessage.includes('bonjour') ||
+        lowerMessage.includes('salut') ||
+        lowerMessage.includes('hello') ||
+        lowerMessage.includes('woof')
+    ) {
+        return "Wouf wouf ! 🐕 Salut toi ! Qu'est-ce que je peux faire pour toi aujourd'hui ?";
     }
 
     if (lowerMessage.includes('merci')) {
-        return 'De rien mon pote à 4 pattes ! N\'hésite pas si t\'as d\'autres questions. Wouf ! 🐕';
+        return "De rien mon pote à 4 pattes ! N'hésite pas si t'as d'autres questions. Wouf ! 🐕";
     }
 
-    return 'Je suis encore un jeune chiot en apprentissage ! 🐶 Pour l\'instant, je peux t\'aider avec tes voyages, les filtres, et répondre à tes questions sur AirB\'n\'Bark. Que veux-tu savoir ?';
+    return "Je suis encore un jeune chiot en apprentissage ! 🐶 Pour l'instant, je peux t'aider avec tes voyages, les filtres, et répondre à tes questions sur AirB'n'Bark. Que veux-tu savoir ?";
 }

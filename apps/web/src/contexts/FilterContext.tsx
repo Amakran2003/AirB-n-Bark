@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
+import {
+    createContext,
+    useContext,
+    useState,
+    ReactNode,
+    useMemo,
+    useEffect,
+    useCallback,
+} from 'react';
 import type { ListingType, ListingCardData } from '../data/listings';
 import { getListings } from '../data/listings';
 import type { ListingCard, ListingsFilters } from '../types/api.types';

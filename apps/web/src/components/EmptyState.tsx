@@ -4,7 +4,7 @@ import { LucideIcon } from 'lucide-react';
  * ==================== EMPTY STATE ====================
  * Composant réutilisable pour afficher un état vide
  * Utilisé dans Messages, Trips, HostListings, etc.
- * 
+ *
  * Usage:
  * <EmptyState
  *   icon={MessageCircle}
@@ -30,24 +30,23 @@ interface EmptyStateProps {
     className?: string;
 }
 
-export const EmptyState = ({ 
-    icon: Icon, 
-    title, 
-    description, 
+export const EmptyState = ({
+    icon: Icon,
+    title,
+    description,
     action,
-    className = ''
+    className = '',
 }: EmptyStateProps) => (
-    <div className={`flex flex-col items-center justify-center h-full px-8 text-center ${className}`}>
+    <div
+        className={`flex flex-col items-center justify-center h-full px-8 text-center ${className}`}
+    >
         <div className="w-20 h-20 bg-tertiary rounded-full flex items-center justify-center mb-6">
             <Icon className="w-10 h-10 text-tertiary" />
         </div>
         <h3 className="text-h2 mb-2">{title}</h3>
         <p className="text-body text-secondary mb-6">{description}</p>
         {action && (
-            <button
-                onClick={action.onClick}
-                className="btn-primary px-6 py-3"
-            >
+            <button onClick={action.onClick} className="btn-primary px-6 py-3">
                 {action.label}
             </button>
         )}

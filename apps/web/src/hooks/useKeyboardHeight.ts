@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
  * ==================== HOOK USE KEYBOARD HEIGHT ====================
  * Hook réutilisable pour gérer le clavier mobile (iOS/Android)
  * Utilisé sur: Messages, ChatBot, et autres pages avec input
- * 
+ *
  * @param enabled - Activer/désactiver la détection (défaut: true)
  * @returns { keyboardHeight, isKeyboardOpen, viewportHeight }
  */
@@ -27,11 +27,9 @@ export const useKeyboardHeight = (
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [viewportHeight, setViewportHeight] = useState(
-        typeof window !== 'undefined' ? (window.visualViewport?.height || window.innerHeight) : 0
+        typeof window !== 'undefined' ? window.visualViewport?.height || window.innerHeight : 0
     );
-    const initialHeightRef = useRef<number>(
-        typeof window !== 'undefined' ? window.innerHeight : 0
-    );
+    const initialHeightRef = useRef<number>(typeof window !== 'undefined' ? window.innerHeight : 0);
 
     useEffect(() => {
         if (!enabled) {
@@ -47,7 +45,7 @@ export const useKeyboardHeight = (
             if (window.visualViewport) {
                 const vh = window.visualViewport.height;
                 const keyboard = initialHeightRef.current - vh;
-                
+
                 setViewportHeight(vh);
                 setKeyboardHeight(keyboard > 50 ? keyboard : 0); // 50px minimum pour considérer que c'est un clavier
                 setIsKeyboardOpen(keyboard > 100); // 100px pour être sûr

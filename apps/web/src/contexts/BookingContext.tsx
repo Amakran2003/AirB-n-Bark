@@ -28,7 +28,7 @@ export interface Booking {
     listingId: string;
     userId: string;
     startDate: string; // YYYY-MM-DD
-    endDate: string;   // YYYY-MM-DD
+    endDate: string; // YYYY-MM-DD
     dogsCount: number;
     totalPrice: number;
     hasFreeCancellation: boolean; // Si l'annonce permet l'annulation gratuite
@@ -129,7 +129,7 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     useEffect(() => {
         const handleAuthChange = () => {
             console.log('🔄 Auth changed, reloading bookings...');
-            setAuthTrigger(prev => prev + 1);
+            setAuthTrigger((prev) => prev + 1);
         };
 
         // Écouter l'événement personnalisé de login/logout
@@ -261,28 +261,31 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
 
     // Modifier une réservation
     // TODO: Connecter à l'API backend
-    const updateBooking = useCallback(async (id: string, data: UpdateBookingData): Promise<Booking | null> => {
-        setIsLoading(true);
-        setError(null);
+    const updateBooking = useCallback(
+        async (id: string, data: UpdateBookingData): Promise<Booking | null> => {
+            setIsLoading(true);
+            setError(null);
 
-        const existingBooking = bookings.find((b) => b.id === id);
-        if (!existingBooking) {
-            setError('Réservation non trouvée');
+            const existingBooking = bookings.find((b) => b.id === id);
+            if (!existingBooking) {
+                setError('Réservation non trouvée');
+                setIsLoading(false);
+                return null;
+            }
+
+            const updatedBooking: Booking = {
+                ...existingBooking,
+                ...data,
+                updatedAt: new Date().toISOString(),
+            };
+
+            // TODO: PUT vers l'API
+            setBookings((prev) => prev.map((b) => (b.id === id ? updatedBooking : b)));
             setIsLoading(false);
-            return null;
-        }
-
-        const updatedBooking: Booking = {
-            ...existingBooking,
-            ...data,
-            updatedAt: new Date().toISOString(),
-        };
-
-        // TODO: PUT vers l'API
-        setBookings((prev) => prev.map((b) => (b.id === id ? updatedBooking : b)));
-        setIsLoading(false);
-        return updatedBooking;
-    }, [bookings]);
+            return updatedBooking;
+        },
+        [bookings]
+    );
 
     // Annuler une réservation
     const cancelBooking = useCallback(async (id: string): Promise<boolean> => {
@@ -297,7 +300,11 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
                 setBookings((prev) =>
                     prev.map((b) =>
                         b.id === id
-                            ? { ...b, status: 'cancelled' as const, updatedAt: new Date().toISOString() }
+                            ? {
+                                  ...b,
+                                  status: 'cancelled' as const,
+                                  updatedAt: new Date().toISOString(),
+                              }
                             : b
                     )
                 );
@@ -321,9 +328,12 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     }, []);
 
     // Récupérer une réservation par ID
-    const getBookingById = useCallback((id: string): Booking | undefined => {
-        return bookings.find((b) => b.id === id);
-    }, [bookings]);
+    const getBookingById = useCallback(
+        (id: string): Booking | undefined => {
+            return bookings.find((b) => b.id === id);
+        },
+        [bookings]
+    );
 
     const value: BookingContextType = {
         bookings,

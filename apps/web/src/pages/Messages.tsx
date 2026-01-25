@@ -40,63 +40,67 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
     };
 
     // Envoyer un message
-    const handleSendMessage = useCallback(async (content: string) => {
-        if (!selectedConversation) return;
+    const handleSendMessage = useCallback(
+        async (content: string) => {
+            if (!selectedConversation) return;
 
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            senderId: 'user',
-            content,
-            timestamp: new Date(),
-            isRead: true,
-        };
-
-        // Ajouter le message
-        addMessage(selectedConversation.id, newMessage);
-        setSelectedConversation((prev: Conversation | null) => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                messages: [...prev.messages, newMessage],
-                lastMessage: newMessage.content,
-                lastMessageTime: newMessage.timestamp,
-            };
-        });
-
-        // TODO: Appel API réel
-        // await fetch(`/api/conversations/${selectedConversation.id}/messages`, { ... });
-
-        // Simuler réponse de l'hôte
-        setTimeout(() => {
-            const hostResponse: Message = {
-                id: (Date.now() + 1).toString(),
-                senderId: 'host',
-                content: getHostAutoResponse(content),
+            const newMessage: Message = {
+                id: Date.now().toString(),
+                senderId: 'user',
+                content,
                 timestamp: new Date(),
-                isRead: false,
+                isRead: true,
             };
 
-            addMessage(selectedConversation.id, hostResponse);
+            // Ajouter le message
+            addMessage(selectedConversation.id, newMessage);
             setSelectedConversation((prev: Conversation | null) => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    messages: [...prev.messages, hostResponse],
-                    lastMessage: hostResponse.content,
-                    lastMessageTime: hostResponse.timestamp,
+                    messages: [...prev.messages, newMessage],
+                    lastMessage: newMessage.content,
+                    lastMessageTime: newMessage.timestamp,
                 };
             });
-        }, 1500);
-    }, [selectedConversation, addMessage]);
+
+            // TODO: Appel API réel
+            // await fetch(`/api/conversations/${selectedConversation.id}/messages`, { ... });
+
+            // Simuler réponse de l'hôte
+            setTimeout(() => {
+                const hostResponse: Message = {
+                    id: (Date.now() + 1).toString(),
+                    senderId: 'host',
+                    content: getHostAutoResponse(content),
+                    timestamp: new Date(),
+                    isRead: false,
+                };
+
+                addMessage(selectedConversation.id, hostResponse);
+                setSelectedConversation((prev: Conversation | null) => {
+                    if (!prev) return null;
+                    return {
+                        ...prev,
+                        messages: [...prev.messages, hostResponse],
+                        lastMessage: hostResponse.content,
+                        lastMessageTime: hostResponse.timestamp,
+                    };
+                });
+            }, 1500);
+        },
+        [selectedConversation, addMessage]
+    );
 
     // Convertir les messages pour ChatModal (senderId: user/host → user/other)
-    const modalMessages: ChatMessage[] = selectedConversation?.messages.map((msg: Message) => ({
-        id: msg.id,
-        senderId: msg.senderId === 'user' ? 'user' : 'other',
-        content: msg.content,
-        timestamp: msg.timestamp,
-        isRead: msg.isRead,
-    })) || [];
+    const modalMessages: ChatMessage[] =
+        selectedConversation?.messages.map((msg: Message) => ({
+            id: msg.id,
+            senderId: msg.senderId === 'user' ? 'user' : 'other',
+            content: msg.content,
+            timestamp: msg.timestamp,
+            isRead: msg.isRead,
+        })) || [];
 
     // Header personnalisé avec avatar hôte
     const headerContent = selectedConversation ? (
@@ -124,7 +128,9 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
             alt={selectedConversation.hostName}
             className="w-8 h-8 rounded-full object-cover"
         />
-    ) : <div className="w-8 h-8 rounded-full bg-tertiary" />;
+    ) : (
+        <div className="w-8 h-8 rounded-full bg-tertiary" />
+    );
 
     // Avatar utilisateur
     const userAvatar = (
@@ -135,12 +141,7 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
 
     return (
         <>
-            <PageLayout
-                title="Messages"
-                showNavbar
-                activeTab="messages"
-                onTabChange={onTabChange}
-            >
+            <PageLayout title="Messages" showNavbar activeTab="messages" onTabChange={onTabChange}>
                 {conversations.length === 0 ? (
                     <EmptyState
                         icon={MessageCircle}
@@ -230,11 +231,19 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
 function getHostAutoResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.includes('arrivée') || lowerMessage.includes('heure') || lowerMessage.includes('check')) {
+    if (
+        lowerMessage.includes('arrivée') ||
+        lowerMessage.includes('heure') ||
+        lowerMessage.includes('check')
+    ) {
         return "L'arrivée c'est à partir de 15h ! Je serai là pour t'accueillir avec des friandises 🦴";
     }
 
-    if (lowerMessage.includes('clé') || lowerMessage.includes('code') || lowerMessage.includes('accès')) {
+    if (
+        lowerMessage.includes('clé') ||
+        lowerMessage.includes('code') ||
+        lowerMessage.includes('accès')
+    ) {
         return "Le code d'accès c'est 1234#. Je te l'enverrai aussi la veille de ton arrivée ! 🔑";
     }
 
@@ -246,16 +255,28 @@ function getHostAutoResponse(message: string): string {
         return "Y'a une place de parking gratuite juste devant la niche. Ton humain pourra se garer tranquille ! 🚗";
     }
 
-    if (lowerMessage.includes('gamelle') || lowerMessage.includes('eau') || lowerMessage.includes('croquette')) {
+    if (
+        lowerMessage.includes('gamelle') ||
+        lowerMessage.includes('eau') ||
+        lowerMessage.includes('croquette')
+    ) {
         return "T'inquiète ! Gamelle d'eau fraîche toujours remplie et des croquettes premium t'attendent. Tu vas te régaler ! 🍖";
     }
 
-    if (lowerMessage.includes('merci') || lowerMessage.includes('super') || lowerMessage.includes('génial')) {
+    if (
+        lowerMessage.includes('merci') ||
+        lowerMessage.includes('super') ||
+        lowerMessage.includes('génial')
+    ) {
         return "Avec plaisir mon pote ! J'ai hate de te rencontrer. A tres vite ! 🐕";
     }
 
-    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('woof')) {
-        return "Wouf wouf ! Ravi de te parler ! Tu as des questions sur la niche ? 🐶";
+    if (
+        lowerMessage.includes('bonjour') ||
+        lowerMessage.includes('salut') ||
+        lowerMessage.includes('woof')
+    ) {
+        return 'Wouf wouf ! Ravi de te parler ! Tu as des questions sur la niche ? 🐶';
     }
 
     return "Super ! Je note ca. N'hesite pas si t'as d'autres questions avant ton arrivee ! 🦴";

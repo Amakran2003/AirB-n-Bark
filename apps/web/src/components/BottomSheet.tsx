@@ -10,7 +10,7 @@ import { useKeyboardHeight } from '../hooks/useKeyboardHeight';
  * - Gestion du clavier mobile
  * - Animation d'entrée/sortie
  * - Safe area support
- * 
+ *
  * Usage:
  * <BottomSheet isOpen={isOpen} onClose={onClose} title="Mon titre">
  *   <p>Contenu de la modal</p>
@@ -56,10 +56,12 @@ export const BottomSheet = ({
     footer,
 }: BottomSheetProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
-    
+
     // Keyboard handling
-    const { viewportHeight, isKeyboardOpen } = useKeyboardHeight({ enabled: isOpen && handleKeyboard });
-    
+    const { viewportHeight, isKeyboardOpen } = useKeyboardHeight({
+        enabled: isOpen && handleKeyboard,
+    });
+
     // Swipe to close
     const { swipeY, handlers } = useSwipeToClose(onClose, { enabled: isOpen });
 
@@ -122,7 +124,7 @@ export const BottomSheet = ({
                         ) : (
                             <div className="w-10" />
                         )}
-                        
+
                         {headerContent ? (
                             headerContent
                         ) : title ? (
@@ -130,7 +132,7 @@ export const BottomSheet = ({
                         ) : (
                             <div />
                         )}
-                        
+
                         <div className="w-10" />
                     </div>
                 </div>
@@ -148,8 +150,10 @@ export const BottomSheet = ({
                 {footer && (
                     <div
                         className="shrink-0 border-t border-(--color-border-light) bg-white"
-                        style={{ 
-                            paddingBottom: isKeyboardOpen ? '16px' : 'calc(16px + env(safe-area-inset-bottom))'
+                        style={{
+                            paddingBottom: isKeyboardOpen
+                                ? '16px'
+                                : 'calc(16px + env(safe-area-inset-bottom))',
                         }}
                     >
                         {footer}

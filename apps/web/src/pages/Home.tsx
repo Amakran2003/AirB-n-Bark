@@ -223,7 +223,11 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                     </button>
 
                     {/* Icône Bot - sans bordure, taille augmentée */}
-                    <button className="btn-icon" onClick={() => setIsChatBotOpen(true)} aria-label="Ouvrir l'assistant">
+                    <button
+                        className="btn-icon"
+                        onClick={() => setIsChatBotOpen(true)}
+                        aria-label="Ouvrir l'assistant"
+                    >
                         <Bot className="w-8 h-8 text-black" strokeWidth={1.5} />
                     </button>
                 </header>
@@ -248,7 +252,11 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                                 onSwipeUp={() => handleSwipeUp(listing)}
                                 onUndo={handleUndo}
                                 canUndo={currentIndex > 0}
-                                tutorialStep={index === remainingCards.slice(0, 2).length - 1 ? tutorialStep : null}
+                                tutorialStep={
+                                    index === remainingCards.slice(0, 2).length - 1
+                                        ? tutorialStep
+                                        : null
+                                }
                             />
                         ))
                 ) : (
@@ -268,9 +276,7 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
 
             {/* ==================== BOTTOM NAVBAR ==================== */}
             {/* Cacher la navbar pendant la transition */}
-            {!isDetailTransitioning && (
-                <BottomNavbar activeTab="home" onTabChange={onTabChange} />
-            )}
+            {!isDetailTransitioning && <BottomNavbar activeTab="home" onTabChange={onTabChange} />}
 
             {/* ==================== CHATBOT ==================== */}
             <ChatBot isOpen={isChatBotOpen} onClose={() => setIsChatBotOpen(false)} />

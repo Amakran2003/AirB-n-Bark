@@ -8,7 +8,7 @@ import {
     HostListings,
     HostAddListing,
     HostBookings,
-    HostMessages
+    HostMessages,
 } from './pages/host';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { FilterProvider, useFilters } from './contexts/FilterContext';
@@ -121,13 +121,9 @@ const AppContent = () => {
                                 />
                             )}
                             {hostTab === 'bookings' && !hostOverlay && (
-                                <HostBookings
-                                    onMessage={() => setHostTab('messages')}
-                                />
+                                <HostBookings onMessage={() => setHostTab('messages')} />
                             )}
-                            {hostTab === 'messages' && !hostOverlay && (
-                                <HostMessages />
-                            )}
+                            {hostTab === 'messages' && !hostOverlay && <HostMessages />}
                             {hostTab === 'profile' && !hostOverlay && (
                                 <Profile
                                     onTabChange={handleTabChange}
@@ -173,12 +169,8 @@ const AppContent = () => {
                                     onTabChange={handleTabChange}
                                 />
                             )}
-                            {activeTab === 'trips' && (
-                                <Trips onTabChange={handleTabChange} />
-                            )}
-                            {activeTab === 'messages' && (
-                                <Messages onTabChange={handleTabChange} />
-                            )}
+                            {activeTab === 'trips' && <Trips onTabChange={handleTabChange} />}
+                            {activeTab === 'messages' && <Messages onTabChange={handleTabChange} />}
                             {activeTab === 'profile' && (
                                 <Profile
                                     onTabChange={handleTabChange}

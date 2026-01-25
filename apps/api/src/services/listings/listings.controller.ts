@@ -89,8 +89,9 @@ function formatListingForFrontend(listing: any) {
             description: h.description,
         })),
         reviews: (listing.reviews || []).map((r: any) => ({
-            author: r.author?.name || 'Anonyme',
-            avatar: r.author?.avatar || '',
+            id: r.id || '',
+            authorName: r.author?.name || 'Anonyme',
+            authorAvatar: r.author?.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
             rating: r.rating,
             date: r.createdAt?.toISOString?.()?.split('T')[0] || '',
             content: r.content,

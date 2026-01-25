@@ -17,11 +17,11 @@ interface OnboardingProps {
 }
 
 const quotes = [
-    "Trouve ta niche de rêve, boule de poils !",
-    "Swipe, craque, réserve... WOUF !",
-    "Le Airbnb des toutous, par les toutous",
-    "Fini les chenils moches, bienvenue au luxe canin",
-    "Voyage la truffe au vent 🐾",
+    'Trouve ta niche de rêve, boule de poils !',
+    'Swipe, craque, réserve... WOUF !',
+    'Le Airbnb des toutous, par les toutous',
+    'Fini les chenils moches, bienvenue au luxe canin',
+    'Voyage la truffe au vent 🐾',
 ];
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
@@ -113,9 +113,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                         <div
                             key={index}
                             className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                index === currentQuote
-                                    ? 'bg-brand w-6'
-                                    : 'bg-tertiary'
+                                index === currentQuote ? 'bg-brand w-6' : 'bg-tertiary'
                             }`}
                         />
                     ))}
@@ -127,19 +125,13 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                 className="shrink-0 px-6"
                 style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' }}
             >
-                <button
-                    className="btn-primary btn-full"
-                    onClick={handleStart}
-                >
+                <button className="btn-primary btn-full" onClick={handleStart}>
                     Commencer
                 </button>
             </div>
 
             {/* iOS Install Prompt */}
-            <IOSInstallPrompt
-                isOpen={showIOSPrompt}
-                onClose={handleIOSPromptClose}
-            />
+            <IOSInstallPrompt isOpen={showIOSPrompt} onClose={handleIOSPromptClose} />
         </div>
     );
 };
