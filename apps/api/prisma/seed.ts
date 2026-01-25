@@ -38,9 +38,24 @@ async function main() {
     await prisma.listingAmenity.deleteMany();
     await prisma.listing.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.language.deleteMany();
 
     // ==================== CREATE USERS ====================
     console.log('👤 Creating users...');
+
+    await prisma.language.createMany({
+        data: [
+            { code: 'english', label: 'English' },
+            { code: 'french', label: 'Français' },
+            { code: 'german', label: 'Deutsch' },
+            { code: 'icelandic', label: 'Íslenska' },
+        ],
+        skipDuplicates: true,
+    });
+
+    const englishLanguage = await prisma.language.findUnique({
+        where: { code: 'english' },
+    });
     
     const hashedPassword = await hash('password123', 12);
 
@@ -53,6 +68,7 @@ async function main() {
             phone: '+33612345678',
             isHost: true,
             isVerified: true,
+            languageId: englishLanguage?.id,
         },
     });
 
@@ -65,6 +81,7 @@ async function main() {
             phone: '+33687654321',
             isHost: true,
             isVerified: true,
+            languageId: englishLanguage?.id,
         },
     });
 
@@ -75,6 +92,7 @@ async function main() {
             name: 'Sophie Bernard',
             avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
             isHost: false,
+            languageId: englishLanguage?.id,
         },
     });
 

@@ -1,6 +1,6 @@
 import random
 
-lang = 'french'
+lang = 'english'
 
 def woobot():
     word = choose_main_word()
@@ -72,6 +72,8 @@ def choose_main_word():
             return 'ouaf'
         case 'english':
             return 'woof'
+        case 'german':
+            return 'wuff'
         case 'icelandic':
             return 'voff'
         case _:

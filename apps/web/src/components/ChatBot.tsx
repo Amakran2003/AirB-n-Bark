@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Bot, User } from 'lucide-react';
 import { ChatModal, ChatMessage } from './ChatModal';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * ==================== CHATBOT ====================
@@ -19,8 +20,11 @@ interface ChatBotProps {
 
 // URL du webhook n8n (à configurer)
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
+const WOOBOT_BASE_URL = import.meta.env.VITE_WOOBOT_URL || 'http://localhost:3002';
+const LANGUAGE_STORAGE_KEY = 'preferredLanguage';
 
 export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
+    const { user } = useAuth();
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             id: '1',
@@ -30,6 +34,7 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         },
     ]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isWoobotMode, setIsWoobotMode] = useState(true);
 
     const handleSendMessage = useCallback(async (content: string) => {
         // Ajouter le message utilisateur
@@ -43,7 +48,24 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         setIsLoading(true);
 
         try {
-            if (N8N_WEBHOOK_URL) {
+            if (isWoobotMode) {
+                const preferredLanguage = user?.language
+                    ?? localStorage.getItem(LANGUAGE_STORAGE_KEY)
+                    ?? 'english';
+                const response = await fetch(`${WOOBOT_BASE_URL}/woobot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: preferredLanguage }),
+                });
+                const data = await response.json();
+                const botMessage: ChatMessage = {
+                    id: (Date.now() + 1).toString(),
+                    senderId: 'other',
+                    content: data.message || 'Je n\'ai pas compris, peux-tu reformuler ?',
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, botMessage]);
+            } else if (N8N_WEBHOOK_URL) {
                 // Appel au webhook n8n
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
@@ -87,13 +109,22 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isWoobotMode, user?.language]);
 
     // Header du ChatBot
     const headerContent = (
-        <div className="flex items-center gap-2 flex-1 justify-center">
-            <Bot className="w-5 h-5 text-primary" />
-            <span className="text-base font-semibold text-primary">BarkBot</span>
+        <div className="flex flex-col items-center gap-2 flex-1 justify-center">
+            <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5 text-primary" />
+                <span className="text-base font-semibold text-primary">BarkBot</span>
+            </div>
+            <button
+                type="button"
+                onClick={() => setIsWoobotMode((prev) => !prev)}
+                className="px-3 py-1 rounded-full text-xs font-medium border border-(--color-border-light) text-secondary"
+            >
+                {isWoobotMode ? 'Mode WooBot 🤖' : 'Mode BarkBot 🐶'}
+            </button>
         </div>
     );
 

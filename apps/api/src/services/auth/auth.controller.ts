@@ -273,6 +273,59 @@ export async function becomeHost(
 }
 
 /**
+ * PUT /api/auth/language
+ * Met à jour la langue préférée de l'utilisateur
+ */
+export async function updateLanguage(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: 'UNAUTHORIZED',
+                    message: 'Non authentifié',
+                },
+            });
+        }
+
+        const { language } = req.body;
+
+        if (!language || typeof language !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_LANGUAGE',
+                    message: 'Langue non supportee.',
+                },
+            });
+        }
+
+        const result = await authService.updateLanguage(req.user.id, language);
+
+        return res.json({
+            success: true,
+            data: result,
+            message: 'Langue mise à jour',
+        });
+    } catch (error) {
+        if (error instanceof Error && error.message === 'INVALID_LANGUAGE') {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_LANGUAGE',
+                    message: 'Langue non supportee.',
+                },
+            });
+        }
+        next(error);
+    }
+}
+
+/**
  * POST /api/auth/logout
  * Déconnexion (côté client, invalider le token)
  */

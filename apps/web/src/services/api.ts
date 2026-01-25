@@ -27,6 +27,7 @@ import type {
     HostListingsResponse,
     PaymentIntent,
     CreatePaymentRequest,
+    Language,
 } from '../types/api.types';
 
 // ==================== CONFIGURATION ====================
@@ -145,6 +146,12 @@ export const authApi = {
         apiFetch<AuthResponse>('/auth/oauth/apple', {
             method: 'POST',
             body: JSON.stringify({ token }),
+        }),
+
+    updateLanguage: (language: string) =>
+        apiFetch<AuthResponse['user']>('/auth/language', {
+            method: 'PUT',
+            body: JSON.stringify({ language }),
         }),
 };
 
@@ -277,6 +284,12 @@ export const paymentsApi = {
         }),
 };
 
+// ==================== META API ====================
+
+export const metaApi = {
+    getLanguages: () => apiFetch<Language[]>('/meta/languages'),
+};
+
 // ==================== EXPORT GROUPED ====================
 
 export const api = {
@@ -286,6 +299,7 @@ export const api = {
     messages: messagesApi,
     host: hostApi,
     payments: paymentsApi,
+    meta: metaApi,
 };
 
 export default api;

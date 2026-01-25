@@ -19,6 +19,7 @@ export interface AuthResult {
         phone: string | null;
         isHost: boolean;
         isVerified: boolean;
+        language: string;
         createdAt: Date;
     };
     token: string;
@@ -61,6 +62,11 @@ export async function register(data: RegisterInput): Promise<AuthResult> {
             role: true,
             isHost: true,
             isVerified: true,
+            language: {
+                select: {
+                    code: true,
+                },
+            },
             createdAt: true,
         },
     });
@@ -83,6 +89,7 @@ export async function register(data: RegisterInput): Promise<AuthResult> {
             phone: user.phone,
             isHost: user.isHost,
             isVerified: user.isVerified,
+            language: user.language?.code ?? 'english',
             createdAt: user.createdAt,
         },
         token,
@@ -107,6 +114,11 @@ export async function login(data: LoginInput): Promise<AuthResult> {
             role: true,
             isHost: true,
             isVerified: true,
+            language: {
+                select: {
+                    code: true,
+                },
+            },
             createdAt: true,
         },
     });
@@ -145,6 +157,7 @@ export async function login(data: LoginInput): Promise<AuthResult> {
             phone: user.phone,
             isHost: user.isHost,
             isVerified: user.isVerified,
+            language: user.language?.code ?? 'english',
             createdAt: user.createdAt,
         },
         token,
@@ -168,6 +181,11 @@ export async function getProfile(userId: string) {
             isHost: true,
             isVerified: true,
             createdAt: true,
+            language: {
+                select: {
+                    code: true,
+                },
+            },
             _count: {
                 select: {
                     listings: true,
@@ -184,6 +202,7 @@ export async function getProfile(userId: string) {
 
     return {
         ...user,
+        language: user.language?.code ?? 'english',
         listingsCount: user._count.listings,
         bookingsCount: user._count.bookingsAsGuest,
         reviewsCount: user._count.reviews,
@@ -277,4 +296,51 @@ export async function becomeHost(userId: string) {
     });
 
     return { user, token };
+}
+
+/**
+ * Met à jour la langue préférée de l'utilisateur
+ */
+export async function updateLanguage(userId: string, language: string) {
+    const normalizedLanguage = language.trim().toLowerCase();
+    const languageRecord = await prisma.language.findFirst({
+        where: {
+            code: normalizedLanguage,
+            isActive: true,
+        },
+        select: {
+            id: true,
+            code: true,
+        },
+    });
+
+    if (!languageRecord) {
+        throw new Error('INVALID_LANGUAGE');
+    }
+
+    const user = await prisma.user.update({
+        where: { id: userId },
+        data: { languageId: languageRecord.id },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            avatar: true,
+            phone: true,
+            role: true,
+            isHost: true,
+            isVerified: true,
+            language: {
+                select: {
+                    code: true,
+                },
+            },
+            createdAt: true,
+        },
+    });
+
+    return {
+        ...user,
+        language: user.language?.code ?? 'english',
+    };
 }

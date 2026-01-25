@@ -57,6 +57,13 @@ router.post('/change-password', globalRateLimiter, requireAuth, authController.c
 router.post('/become-host', globalRateLimiter, requireAuth, authController.becomeHost);
 
 /**
+ * @route   PUT /api/auth/language
+ * @desc    Met à jour la langue préférée de l'utilisateur
+ * @access  Private
+ */
+router.put('/language', globalRateLimiter, requireAuth, authController.updateLanguage);
+
+/**
  * @route   POST /api/auth/logout
  * @desc    Déconnexion
  * @access  Private

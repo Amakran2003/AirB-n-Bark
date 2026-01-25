@@ -32,6 +32,7 @@ interface User {
     avatar?: string;         // URL de la photo de profil
     role: 'guest' | 'host';  // guest = voyageur, host = hote
     isHost: boolean;         // Si l'utilisateur est aussi hote
+    language?: string;
 }
 
 // Résultat d'auth avec erreur optionnelle
@@ -57,6 +58,7 @@ interface AuthContextType {
     switchToGuest: () => void;
     switchToHost: () => void;
     updateAvatar: (avatarUrl: string) => Promise<AuthResult>;
+    updateLanguage: (language: string) => Promise<AuthResult>;
     logout: () => void;
 }
 
@@ -68,6 +70,7 @@ const mapApiUser = (apiUser: ApiUser): User => ({
     avatar: apiUser.avatar,
     role: apiUser.isHost ? 'host' : 'guest',
     isHost: apiUser.isHost,
+    language: apiUser.language ?? 'english',
 });
 
 /**
@@ -145,6 +148,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             pseudo: email.split('@')[0],
             role: 'guest',
             isHost: false,
+            language: 'english',
         });
         setIsLoading(false);
         return { success: true };
@@ -180,6 +184,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 pseudo,
                 role: 'guest',
                 isHost: false,
+                language: 'english',
             });
             setIsLoading(false);
             return { success: true };
@@ -295,6 +300,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { success: true };
     }, [user]);
 
+    const updateLanguage = useCallback(async (language: string): Promise<AuthResult> => {
+        if (!user) {
+            return { success: false, error: 'Non connecté' };
+        }
+
+        if (USE_API) {
+            setIsLoading(true);
+            const response = await api.auth.updateLanguage(language);
+            setIsLoading(false);
+
+            if (response.success) {
+                setUser((prev) => prev ? {
+                    ...prev,
+                    language: response.data.language ?? language,
+                } : null);
+                return { success: true };
+            }
+            return { success: false, error: response.error.message };
+        }
+
+        setUser((prev) => prev ? {
+            ...prev,
+            language,
+        } : null);
+        return { success: true };
+    }, [user]);
+
     const logout = useCallback(async () => {
         if (USE_API) {
             await api.auth.logout();
@@ -324,6 +356,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 switchToGuest,
                 switchToHost,
                 updateAvatar,
+                updateLanguage,
                 logout,
             }}
         >
