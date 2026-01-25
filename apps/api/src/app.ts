@@ -18,6 +18,7 @@ import {
 import { listingsRoutes } from './services/listings/index.js';
 import { bookingRoutes } from './services/booking/index.js';
 import { authRoutes } from './services/auth/index.js';
+import { metaRoutes } from './services/meta/index.js';
 
 // ==================== APP INITIALIZATION ====================
 
@@ -102,6 +103,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Auth microservice
 app.use('/api/auth', authRoutes);
 
+// Meta endpoints
+app.use('/api/meta', metaRoutes);
+
 // Listings microservice
 app.use('/api/listings', listingsRoutes);
 
@@ -150,6 +154,11 @@ app.get('/api', (_req: Request, res: Response) => {
                     'GET /api/bookings/host/stats': 'Statistiques (auth)',
                     'POST /api/bookings/host/:id/confirm': 'Confirmer (auth)',
                     'POST /api/bookings/host/:id/reject': 'Rejeter (auth)',
+                },
+            },
+            meta: {
+                public: {
+                    'GET /api/meta/languages': 'Liste des langues disponibles',
                 },
             },
         },
