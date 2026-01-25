@@ -105,17 +105,17 @@ async function main() {
             type: ListingType.niche,
             title: 'Niche de luxe avec jardin privatif',
             subtitle: 'Paradis canin au cœur de Paris',
-            description: `Offrez à votre chien un séjour de rêve dans notre magnifique niche de luxe !
+            description: `Salut toi, le chien ! Ici, tout est fait pour que tu passes un séjour de rêve dans une niche de luxe.
 
-Située dans un jardin arboré de 500m², cette niche spacieuse a été pensée pour que votre compagnon à quatre pattes se sente roi.
+Dans un jardin arboré de 500m², ta niche spacieuse est pensée pour que tu te sentes roi.
 
-Équipements inclus :
+Équipements inclus pour toi :
 - Coussin orthopédique haut de gamme
 - Gamelles en inox
 - Jouets variés
 - Accès au jardin 24h/24
 
-Je suis présente à la maison et je propose des promenades 3 fois par jour minimum pour que ton chien reste actif et serein.`,
+Je suis présente à la maison et je propose des promenades 3 fois par jour minimum pour que tu restes actif et serein.`,
             address: '15 Rue de la Paix',
             city: 'Paris',
             country: 'France',
@@ -189,11 +189,11 @@ Je suis présente à la maison et je propose des promenades 3 fois par jour mini
             type: ListingType.nicholoc,
             title: 'Appartement dog-friendly avec balcon',
             subtitle: 'Proche du Parc de la Tête d\'Or',
-            description: `Bienvenue dans mon appartement spécialement aménagé pour accueillir votre toutou !
+            description: `Bienvenue à toi, le toutou ! Mon appartement est spécialement aménagé pour que tu sois à l'aise.
 
-Situé en plein cœur de Lyon, à deux pas du Parc de la Tête d'Or, c'est l'endroit idéal pour des balades quotidiennes.
+Situé en plein cœur de Lyon, à deux pas du Parc de la Tête d'Or, c'est l'endroit idéal pour tes balades quotidiennes.
 
-Votre chien aura son propre espace avec :
+Tu auras ton propre espace avec :
 - Un panier confortable
 - Des gamelles personnalisées
 - Un accès au balcon sécurisé
@@ -243,9 +243,9 @@ Votre chien aura son propre espace avec :
             type: ListingType.nichortoir,
             title: 'Pension canine familiale avec piscine',
             subtitle: 'Le paradis des chiens à Bordeaux',
-            description: `Notre pension familiale accueille votre compagnon dans un cadre exceptionnel !
+            description: `Notre pension familiale t'accueille, toi le chien, dans un cadre exceptionnel !
 
-Sur un terrain de 2 hectares, nous proposons :
+Sur un terrain de 2 hectares, nous te proposons :
 - Chambres individuelles climatisées
 - Piscine canine chauffée
 - Parcours d'agility
