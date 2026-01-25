@@ -51,22 +51,25 @@ model User {
   role          UserRole  @default(guest)
   isHost        Boolean   @default(false)
   isVerified    Boolean   @default(false)
-  
+
   // Host profile fields
   isSuperHost     Boolean   @default(false)
   hostingSince    DateTime?
   responseRate    Int       @default(100) // Pourcentage 0-100
   hostDescription String?
-  
+
+  // Preferences
+  language        String    @default("english") // english | french | icelandic
+
   // OAuth
   googleId      String?   @unique
   appleId       String?   @unique
-  
+
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?
-  
+
   // Relations
   listings      Listing[]
   bookingsAsGuest Booking[] @relation("GuestBookings")
@@ -75,7 +78,7 @@ model User {
   sentMessages  Message[] @relation("SentMessages")
   conversationsAsGuest Conversation[] @relation("GuestConversations")
   conversationsAsHost  Conversation[] @relation("HostConversations")
-  
+
   @@index([email])
   @@index([googleId])
   @@index([appleId])
@@ -87,54 +90,54 @@ model Listing {
   title               String
   subtitle            String
   description         String
-  
+
   // Location
   address             String
   city                String
   country             String             @default("France")
   lat                 Float
   lng                 Float
-  
+
   // Pricing
   pricePerNight       Float
   currency            String             @default("EUR")
-  
+
   // Capacity
   maxDogs             Int                @default(1)
   capacity            String             // "2 chiens max"
-  
+
   // Images
   mainImage           String
   images              String[]           // Array of image URLs
-  
+
   // Ratings
   rating              Float              @default(0)
   reviewsCount        Int                @default(0)
-  
+
   // Options
   antiCatAvailable    Boolean            @default(false)
   antiCatRiskScore    Int                @default(0)  // 0-100
   antiCatExtraPrice   Float              @default(0)
-  
+
   // Policies
   cancellationPolicy  CancellationPolicy @default(flexible)
   hasFreeCancellation Boolean            @default(true)
-  
+
   // Instructions d'arrivée (JSON structuré)
   instructions        Json?
-  
+
   // Status
   isActive            Boolean            @default(true)
   isPublished         Boolean            @default(false)
-  
+
   // Host
   hostId              String
   host                User               @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  
+
   // Timestamps
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
-  
+
   // Relations
   amenities           ListingAmenity[]
   highlights          ListingHighlight[]
@@ -144,7 +147,7 @@ model Listing {
   bookings            Booking[]
   reviews             Review[]
   conversations       Conversation[]
-  
+
   @@index([hostId])
   @@index([city])
   @@index([type])
@@ -159,7 +162,7 @@ model ListingAmenity {
   icon        String   // flame, droplets, bone, etc.
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+
   @@index([listingId])
 }
 
@@ -170,7 +173,7 @@ model ListingHighlight {
   icon        String   // search, star, check, paw, shield
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+
   @@index([listingId])
 }
 
@@ -181,7 +184,7 @@ model ListingRoom {
   image       String
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+
   @@index([listingId])
 }
 
@@ -203,7 +206,7 @@ model ListingAvailability {
   isBlocked   Boolean  @default(false)  // true = non dispo
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+
   @@index([listingId])
   @@index([startDate, endDate])
 }
@@ -211,24 +214,24 @@ model ListingAvailability {
 model Booking {
   id              String        @id @default(uuid())
   bookingNumber   String        @unique  // BARK-XXXXXX
-  
+
   // Dates
   startDate       DateTime
   endDate         DateTime
   nights          Int
-  
+
   // Details
   guestsCount     Int           @default(1)  // nombre de chiens
-  
+
   // Pricing
   pricePerNight   Float
   totalPrice      Float
   serviceFee      Float         @default(0)
   antiCatFee      Float         @default(0)
-  
+
   // Status
   status          BookingStatus @default(pending)
-  
+
   // References
   listingId       String
   listing         Listing       @relation(fields: [listingId], references: [id])
@@ -236,17 +239,17 @@ model Booking {
   guest           User          @relation("GuestBookings", fields: [guestId], references: [id])
   hostId          String
   host            User          @relation("HostBookings", fields: [hostId], references: [id])
-  
+
   // Timestamps
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   confirmedAt     DateTime?
   cancelledAt     DateTime?
-  
+
   // Relations
   review          Review?
   conversation    Conversation?
-  
+
   @@index([listingId])
   @@index([guestId])
   @@index([hostId])
@@ -258,23 +261,23 @@ model Review {
   id          String   @id @default(uuid())
   rating      Float    // 1-5
   content     String
-  
+
   // Author
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
-  
+
   // Listing
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
+
   // Booking (optional - for verified reviews)
   bookingId   String?  @unique
   booking     Booking? @relation(fields: [bookingId], references: [id])
-  
+
   // Timestamps
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@index([listingId])
   @@index([authorId])
   @@index([rating])
@@ -282,30 +285,30 @@ model Review {
 
 model Conversation {
   id          String    @id @default(uuid())
-  
+
   // Participants
   guestId     String
   guest       User      @relation("GuestConversations", fields: [guestId], references: [id])
   hostId      String
   host        User      @relation("HostConversations", fields: [hostId], references: [id])
-  
+
   // Context
   listingId   String
   listing     Listing   @relation(fields: [listingId], references: [id])
   bookingId   String?   @unique
   booking     Booking?  @relation(fields: [bookingId], references: [id])
-  
+
   // Last message cache
   lastMessage String?
   lastMessageAt DateTime?
-  
+
   // Timestamps
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   // Relations
   messages    Message[]
-  
+
   @@unique([guestId, hostId, listingId])
   @@index([guestId])
   @@index([hostId])
@@ -316,18 +319,18 @@ model Message {
   id              String       @id @default(uuid())
   content         String
   isRead          Boolean      @default(false)
-  
+
   // Sender
   senderId        String
   sender          User         @relation("SentMessages", fields: [senderId], references: [id])
-  
+
   // Conversation
   conversationId  String
   conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
+
   // Timestamps
   createdAt       DateTime     @default(now())
-  
+
   @@index([conversationId])
   @@index([senderId])
   @@index([isRead])
@@ -340,7 +343,7 @@ model ListingView {
   listingId   String
   userId      String?  // Null if anonymous
   createdAt   DateTime @default(now())
-  
+
   @@index([listingId])
   @@index([createdAt])
 }
@@ -350,6 +353,6 @@ model ListingShare {
   listingId   String
   platform    String?  // twitter, facebook, copy, etc.
   createdAt   DateTime @default(now())
-  
+
   @@index([listingId])
 }
