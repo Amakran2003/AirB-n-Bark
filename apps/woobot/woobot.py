@@ -29,7 +29,6 @@ def woobot():
             punctuations.remove(':')
 
 
-        # lang = get_language()
         match (punctuation):
             case '?':
                 if (lang) == 'french':
@@ -66,7 +65,6 @@ def woobot():
 
 
 def choose_main_word():
-    # lang = get_language()
     match (lang):
         case 'french':
             return 'ouaf'
