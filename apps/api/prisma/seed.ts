@@ -56,7 +56,7 @@ async function main() {
     const englishLanguage = await prisma.language.findUnique({
         where: { code: 'english' },
     });
-    
+
     const hashedPassword = await hash('password123', 12);
 
     const host1 = await prisma.user.create({
@@ -64,7 +64,7 @@ async function main() {
             email: 'marie@example.com',
             password: hashedPassword,
             name: 'Marie Dupont',
-            avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+            avatar: 'https://picsum.photos/id/237/200',
             phone: '+33612345678',
             isHost: true,
             isVerified: true,
@@ -77,7 +77,7 @@ async function main() {
             email: 'jean@example.com',
             password: hashedPassword,
             name: 'Jean Martin',
-            avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
+            avatar: 'https://picsum.photos/id/200/200',
             phone: '+33687654321',
             isHost: true,
             isVerified: true,
@@ -90,7 +90,7 @@ async function main() {
             email: 'guest@example.com',
             password: hashedPassword,
             name: 'Sophie Bernard',
-            avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
+            avatar: 'https://picsum.photos/id/169/200',
             isHost: false,
             languageId: englishLanguage?.id,
         },
@@ -105,9 +105,9 @@ async function main() {
             type: ListingType.niche,
             title: 'Niche de luxe avec jardin privatif',
             subtitle: 'Paradis canin au cœur de Paris',
-            description: `Offrez à votre toutou un séjour de rêve dans notre magnifique niche de luxe ! 
-                
-Située dans un jardin arboré de 500m², cette niche spacieuse offre tout le confort nécessaire pour que votre compagnon se sente comme chez lui.
+            description: `Offrez à votre chien un séjour de rêve dans notre magnifique niche de luxe !
+
+Située dans un jardin arboré de 500m², cette niche spacieuse a été pensée pour que votre compagnon à quatre pattes se sente roi.
 
 Équipements inclus :
 - Coussin orthopédique haut de gamme
@@ -115,7 +115,7 @@ Située dans un jardin arboré de 500m², cette niche spacieuse offre tout le co
 - Jouets variés
 - Accès au jardin 24h/24
 
-Je suis présente à la maison et je promène les chiens 3 fois par jour minimum.`,
+Je suis présente à la maison et je propose des promenades 3 fois par jour minimum pour que ton chien reste actif et serein.`,
             address: '15 Rue de la Paix',
             city: 'Paris',
             country: 'France',
@@ -125,10 +125,10 @@ Je suis présente à la maison et je promène les chiens 3 fois par jour minimum
             currency: 'EUR',
             maxDogs: 2,
             capacity: '2 chiens max',
-            mainImage: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+            mainImage: 'https://picsum.photos/id/98/4928/3264',
             images: [
-                'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
-                'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+                'https://picsum.photos/id/28/4928/3264',
+                'https://picsum.photos/id/89/4928/3264',
             ],
             rating: 4.9,
             reviewsCount: 47,
@@ -207,9 +207,9 @@ Votre chien aura son propre espace avec :
             currency: 'EUR',
             maxDogs: 1,
             capacity: '1 chien',
-            mainImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
+            mainImage: 'https://picsum.photos/id/107/4928/3264',
             images: [
-                'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
+                'https://picsum.photos/id/112/4928/3264',
             ],
             rating: 4.7,
             reviewsCount: 23,
@@ -260,10 +260,10 @@ Sur un terrain de 2 hectares, nous proposons :
             currency: 'EUR',
             maxDogs: 5,
             capacity: '5 chiens max',
-            mainImage: 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=800',
+            mainImage: 'https://picsum.photos/id/120/4928/3264',
             images: [
-                'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
-                'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800',
+                'https://picsum.photos/id/121/4928/3264',
+                'https://picsum.photos/id/118/4928/3264',
             ],
             rating: 5.0,
             reviewsCount: 89,
@@ -322,7 +322,7 @@ Sur un terrain de 2 hectares, nous proposons :
 
     // ==================== CREATE REVIEWS ====================
     console.log('⭐ Creating reviews...');
-    
+
     await prisma.review.createMany({
         data: [
             {
@@ -408,7 +408,7 @@ Sur un terrain de 2 hectares, nous proposons :
 
 🔑 Test accounts:
    - Host: marie@example.com / password123
-   - Host: jean@example.com / password123  
+   - Host: jean@example.com / password123
    - Guest: guest@example.com / password123
     `);
 }
