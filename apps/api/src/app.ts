@@ -8,16 +8,17 @@ import express, { Application, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/env.js';
-import { 
-    globalRateLimiter, 
-    requestLogger, 
-    errorHandler, 
+import {
+    globalRateLimiter,
+    requestLogger,
+    errorHandler,
     notFoundHandler,
     sanitizeBody,
 } from './middlewares/security.js';
 import { listingsRoutes } from './services/listings/index.js';
 import { bookingRoutes } from './services/booking/index.js';
 import { authRoutes } from './services/auth/index.js';
+import { paymentRoutes } from './services/payments/index.js';
 import { metaRoutes } from './services/meta/index.js';
 
 // ==================== APP INITIALIZATION ====================
@@ -37,12 +38,12 @@ app.use(cors({
     origin: (origin, callback) => {
         // Autoriser les requêtes sans origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
-        
+
         // En développement, autoriser toutes les origines
         if (!config.isProd) {
             return callback(null, true);
         }
-        
+
         // En production, vérifier la whitelist
         if (config.corsOrigins.includes(origin)) {
             callback(null, true);
@@ -62,13 +63,13 @@ app.use(globalRateLimiter);
 // ==================== PARSING MIDDLEWARES ====================
 
 // Body parsers avec limites de taille (50mb pour supporter images base64)
-app.use(express.json({ 
+app.use(express.json({
     limit: '50mb',
     strict: true,
 }));
 
-app.use(express.urlencoded({ 
-    extended: true, 
+app.use(express.urlencoded({
+    extended: true,
     limit: '50mb',
 }));
 
@@ -111,6 +112,9 @@ app.use('/api/listings', listingsRoutes);
 
 // Bookings microservice
 app.use('/api/bookings', bookingRoutes);
+
+// Payments microservice
+app.use('/api/payments', paymentRoutes);
 
 // ==================== API DOCUMENTATION ====================
 

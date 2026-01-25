@@ -27,6 +27,7 @@ services:
       NODE_ENV: ${NODE_ENV}
       CORS_ORIGINS: ${CORS_ORIGINS}
       REDIS_URL: redis://redis:6379
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
     depends_on:
       db:
         condition: service_started
@@ -41,6 +42,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
         VITE_USE_API: ${VITE_USE_API}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     restart: unless-stopped
     ports:
       - "${WEB_PORT}:5173"
