@@ -36,7 +36,7 @@ interface PaymentProps {
 // Frais d'annulation (20% du total si pas d'annulation gratuite)
 export const CANCELLATION_FEE_PERCENT = 0.20;
 
-// Style pour les elements Stripe - taille reduite pour mobile
+// Style pour les elements Stripe
 const elementStyle = {
     base: {
         fontSize: '14px',
@@ -114,13 +114,12 @@ const PaymentForm = ({
             currency: 'eur',
             total: {
                 label: `AirB-n-Bark - ${listing.title}`,
-                amount: Math.round(grandTotal * 100), // En centimes
+                amount: Math.round(grandTotal * 100),
             },
             requestPayerName: true,
             requestPayerEmail: true,
         });
 
-        // Verifier si Apple Pay / Google Pay est disponible
         pr.canMakePayment().then((result) => {
             if (result) {
                 setPaymentRequest(pr);
@@ -128,7 +127,6 @@ const PaymentForm = ({
             }
         });
 
-        // Gerer le paiement
         pr.on('paymentmethod', async (event) => {
             setIsProcessing(true);
             setError(null);
@@ -243,82 +241,75 @@ const PaymentForm = ({
     };
 
     const getFieldClass = (fieldName: string, isComplete: boolean) => {
-        const baseClass = "transition-all duration-200";
+        let className = 'payment-card-field';
         if (focusedField === fieldName) {
-            return `${baseClass} ring-2 ring-indigo-500 border-transparent`;
+            className += ' payment-card-field-focused';
+        } else if (isComplete) {
+            className += ' payment-card-field-complete';
         }
-        if (isComplete) {
-            return `${baseClass} border-green-400 bg-green-50/50`;
-        }
-        return baseClass;
+        return className;
     };
 
     return (
-        <div className="fixed inset-0 z-150 bg-gray-100 flex flex-col" style={containerStyle}>
+        <div className="payment-container" style={containerStyle}>
             {/* Header */}
-            <header
-                className="shrink-0 flex items-center justify-between px-3 py-3 bg-white border-b border-gray-200"
-                style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))' }}
-            >
-                <button
-                    className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                    onClick={onBack}
-                >
-                    <ChevronLeft className="w-5 h-5" />
+            <header className="payment-header">
+                <button className="payment-back-btn" onClick={onBack}>
+                    <ChevronLeft size={20} />
                 </button>
-                <span className="text-base font-semibold">Paiement securise</span>
-                <div className="w-9" />
+                <span className="payment-header-title">Paiement securise</span>
+                <div style={{ width: 36 }} />
             </header>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="p-3 space-y-3">
+            <div className="payment-content">
+                <div className="payment-content-inner">
 
                     {/* Stripe Security Banner */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-3 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-white" />
+                    <div className="payment-security-banner">
+                        <div className="payment-security-icon">
+                            <Shield />
                         </div>
-                        <div className="flex-1">
-                            <p className="text-white font-medium text-sm">Paiement 100% securise</p>
-                            <p className="text-white/80 text-xs">Protege par Stripe, leader mondial du paiement</p>
+                        <div className="payment-security-text">
+                            <p className="payment-security-title">Paiement 100% securise</p>
+                            <p className="payment-security-subtitle">Protege par Stripe, leader mondial du paiement</p>
                         </div>
                         <img
                             src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
                             alt="Stripe"
-                            className="h-6 opacity-90 invert"
+                            className="payment-stripe-logo"
                         />
                     </div>
 
                     {/* Recap reservation */}
-                    <div className="bg-white rounded-xl p-3 shadow-sm">
-                        <div className="flex gap-3">
+                    <div className="payment-recap">
+                        <div className="payment-recap-inner">
                             <img
                                 src={listing.image}
                                 alt={listing.title}
-                                className="w-16 h-16 rounded-lg object-cover"
+                                className="payment-recap-image"
                             />
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-medium text-gray-900 text-sm truncate">{listing.title}</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">
+                            <div className="payment-recap-info">
+                                <h3 className="payment-recap-title">{listing.title}</h3>
+                                <p className="payment-recap-dates">
                                     {formatDate(checkIn)} - {formatDate(checkOut)} · {nights} nuit{nights > 1 ? 's' : ''}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="payment-recap-dogs">
                                     {dogsCount} {dogsCount > 1 ? 'toutous' : 'toutou'}
                                 </p>
                             </div>
-                            <div className="text-right">
-                                <p className="font-semibold text-gray-900">{grandTotal} €</p>
-                                <p className="text-xs text-gray-500">Total</p>
+                            <div className="payment-recap-price">
+                                <p className="payment-recap-amount">{grandTotal} €</p>
+                                <p className="payment-recap-label">Total</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Apple Pay / Google Pay Section */}
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Smartphone className="w-5 h-5 text-gray-700" />
-                            <span className="font-medium text-gray-900 text-sm">Paiement express</span>
+                    <div className="payment-card-section">
+                        <div className="payment-section-header">
+                            <Smartphone />
+                            <span className="payment-section-title">Paiement express</span>
                         </div>
 
                         {canMakePayment && paymentRequest ? (
@@ -335,23 +326,17 @@ const PaymentForm = ({
                                 }}
                             />
                         ) : (
-                            <div className="space-y-2">
+                            <div>
                                 {/* Apple Pay button placeholder */}
-                                <button
-                                    className="w-full py-3 bg-black text-white rounded-lg font-medium flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
-                                    disabled
-                                >
-                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                <button className="payment-wallet-btn payment-wallet-btn-apple" disabled>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                                     </svg>
                                     Apple Pay
                                 </button>
                                 {/* Google Pay button placeholder */}
-                                <button
-                                    className="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
-                                    disabled
-                                >
-                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <button className="payment-wallet-btn payment-wallet-btn-google" disabled style={{ marginTop: 8 }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -359,61 +344,59 @@ const PaymentForm = ({
                                     </svg>
                                     Google Pay
                                 </button>
-                                <p className="text-[10px] text-gray-400 text-center mt-1">
+                                <p className="payment-wallet-hint">
                                     Disponible sur Safari (iOS/Mac) et Chrome (Android)
                                 </p>
                             </div>
                         )}
 
-                        <div className="flex items-center gap-3 my-4">
-                            <div className="flex-1 h-px bg-gray-200" />
-                            <span className="text-xs text-gray-400">ou payer par carte</span>
-                            <div className="flex-1 h-px bg-gray-200" />
+                        <div className="payment-divider">
+                            <div className="payment-divider-line" />
+                            <span className="payment-divider-text">ou payer par carte</span>
+                            <div className="payment-divider-line" />
                         </div>
 
                         {/* Card brands header */}
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <CreditCard className="w-4 h-4 text-gray-600" />
-                                <span className="font-medium text-gray-700 text-xs">Carte bancaire</span>
+                        <div className="payment-card-brands">
+                            <div className="payment-card-brands-label">
+                                <CreditCard />
+                                <span>Carte bancaire</span>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="payment-card-brands-icons">
                                 {/* Visa */}
-                                <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                                    <svg viewBox="0 0 48 32" className="h-3">
+                                <div className="payment-card-brand">
+                                    <svg viewBox="0 0 48 32" style={{ height: 12 }}>
                                         <path fill="#1434CB" d="M19.5 24.3l1.8-11h2.9l-1.8 11h-2.9zm12-11l-2.8 7.5-.3-1.6-1-5.1s-.1-.8-1.2-.8h-4.5l-.1.3s1.3.3 2.8 1.2l2.3 9h3l4.6-11.5h-2.8zm5.8 7.5c0-.7.6-1.1 1.8-1.2.6 0 1.2.1 1.8.4l.3-2s-.7-.3-1.8-.3c-2 0-3.4 1.1-3.4 2.6 0 1.2 1 1.8 1.8 2.2.8.4 1.1.7 1.1 1.1 0 .6-.7.9-1.3.9-.9 0-1.7-.2-2.3-.5l-.3 2c.5.2 1.4.4 2.4.4 2.2 0 3.6-1.1 3.6-2.7 0-2.1-2.9-2.2-2.9-3.2l.2.3zm-26.5-7.5L7.6 24.3h3l.5-2.3h3.6l.3 2.3h2.7l-2.4-11h-3.6zm.5 6.8l1.5-4.1.8 4.1h-2.3z"/>
                                     </svg>
                                 </div>
                                 {/* Mastercard */}
-                                <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                                    <svg viewBox="0 0 48 32" className="h-3">
+                                <div className="payment-card-brand">
+                                    <svg viewBox="0 0 48 32" style={{ height: 12 }}>
                                         <circle cx="18" cy="16" r="10" fill="#EB001B"/>
                                         <circle cx="30" cy="16" r="10" fill="#F79E1B"/>
                                         <path d="M24 8.5a10 10 0 000 15 10 10 0 000-15z" fill="#FF5F00"/>
                                     </svg>
                                 </div>
                                 {/* Amex */}
-                                <div className="w-8 h-5 bg-[#006FCF] border border-gray-200 rounded flex items-center justify-center">
-                                    <span className="text-white text-[6px] font-bold">AMEX</span>
+                                <div className="payment-card-brand payment-card-brand-amex">
+                                    <span>AMEX</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Card fields */}
-                        <div className="space-y-2">
-                            <div>
-                                <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('number', cardNumberComplete)}`}>
-                                    <CardNumberElement
-                                        options={cardNumberOptions}
-                                        onChange={(e) => setCardNumberComplete(e.complete)}
-                                        onFocus={() => setFocusedField('number')}
-                                        onBlur={() => setFocusedField(null)}
-                                    />
-                                </div>
+                        <div className="payment-card-fields">
+                            <div className={getFieldClass('number', cardNumberComplete)}>
+                                <CardNumberElement
+                                    options={cardNumberOptions}
+                                    onChange={(e) => setCardNumberComplete(e.complete)}
+                                    onFocus={() => setFocusedField('number')}
+                                    onBlur={() => setFocusedField(null)}
+                                />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('expiry', cardExpiryComplete)}`}>
+                            <div className="payment-card-row">
+                                <div className={getFieldClass('expiry', cardExpiryComplete)}>
                                     <CardExpiryElement
                                         options={cardExpiryOptions}
                                         onChange={(e) => setCardExpiryComplete(e.complete)}
@@ -421,7 +404,7 @@ const PaymentForm = ({
                                         onBlur={() => setFocusedField(null)}
                                     />
                                 </div>
-                                <div className={`p-3 border border-gray-200 rounded-lg bg-gray-50 ${getFieldClass('cvc', cardCvcComplete)}`}>
+                                <div className={getFieldClass('cvc', cardCvcComplete)}>
                                     <CardCvcElement
                                         options={cardCvcOptions}
                                         onChange={(e) => setCardCvcComplete(e.complete)}
@@ -434,124 +417,111 @@ const PaymentForm = ({
 
                         {/* Error message */}
                         {error && (
-                            <div className="mt-3 p-2.5 bg-red-50 rounded-lg border border-red-100 flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                                <p className="text-xs text-red-600">{error}</p>
+                            <div className="payment-error">
+                                <AlertCircle />
+                                <p className="payment-error-text">{error}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Test cards tooltip */}
-                    <div className="relative flex justify-center">
+                    <div className="payment-test-cards">
                         <button
+                            className="payment-test-cards-btn"
                             onClick={() => setShowTestCards(!showTestCards)}
-                            className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 transition-colors py-1"
                         >
-                            <Info className="w-3.5 h-3.5" />
-                            <span className="underline underline-offset-2">Cliquez ici pour les cartes de test</span>
+                            <Info />
+                            <span>Cliquez ici pour les cartes de test</span>
                         </button>
 
-                        {/* Tooltip popup */}
                         {showTestCards && (
                             <>
-                                {/* Backdrop */}
                                 <div
-                                    className="fixed inset-0 z-50"
+                                    className="payment-tooltip-backdrop"
                                     onClick={() => setShowTestCards(false)}
                                 />
-                                {/* Tooltip content */}
-                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-72 bg-white rounded-xl shadow-xl border border-gray-200 p-3 animate-in fade-in zoom-in-95 duration-200">
-                                    {/* Arrow */}
-                                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r border-b border-gray-200 rotate-45" />
+                                <div className="payment-tooltip">
+                                    <div className="payment-tooltip-arrow" />
 
-                                    {/* Header */}
-                                    <div className="flex items-center justify-between mb-2">
-                                        <p className="text-xs font-semibold text-gray-800">Cartes de test Stripe</p>
+                                    <div className="payment-tooltip-header">
+                                        <p className="payment-tooltip-title">Cartes de test Stripe</p>
                                         <button
+                                            className="payment-tooltip-close"
                                             onClick={() => setShowTestCards(false)}
-                                            className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100"
                                         >
-                                            <X className="w-3 h-3 text-gray-500" />
+                                            <X />
                                         </button>
                                     </div>
 
-                                    {/* Cards list */}
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                                            <div className="flex-1">
-                                                <p className="text-[11px] font-medium text-green-800">Visa (succes)</p>
-                                                <p className="text-[11px] text-green-600 font-mono">4242 4242 4242 4242</p>
+                                    <div className="payment-tooltip-cards">
+                                        <div className="payment-test-card payment-test-card-success">
+                                            <CheckCircle2 />
+                                            <div>
+                                                <p className="payment-test-card-name">Visa (succes)</p>
+                                                <p className="payment-test-card-number">4242 4242 4242 4242</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                                            <div className="flex-1">
-                                                <p className="text-[11px] font-medium text-green-800">Mastercard (succes)</p>
-                                                <p className="text-[11px] text-green-600 font-mono">5555 5555 5555 4444</p>
+                                        <div className="payment-test-card payment-test-card-success">
+                                            <CheckCircle2 />
+                                            <div>
+                                                <p className="payment-test-card-name">Mastercard (succes)</p>
+                                                <p className="payment-test-card-number">5555 5555 5555 4444</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
-                                            <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                                            <div className="flex-1">
-                                                <p className="text-[11px] font-medium text-red-700">Carte refusee</p>
-                                                <p className="text-[11px] text-red-500 font-mono">4000 0000 0000 0002</p>
+                                        <div className="payment-test-card payment-test-card-error">
+                                            <AlertCircle />
+                                            <div>
+                                                <p className="payment-test-card-name">Carte refusee</p>
+                                                <p className="payment-test-card-number">4000 0000 0000 0002</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-2 text-center">Date: futur · CVC: 3 chiffres</p>
+                                    <p className="payment-tooltip-hint">Date: futur · CVC: 3 chiffres</p>
                                 </div>
                             </>
                         )}
                     </div>
 
                     {/* Security footer */}
-                    <div className="flex items-center justify-center gap-3 py-2">
-                        <div className="flex items-center gap-1 text-gray-400">
-                            <Lock className="w-3 h-3" />
-                            <span className="text-[10px]">SSL 256-bit</span>
+                    <div className="payment-security-footer">
+                        <div className="payment-security-badge">
+                            <Lock />
+                            <span>SSL 256-bit</span>
                         </div>
-                        <div className="w-px h-3 bg-gray-200" />
-                        <div className="flex items-center gap-1 text-gray-400">
-                            <Shield className="w-3 h-3" />
-                            <span className="text-[10px]">PCI DSS</span>
+                        <div className="payment-security-divider" />
+                        <div className="payment-security-badge">
+                            <Shield />
+                            <span>PCI DSS</span>
                         </div>
-                        <div className="w-px h-3 bg-gray-200" />
-                        <div className="flex items-center gap-1 text-gray-400">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span className="text-[10px]">3D Secure</span>
+                        <div className="payment-security-divider" />
+                        <div className="payment-security-badge">
+                            <CheckCircle2 />
+                            <span>3D Secure</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Footer - Bouton payer */}
-            <div
-                className="shrink-0 bg-white px-3 pt-3 border-t border-gray-200"
-                style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))' }}
-            >
+            <div className="payment-footer">
                 <button
-                    className={`w-full py-3.5 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 text-sm
-                        ${cardComplete && !isProcessing && stripe
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] shadow-lg shadow-indigo-500/30'
-                            : 'bg-gray-300 cursor-not-allowed'
-                        }`}
+                    className={`payment-btn ${cardComplete && !isProcessing && stripe ? 'payment-btn-active' : 'payment-btn-disabled'}`}
                     onClick={handlePayment}
                     disabled={!cardComplete || isProcessing || !stripe}
                 >
                     {isProcessing ? (
                         <>
-                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span className="payment-btn-spinner" />
                             <span>Paiement en cours...</span>
                         </>
                     ) : (
                         <>
-                            <Lock className="w-4 h-4" />
+                            <Lock />
                             <span>Payer {grandTotal} € par carte</span>
                         </>
                     )}
                 </button>
-                <p className="text-center text-[10px] text-gray-400 mt-2">
+                <p className="payment-terms">
                     En cliquant, vous acceptez les conditions generales
                 </p>
             </div>
