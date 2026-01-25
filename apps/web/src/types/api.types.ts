@@ -18,7 +18,14 @@ export interface User {
     avatar?: string;
     phone?: string;
     isHost: boolean;
+    language?: string;
     createdAt: string;
+}
+
+export interface Language {
+    id: string;
+    code: string;
+    label: string;
 }
 
 export interface AuthResponse {

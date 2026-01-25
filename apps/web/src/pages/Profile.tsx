@@ -3,6 +3,7 @@ import { ChevronDown, Camera, Dog, Home, Check, ChevronRight } from 'lucide-reac
 import { useAuth } from '../contexts/AuthContext';
 import { BottomNavbar } from '../components/BottomNavbar';
 import { api } from '../services/api';
+import type { Language } from '../types/api.types';
 
 /**
  * ==================== PAGE PROFIL ====================
@@ -25,11 +26,13 @@ interface ProfileProps {
 }
 
 export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHostMode = false, onSwitchToGuest }: ProfileProps) => {
-    const { user, becomeHost, logout, openAuthModal, updateAvatar } = useAuth();
+    const { user, becomeHost, logout, openAuthModal, updateAvatar, updateLanguage } = useAuth();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const [showLanguages, setShowLanguages] = useState(false);
-    const [selectedLanguage, setSelectedLanguage] = useState<string>('Français');
+    const [languages, setLanguages] = useState<Language[]>([]);
+    const [selectedLanguageCode, setSelectedLanguageCode] = useState<string>('english');
+    const [languageError, setLanguageError] = useState<string | null>(null);
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [email, setEmail] = useState(user?.email ?? '');
@@ -39,12 +42,20 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-    const languages = ['Français', 'English', 'Español', 'Deutsch'];
-
-    const selectLanguage = (language: string) => {
-        setSelectedLanguage(language);
-        // TODO: Changer la langue de l'app
+    const selectLanguage = async (languageCode: string) => {
+        setSelectedLanguageCode(languageCode);
+        setLanguageError(null);
         setShowLanguages(false);
+
+        if (!user) {
+            openAuthModal();
+            return;
+        }
+
+        const result = await updateLanguage(languageCode);
+        if (!result.success) {
+            setLanguageError(result.error || 'Erreur lors de la mise a jour de la langue');
+        }
     };
 
     const handleSaveEmail = async () => {
@@ -134,7 +145,30 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
         }
     }, [user?.email]);
 
+    useEffect(() => {
+        if (user?.language) {
+            setSelectedLanguageCode(user.language);
+        }
+    }, [user?.language]);
+
+    useEffect(() => {
+        const loadLanguages = async () => {
+            const response = await api.meta.getLanguages();
+            if (response.success) {
+                setLanguages(response.data);
+            }
+        };
+        loadLanguages();
+    }, []);
+
+    useEffect(() => {
+        if (languages.length && !languages.find((lang) => lang.code === selectedLanguageCode)) {
+            setSelectedLanguageCode(languages[0].code);
+        }
+    }, [languages, selectedLanguageCode]);
+
     const displayName = user?.pseudo ?? 'Mon Toutou';
+    const selectedLanguageLabel = languages.find((lang) => lang.code === selectedLanguageCode)?.label ?? selectedLanguageCode;
 
     return (
         <div className="fixed inset-0 bg-page flex flex-col">
@@ -308,7 +342,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                         <div>
                             <p className="text-body-md font-medium text-left">Langue de l'app</p>
                             <p className="text-sm text-secondary text-left">
-                                {selectedLanguage}
+                                {selectedLanguageLabel}
                             </p>
                         </div>
                         <ChevronDown
@@ -320,19 +354,22 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                         <div className="mt-4 pt-4 border-t border-(--color-border-light) space-y-1">
                             {languages.map((language) => (
                                 <button
-                                    key={language}
-                                    onClick={() => selectLanguage(language)}
+                                    key={language.code}
+                                    onClick={() => selectLanguage(language.code)}
                                     className={`w-full flex items-center justify-between py-3 px-2 rounded-lg ${
-                                        selectedLanguage === language ? 'bg-brand-lighter' : ''
+                                        selectedLanguageCode === language.code ? 'bg-brand-lighter' : ''
                                     }`}
                                 >
-                                    <span className="text-body">{language}</span>
-                                    {selectedLanguage === language && (
+                                    <span className="text-body">{language.label}</span>
+                                    {selectedLanguageCode === language.code && (
                                         <Check className="w-5 h-5 text-brand" />
                                     )}
                                 </button>
                             ))}
                         </div>
+                    )}
+                    {languageError && (
+                        <p className="mt-3 text-sm text-warning">{languageError}</p>
                     )}
                 </div>
 
