@@ -59,7 +59,8 @@ model User {
   hostDescription String?
 
   // Preferences
-  language        String    @default("english") // english | french | icelandic
+  languageId      String?
+  language        Language? @relation(fields: [languageId], references: [id])
 
   // OAuth
   googleId      String?   @unique
@@ -82,6 +83,20 @@ model User {
   @@index([email])
   @@index([googleId])
   @@index([appleId])
+}
+
+model Language {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  label     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+
+  @@index([code])
+  @@index([isActive])
 }
 
 model Listing {
