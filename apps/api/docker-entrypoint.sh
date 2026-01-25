@@ -8,11 +8,11 @@ done
 echo "Database is ready"
 
 echo "Running Prisma migrations..."
-npx prisma db push
+npx --no prisma db push
 
 # Check if database has users (if empty = first run)
 # Using echo + pipe for POSIX compatibility (<<< is bash-only)
-USER_COUNT=$(echo "SELECT COUNT(*) FROM \"User\";" | npx prisma db execute --stdin 2>/dev/null | grep -o '[0-9]*' | head -1 || echo "0")
+USER_COUNT=$(echo "SELECT COUNT(*) FROM \"User\";" | npx --no prisma db execute --stdin 2>/dev/null | grep -o '[0-9]*' | head -1 || echo "0")
 
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
   echo "Database is empty, seeding..."
