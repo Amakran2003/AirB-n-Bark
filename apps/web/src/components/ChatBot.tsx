@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Bot, User } from 'lucide-react';
 import { ChatModal, ChatMessage } from './ChatModal';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,17 +22,11 @@ interface ChatBotProps {
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 const WOOBOT_BASE_URL = import.meta.env.VITE_WOOBOT_URL || 'http://localhost:3002';
 const LANGUAGE_STORAGE_KEY = 'preferredLanguage';
+const DEFAULT_BARKBOT_MESSAGE = 'Wouf ! 🐕 Je suis BarkBot, ton assistant AirB\'n\'Bark. Comment puis-je t\'aider aujourd\'hui ?';
 
 export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
     const { user } = useAuth();
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            id: '1',
-            senderId: 'other',
-            content: 'Wouf ! 🐕 Je suis BarkBot, ton assistant AirB\'n\'Bark. Comment puis-je t\'aider aujourd\'hui ?',
-            timestamp: new Date(),
-        },
-    ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isWoobotMode, setIsWoobotMode] = useState(true);
 
@@ -141,6 +135,57 @@ export const ChatBot = ({ isOpen, onClose }: ChatBotProps) => {
             <User className="w-4 h-4 text-white" />
         </div>
     );
+
+    const setInitialMessage = useCallback(async () => {
+        if (messages.length > 0) return;
+
+        if (isWoobotMode) {
+            const preferredLanguage = user?.language
+                ?? localStorage.getItem(LANGUAGE_STORAGE_KEY)
+                ?? 'english';
+            try {
+                const response = await fetch(`${WOOBOT_BASE_URL}/woobot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: preferredLanguage }),
+                });
+                const data = await response.json();
+                setMessages([
+                    {
+                        id: '1',
+                        senderId: 'other',
+                        content: data.message || DEFAULT_BARKBOT_MESSAGE,
+                        timestamp: new Date(),
+                    },
+                ]);
+            } catch {
+                setMessages([
+                    {
+                        id: '1',
+                        senderId: 'other',
+                        content: DEFAULT_BARKBOT_MESSAGE,
+                        timestamp: new Date(),
+                    },
+                ]);
+            }
+            return;
+        }
+
+        setMessages([
+            {
+                id: '1',
+                senderId: 'other',
+                content: DEFAULT_BARKBOT_MESSAGE,
+                timestamp: new Date(),
+            },
+        ]);
+    }, [isWoobotMode, messages.length, user?.language]);
+
+    useEffect(() => {
+        if (isOpen && messages.length === 0) {
+            setInitialMessage();
+        }
+    }, [isOpen, messages.length, setInitialMessage]);
 
     return (
         <ChatModal
