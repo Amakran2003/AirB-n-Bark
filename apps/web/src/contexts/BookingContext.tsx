@@ -128,7 +128,6 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     // Écouter les changements d'authentification
     useEffect(() => {
         const handleAuthChange = () => {
-            console.log('🔄 Auth changed, reloading bookings...');
             setAuthTrigger((prev) => prev + 1);
         };
 
@@ -150,7 +149,6 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
     useEffect(() => {
         const loadBookings = async () => {
             const token = getAuthToken();
-            console.log('📚 Loading bookings, token exists:', !!token);
 
             // Ne pas charger si pas de token (pas connecté)
             if (USE_API && !token) {
@@ -161,7 +159,6 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
             if (USE_API) {
                 setIsLoading(true);
                 const response = await api.bookings.getAll();
-                console.log('Bookings API response:', response);
                 if (response.success && response.data?.bookings) {
                     setBookings(response.data.bookings.map(mapApiBooking));
                 } else if (response.success && Array.isArray(response.data)) {

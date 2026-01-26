@@ -59,6 +59,7 @@ services:
     restart: unless-stopped
     ports:
       - "${CADDY_PORT}:80"
+      - "5555:5555"
     volumes:
       - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,z
     depends_on:

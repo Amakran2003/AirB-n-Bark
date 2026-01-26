@@ -274,14 +274,12 @@ export const buildFilterQueryParams = (filters: FilterState): URLSearchParams =>
  */
 export const fetchFilteredListings = async (filters: FilterState) => {
     const params = buildFilterQueryParams(filters);
-    const url = `/api/listings?${params.toString()}`;
-
     // TODO: Remplacer par l'appel API réel
-    console.log('API Call:', url);
-
-    // Pour le moment, retourner les données mockées
+    // const url = `/api/listings?${params.toString()}`;
     // const response = await fetch(url);
     // return response.json();
 
+    // Pour le moment, retourner null (données mockées utilisées)
+    void params; // Évite l'erreur TS unused
     return null;
 };

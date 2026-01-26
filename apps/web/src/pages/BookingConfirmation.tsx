@@ -128,7 +128,6 @@ export const BookingConfirmation = ({
             setTimeout(() => setCopied(false), 2000);
         } catch {
             // Fallback pour les navigateurs sans clipboard API
-            console.log('Numéro de réservation:', bookingNumber);
         }
     };
 

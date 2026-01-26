@@ -197,10 +197,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (USE_API) {
             // En production: redirection vers Google OAuth ou popup
             // puis récupérer le token et appeler api.auth.oauthGoogle(token)
-            console.log('OAuth Google - Backend requis');
             return false;
         }
-        console.log('OAuth Google - Mode simulation');
+        // Mode simulation
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false; // Retourne false tant que non configure
     }, []);
@@ -209,7 +208,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loginWithApple = useCallback(async (): Promise<boolean> => {
         // TODO: POST /api/auth/oauth/apple
         // En production: utiliser Sign in with Apple JS
-        console.log('OAuth Apple - A configurer');
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
     }, []);
@@ -217,7 +215,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // OAuth Facebook
     const loginWithFacebook = useCallback(async (): Promise<boolean> => {
         // TODO: POST /api/auth/oauth/facebook
-        console.log('OAuth Facebook - A configurer');
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
     }, []);

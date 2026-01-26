@@ -62,10 +62,8 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
 
         try {
             const result = await getHostBookings();
-            console.log('🔍 Host bookings API response:', result);
 
             if (result.success && result.bookings) {
-                console.log('📦 Bookings received:', result.bookings);
                 // Mapper les données de l'API vers le format du composant
                 const mappedBookings: Booking[] = result.bookings.map((b: HostBooking) => ({
                     id: b.id,
@@ -84,7 +82,6 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                     status: b.status,
                     createdAt: b.createdAt,
                 }));
-                console.log('📋 Mapped bookings:', mappedBookings);
                 setBookings(mappedBookings);
             } else {
                 setError(result.error || 'Erreur de chargement');

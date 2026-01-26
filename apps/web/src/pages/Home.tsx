@@ -60,7 +60,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Gestion du swipe gauche (passer)
      */
     const handleSwipeLeft = useCallback(() => {
-        console.log('Passé:', filteredListings[currentIndex]?.title);
         setCurrentIndex((prev) => prev + 1);
     }, [currentIndex, filteredListings]);
 
@@ -71,7 +70,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
     const handleSwipeRight = useCallback(() => {
         const listing = filteredListings[currentIndex];
         if (listing) {
-            console.log('Réservation:', listing.title);
             setBookingListing(listing);
         }
     }, [currentIndex, filteredListings]);
@@ -81,8 +79,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      */
     const handleUndo = useCallback(() => {
         if (currentIndex > 0) {
-            const prevListing = filteredListings[currentIndex - 1];
-            console.log('Retour:', prevListing?.title);
             setCurrentIndex((prev) => prev - 1);
         }
     }, [currentIndex, filteredListings]);
@@ -91,7 +87,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Gestion du swipe haut / clic (ouvrir détails)
      */
     const handleSwipeUp = useCallback((listing: ListingCardData) => {
-        console.log('Ouvrir détails:', listing.title);
         setIsDetailTransitioning(true);
         // Petit délai pour l'animation
         setTimeout(() => {
@@ -113,7 +108,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Confirmer la réservation (après auth)
      */
     const handleConfirmBooking = useCallback(() => {
-        console.log('Réservation confirmée:', bookingListing?.title);
         setBookingListing(null);
         setCurrentIndex((prev) => prev + 1);
     }, [bookingListing]);

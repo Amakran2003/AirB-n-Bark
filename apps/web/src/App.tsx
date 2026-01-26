@@ -139,7 +139,7 @@ const AppContent = () => {
                                 <HostListings
                                     onBack={() => setHostOverlay(null)}
                                     onAddListing={() => setHostOverlay('add-listing')}
-                                    onEditListing={(id) => console.log('Edit listing', id)}
+                                    onEditListing={() => {}}
                                 />
                             )}
                             {hostOverlay === 'add-listing' && (

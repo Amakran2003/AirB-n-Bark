@@ -493,13 +493,6 @@ export async function getHostBookings(
         },
     });
 
-    console.log('🔍 Host bookings raw from DB:', bookings.map(b => ({
-        bookingId: b.id,
-        listingId: b.listingId,
-        listingTitle: b.listing.title,
-        guestName: b.guest.name,
-    })));
-
     // Transformer pour correspondre au format frontend (HostBookings.tsx)
     const formattedBookings = bookings.map(booking => ({
         id: booking.id,

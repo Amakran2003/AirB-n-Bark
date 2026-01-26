@@ -172,7 +172,6 @@ export const BookingRecap = ({
                     totalPrice: total,
                     hasFreeCancellation,
                 });
-                console.log('Réservation créée:', booking);
                 setConfirmedBooking(booking);
                 setShowPayment(false);
                 setShowConfirmation(true);

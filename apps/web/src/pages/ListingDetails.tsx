@@ -112,8 +112,6 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
     const handleReserve = () => {
         if (onReserve) {
             onReserve();
-        } else {
-            console.log('Réservation pour:', listing.title);
         }
     };
 
