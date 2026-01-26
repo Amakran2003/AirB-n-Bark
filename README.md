@@ -9,7 +9,7 @@
 ### Ce qu'il te faut
 
 1. **Docker Desktop** → [Télécharger ici](https://www.docker.com/products/docker-desktop/)
-2. **Un terminal** (Terminal sur Mac, PowerShell sur Windows)
+2. **Un terminal** (Terminal sur Mac/Linux, PowerShell/CMD sur Windows)
 
 C'est tout ! Pas besoin d'installer Node.js, PostgreSQL, ou quoi que ce soit d'autre.
 
@@ -20,7 +20,7 @@ C'est tout ! Pas besoin d'installer Node.js, PostgreSQL, ou quoi que ce soit d'a
 Ouvre ton terminal et copie-colle :
 
 ```bash
-git clone https://github.com/ton-username/AirB-n-Bark.git
+git clone https://github.com/amakran2003/AirB-n-Bark.git
 cd AirB-n-Bark
 ```
 
@@ -41,7 +41,7 @@ cp .env.example .env
 ## 🐳 Étape 3 : Lance Docker
 
 ```bash
-docker compose up --build -d
+docker compose up --build
 ```
 
 ⏳ **Attends 2-3 minutes** la première fois (ça télécharge tout).
@@ -105,7 +105,7 @@ VITE_WOOBOT_URL=http://192.168.1.XX:3002
 
 ```bash
 docker compose down
-docker compose up --build -d
+docker compose up --build 
 ```
 
 ### 4. Ouvre sur ton téléphone
