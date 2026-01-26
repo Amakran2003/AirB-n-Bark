@@ -386,6 +386,7 @@ export const BookingRecap = ({ listing, onBack, onConfirm, onGoToTrips: onGoToTr
                 checkIn={checkIn}
                 checkOut={checkOut}
                 onDateSelect={handleDateSelect}
+                availableDateRanges={listing.availableDateRanges}
             />
 
             {/* Page Payment */}

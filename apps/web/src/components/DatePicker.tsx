@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import type { DateRange } from '../data/listings';
 
 /**
  * ==================== DATE PICKER ====================
@@ -7,6 +8,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
  * - Navigation mois par mois
  * - Sélection check-in / check-out
  * - Dates passées désactivées
+ * - Dates hors plages de disponibilité grisées et barrées
  * - Swipe down pour fermer
  */
 
@@ -16,6 +18,7 @@ interface DatePickerProps {
     checkIn: string | null;
     checkOut: string | null;
     onDateSelect: (checkIn: string | null, checkOut: string | null) => void;
+    availableDateRanges?: DateRange[]; // Plages de dates disponibles pour l'annonce
 }
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -40,6 +43,7 @@ export const DatePicker = ({
     checkIn,
     checkOut,
     onDateSelect,
+    availableDateRanges,
 }: DatePickerProps) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -114,6 +118,21 @@ export const DatePicker = ({
         return new Date(year, month - 1, day);
     };
 
+    // Vérifier si une date est dans les plages disponibles
+    const isDateInAvailableRange = (date: Date): boolean => {
+        // Si pas de plages définies, AUCUNE date n'est disponible
+        if (!availableDateRanges || availableDateRanges.length === 0) return false;
+
+        // Normaliser la date à minuit pour comparaison
+        const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        return availableDateRanges.some((range) => {
+            const rangeStart = new Date(range.start + 'T00:00:00');
+            const rangeEnd = new Date(range.end + 'T00:00:00');
+            return normalizedDate >= rangeStart && normalizedDate <= rangeEnd;
+        });
+    };
+
     const isDateDisabled = (date: Date): boolean => {
         // Dates passées désactivées (sauf si c'est le checkIn sélectionné)
         const dateStr = formatDate(date);
@@ -121,7 +140,16 @@ export const DatePicker = ({
 
         if (date < today) return true;
 
+        // Vérifier si la date est dans une plage disponible
+        if (!isDateInAvailableRange(date)) return true;
+
         return false;
+    };
+
+    // Vérifier si une date est indisponible (hors plages) - pour le style barré
+    const isDateUnavailable = (date: Date): boolean => {
+        if (date < today) return false; // Les dates passées ont leur propre style
+        return !isDateInAvailableRange(date);
     };
 
     const isDateSelected = (date: Date): 'checkIn' | 'checkOut' | 'inRange' | null => {
@@ -337,14 +365,21 @@ export const DatePicker = ({
                         }
 
                         const disabled = isDateDisabled(date);
+                        const unavailable = isDateUnavailable(date);
                         const selectedState = isDateSelected(date);
                         const isToday = formatDate(date) === formatDate(today);
 
                         let className =
-                            'aspect-square flex items-center justify-center rounded-full text-body-sm transition-colors ';
+                            'aspect-square flex items-center justify-center rounded-full text-body-sm transition-colors relative ';
 
                         if (disabled) {
-                            className += 'text-(--color-border) cursor-not-allowed';
+                            if (unavailable) {
+                                // Dates indisponibles (hors plages) - grisées avec texte barré
+                                className += 'text-(--color-border) cursor-not-allowed';
+                            } else {
+                                // Dates passées
+                                className += 'text-(--color-border) cursor-not-allowed';
+                            }
                         } else if (selectedState === 'checkIn' || selectedState === 'checkOut') {
                             // Dates sélectionnées en bleu (primary)
                             className += 'bg-(--color-primary) text-white font-medium';
@@ -365,7 +400,9 @@ export const DatePicker = ({
                                 onClick={() => handleDateClick(date)}
                                 disabled={disabled}
                             >
-                                {date.getDate()}
+                                <span className={unavailable ? 'line-through opacity-50' : ''}>
+                                    {date.getDate()}
+                                </span>
                             </button>
                         );
                     })}

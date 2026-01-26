@@ -155,6 +155,11 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         // Récupère les mocks + les annonces créées par les hôtes (localStorage)
         let result = [...getListings()];
 
+        // Filtrer les annonces sans disponibilités (plages vides ou inexistantes)
+        result = result.filter((listing) => {
+            return listing.availableDateRanges && listing.availableDateRanges.length > 0;
+        });
+
         // Filtre par type de logement
         if (filters.listingTypes.length > 0) {
             result = result.filter((listing) => filters.listingTypes.includes(listing.type));
@@ -204,8 +209,11 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     }, [filters]);
 
     // Choix entre API et local - avec fallback sur tableau vide
+    // Filtrer également les listings API sans disponibilités
     const filteredListings = USE_API
-        ? (apiListings as unknown as ListingCardData[]) || []
+        ? ((apiListings as unknown as ListingCardData[]) || []).filter(
+              (listing) => listing.availableDateRanges && listing.availableDateRanges.length > 0
+          )
         : localFilteredListings;
 
     return (

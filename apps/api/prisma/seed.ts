@@ -234,6 +234,15 @@ Tu auras ton propre espace avec :
                     { title: 'Télétravail', description: 'Présence constante', icon: 'laptop' },
                 ],
             },
+            availability: {
+                create: [
+                    {
+                        startDate: new Date(),
+                        endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 jours
+                        isBlocked: false,
+                    },
+                ],
+            },
         },
     });
 
