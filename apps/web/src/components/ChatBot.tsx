@@ -8,9 +8,10 @@ import { useAuth } from '../contexts/AuthContext';
  * Assistant IA connecté à n8n
  * Utilise ChatModal comme base
  *
- * TODO API:
- * - POST n8n webhook → envoyer un message au chatbot
- * - GET /api/chat/history → historique des conversations
+ * API Status:
+ * - POST /woobot/chat ✓ (microservice Python)
+ * - GET /woobot/initial-message ✓
+ * - GET /api/chat/history → non implémenté
  */
 
 interface ChatBotProps {

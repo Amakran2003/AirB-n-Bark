@@ -206,7 +206,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // OAuth Apple
     const loginWithApple = useCallback(async (): Promise<boolean> => {
-        // TODO: POST /api/auth/oauth/apple
+        // Non implémenté: Sign in with Apple
         // En production: utiliser Sign in with Apple JS
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
@@ -214,7 +214,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // OAuth Facebook
     const loginWithFacebook = useCallback(async (): Promise<boolean> => {
-        // TODO: POST /api/auth/oauth/facebook
+        // Non implémenté: Facebook Login
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
     }, []);

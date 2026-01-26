@@ -10,11 +10,12 @@ import { formatMessageTime } from '../utils/dateFormatters';
  * ==================== PAGE MESSAGES ====================
  * Page de messagerie pour contacter les hotes
  * Utilise ChatModal
- * TODO API:
- * - GET /api/conversations → liste des conversations
- * - GET /api/conversations/:id/messages → messages d'une conversation
- * - POST /api/conversations/:id/messages → envoyer un message
- * - WebSocket pour temps reel
+ * API Status: Non implémenté (mock data)
+ * Endpoints prévus:
+ * - GET /api/conversations
+ * - GET /api/conversations/:id/messages
+ * - POST /api/conversations/:id/messages
+ * - WebSocket pour temps réel
  */
 
 interface MessagesProps {
@@ -64,7 +65,7 @@ export const Messages = ({ onTabChange }: MessagesProps) => {
                 };
             });
 
-            // TODO: Appel API réel
+            // API non implémentée - simulation locale
             // await fetch(`/api/conversations/${selectedConversation.id}/messages`, { ... });
 
             // Simuler réponse de l'hôte

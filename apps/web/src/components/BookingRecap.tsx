@@ -28,10 +28,10 @@ import { useSwipeBack } from '../hooks/useSwipeBack';
  * - Bouton Next → Auth si pas connecte
  * - Swipe retour comme sur ListingDetails
  *
- * TODO API:
- * - GET /api/listings/:id/availability → verifier la disponibilite
- * - GET /api/listings/:id/price → calculer le prix (avec promos)
- * - POST /api/bookings/quote → obtenir un devis
+ * API Status:
+ * - GET /api/listings/:id ✓ (vérifier disponibilité via dates)
+ * - GET /api/listings/:id/price → prix calculé côté client
+ * - POST /api/bookings ✓ (création de réservation)
  */
 
 interface BookingRecapProps {

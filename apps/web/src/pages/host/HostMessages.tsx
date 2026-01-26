@@ -9,11 +9,12 @@ import { formatMessageTime } from '../../utils/dateFormatters';
  * Page de messages pour les hotes
  * Utilise ChatModal (même composant que Messages guest - DRY)
  *
- * TODO API:
- * - GET /api/host/conversations → liste des conversations
- * - GET /api/host/conversations/:id/messages → messages d'une conversation
- * - POST /api/host/conversations/:id/messages → envoyer un message
- * - WebSocket pour temps reel
+ * API Status: Non implémenté (mock data)
+ * Endpoints prévus:
+ * - GET /api/host/conversations
+ * - GET /api/host/conversations/:id/messages
+ * - POST /api/host/conversations/:id/messages
+ * - WebSocket pour temps réel
  */
 
 interface Message {
@@ -176,7 +177,7 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                 )
             );
 
-            // TODO: Appel API réel
+            // API non implémentée - simulation locale
             // await fetch(`/api/host/conversations/${selectedConversation.id}/messages`, { ... });
 
             // Simuler réponse du guest

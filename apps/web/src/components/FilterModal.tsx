@@ -179,7 +179,7 @@ export const FilterModal = () => {
     const handleApply = () => {
         setFilters(localFilters);
         closeFilterModal();
-        // TODO: Appeler l'API avec les nouveaux filtres
+        // Note: Le filtrage se fait côté client via FilterContext
         // fetchFilteredListings(localFilters);
     };
 

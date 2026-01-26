@@ -270,11 +270,11 @@ export const buildFilterQueryParams = (filters: FilterState): URLSearchParams =>
 
 /**
  * Fonction pour appeler l'API avec les filtres
- * TODO: Connecter à l'API réelle
+ * Note: Actuellement retourne null, le filtrage est fait côté client
  */
 export const fetchFilteredListings = async (filters: FilterState) => {
     const params = buildFilterQueryParams(filters);
-    // TODO: Remplacer par l'appel API réel
+    // Pour activer l'API: décommenter ci-dessous
     // const url = `/api/listings?${params.toString()}`;
     // const response = await fetch(url);
     // return response.json();

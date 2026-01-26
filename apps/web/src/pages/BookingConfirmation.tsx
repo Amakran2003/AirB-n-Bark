@@ -23,10 +23,10 @@ import { api } from '../services/api';
  * - Contact proprietaire
  * - Instructions d'acces au logement
  *
- * TODO API:
- * - GET /api/bookings/:id → recuperer les details de la reservation
- * - GET /api/listings/:id/access → instructions d'acces (code, wifi, parking)
- * - POST /api/bookings/:id/contact-host → envoyer un message a l'hote
+ * API Status:
+ * - GET /api/bookings/:id ✓ (détails réservation)
+ * - GET /api/listings/:id → instructions stockées dans listing.instructions ✓
+ * - POST /api/bookings/:id/contact-host → non implémenté
  */
 
 interface ListingInstructions {

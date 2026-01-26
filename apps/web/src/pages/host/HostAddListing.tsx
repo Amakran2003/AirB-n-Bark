@@ -54,12 +54,12 @@ import type {
  * 2. Fais ressortir ta niche (équipements, photos, titre, description)
  * 3. Finalise et publie (prix, règles, disponibilités, récap)
  *
- * TODO API:
- * - POST /api/listings → créer une annonce
- * - POST /api/listings/:id/images → upload images
- * - GET /api/geocode?q=... → recherche d'adresse
- * - GET /api/listings/:id → récupérer une annonce (pour édition)
- * - PUT /api/listings/:id → modifier une annonce
+ * API Status:
+ * - POST /api/listings ✓ (création)
+ * - POST /api/listings/:id/images → images en base64 inline
+ * - GET /api/geocode?q=... → non implémenté (Nominatim utilisé)
+ * - GET /api/listings/:id ✓ (récupération)
+ * - PUT /api/listings/:id ✓ (modification)
  */
 
 interface HostAddListingProps {
@@ -329,7 +329,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         addressTimeoutRef.current = setTimeout(async () => {
             setIsSearchingAddress(true);
             try {
-                // TODO API: Remplacer par GET /api/geocode?q=...
+                // Utilise Nominatim (OpenStreetMap) pour le géocodage
                 const response = await fetch(
                     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&countrycodes=fr&limit=5&addressdetails=1`,
                     {

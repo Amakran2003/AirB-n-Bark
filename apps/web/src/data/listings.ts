@@ -1142,12 +1142,12 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
  * ==================== FONCTIONS UTILITAIRES ====================
  * Helpers pour récupérer les données (simule une API)
  *
- * TODO API:
- * - GET /api/listings → remplacer getListings()
- * - GET /api/listings/:id → remplacer getListingById()
- * - GET /api/listings?favorites=id1,id2 → remplacer getFavorites()
- * - GET /api/listings?type=niche → remplacer getListingsByType()
- * - GET /api/listings?antiCat=true → remplacer getAntiCatListings()
+ * API Status: Ces fonctions sont des helpers mock.
+ * L'API réelle est disponible via api.listings:
+ * - GET /api/listings ✓ (remplace getListings())
+ * - GET /api/listings/:id ✓ (remplace getListingById())
+ * - GET /api/listings?type=... ✓ (filtrage par type)
+ * - GET /api/listings?antiCat=true ✓ (filtrage anti-chat)
  */
 
 // Clé localStorage pour les annonces créées par les hôtes

@@ -89,12 +89,12 @@ const HighlightIcon = ({ type }: { type: string }) => {
 /**
  * ==================== COMPOSANT PRINCIPAL ====================
  *
- * TODO API:
- * - GET /api/listings/:id → details complets de l'annonce
- * - GET /api/listings/:id/reviews → avis (avec pagination)
- * - GET /api/listings/:id/availability → calendrier de disponibilite
- * - POST /api/listings/:id/share → tracker les partages (analytics)
- * - GET /api/listings/:id/similar → annonces similaires
+ * API Status:
+ * - GET /api/listings/:id ✓ (détails complets)
+ * - GET /api/listings/:id/reviews → non implémenté (reviews inline)
+ * - GET /api/listings/:id/availability → non implémenté
+ * - POST /api/listings/:id/share → non implémenté
+ * - GET /api/listings/:id/similar → non implémenté
  */
 interface ListingDetailsProps {
     listing: ListingFullData;

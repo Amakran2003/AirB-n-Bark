@@ -37,7 +37,7 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
         averageRating: 0,
     });
 
-    const isVerified = false; // TODO: GET /api/host/verification-status
+    const isVerified = false; // Non implémenté: /api/host/verification-status
 
     // Charger les stats au montage
     useEffect(() => {

@@ -71,12 +71,6 @@ const validateEmail = (email: string): boolean => {
  * Utilise les classes CSS existantes du design system
  * Swipe down pour fermer
  * Gestion du clavier iOS (visualViewport API)
- *
- * TODO API:
- * - POST /api/auth/register → inscription avec email/password
- * - POST /api/auth/login → connexion
- * - POST /api/auth/oauth/google → OAuth Google
- * - POST /api/auth/oauth/apple → OAuth Apple (Sign in with Apple)
  */
 export const AuthModal = () => {
     const {
@@ -213,7 +207,6 @@ export const AuthModal = () => {
 
         setIsLoading(true);
         try {
-            // TODO API: POST /api/auth/login
             const result = await login(email, password);
             if (result.success) {
                 setIsSuccess(true);
@@ -270,7 +263,6 @@ export const AuthModal = () => {
 
         setIsLoading(true);
         try {
-            // TODO API: POST /api/auth/register
             const result = await register(pseudo, email, password);
             if (result.success) {
                 setIsSuccess(true);

@@ -13,12 +13,12 @@ import { formatDateRange, calculateNights } from '../utils/dateFormatters';
  * - Reservations a venir / passees
  * - Possibilite d'annuler ou modifier
  *
- * TODO API:
- * - GET /api/bookings → recuperer les reservations de l'utilisateur
- * - GET /api/bookings/:id → details d'une reservation
- * - PUT /api/bookings/:id → modifier les dates
- * - DELETE /api/bookings/:id → annuler une reservation
- * - POST /api/bookings/:id/cancel → annulation avec calcul des frais
+ * API Status:
+ * - GET /api/bookings ✓ (réservations utilisateur)
+ * - GET /api/bookings/:id ✓ (détails réservation)
+ * - PUT /api/bookings/:id → non implémenté (modifier dates)
+ * - DELETE /api/bookings/:id → utiliser cancel à la place
+ * - POST /api/bookings/:id/cancel ✓ (annulation)
  */
 
 interface TripsProps {
@@ -246,7 +246,7 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                 <button
                                     className="w-full py-4 px-4 text-left text-body-md border border-(--color-border-light) rounded-xl hover:bg-secondary transition-colors"
                                     onClick={() => {
-                                        // TODO: Implémenter la modification des dates
+                                        // Fonctionnalité non implémentée
                                         setShowModifyModal(false);
                                         alert('Fonctionnalité à venir : Modifier les dates');
                                     }}

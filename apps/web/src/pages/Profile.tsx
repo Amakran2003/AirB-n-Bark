@@ -9,12 +9,12 @@ import type { Language } from '../types/api.types';
  * ==================== PAGE PROFIL ====================
  * Profil du toutou sur AirB'n'Bark
  *
- * TODO API:
- * - GET /api/users/:id/profile → recuperer les donnees du profil
- * - PUT /api/users/:id/profile → mettre a jour le profil
- * - POST /api/users/:id/avatar → upload de la photo de profil
- * - PUT /api/users/:id/password → changer le mot de passe
- * - PUT /api/users/:id/languages → mettre a jour les langues
+ * API Status:
+ * - GET /api/auth/me ✓ (profil utilisateur)
+ * - PUT /api/auth/profile ✓ (avatar)
+ * - POST /api/auth/change-password ✓
+ * - PUT /api/auth/language ✓
+ * - PUT /api/users/:id/profile { email } → non implémenté
  */
 
 interface ProfileProps {
@@ -64,7 +64,7 @@ export const Profile = ({
     };
 
     const handleSaveEmail = async () => {
-        // TODO: PUT /api/users/:id/profile { email: tempEmail }
+        // Non implémenté: PUT /api/auth/profile { email }
         setEmail(tempEmail);
         setIsEditingEmail(false);
     };

@@ -98,7 +98,7 @@ const mapApiBooking = (apiBooking: ApiBooking): Booking => ({
     endDate: apiBooking.endDate,
     dogsCount: apiBooking.guests,
     totalPrice: apiBooking.totalPrice,
-    hasFreeCancellation: true, // TODO: get from listing
+    hasFreeCancellation: true, // Valeur par défaut (listing.hasFreeCancellation non inclus dans API)
     status: apiBooking.status === 'completed' ? 'confirmed' : apiBooking.status,
     createdAt: apiBooking.createdAt,
     updatedAt: apiBooking.createdAt,
@@ -256,8 +256,7 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
         return newBooking;
     }, []);
 
-    // Modifier une réservation
-    // TODO: Connecter à l'API backend
+    // Modifier une réservation (localStorage only - pas d'endpoint API)
     const updateBooking = useCallback(
         async (id: string, data: UpdateBookingData): Promise<Booking | null> => {
             setIsLoading(true);
@@ -276,7 +275,7 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
                 updatedAt: new Date().toISOString(),
             };
 
-            // TODO: PUT vers l'API
+            // Mode local uniquement
             setBookings((prev) => prev.map((b) => (b.id === id ? updatedBooking : b)));
             setIsLoading(false);
             return updatedBooking;

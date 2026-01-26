@@ -22,10 +22,10 @@ const USE_API = import.meta.env.VITE_USE_API === 'true';
  * - Swipe haut / clic = ouvrir la page description
  * - Bottom navigation
  *
- * TODO API:
- * - GET /api/listings → recuperer les annonces (avec pagination)
- * - GET /api/listings?filters=... → filtrage cote serveur
- * - POST /api/listings/:id/skip → enregistrer un swipe gauche (analytics)
+ * API Status:
+ * - GET /api/listings ✓ (pagination incluse)
+ * - GET /api/listings?filters=... ✓ (filtrage côté serveur)
+ * - POST /api/listings/:id/skip → non implémenté (analytics)
  */
 
 interface HomeProps {
