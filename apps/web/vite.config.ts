@@ -9,13 +9,17 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png'],
+      injectRegister: 'auto', // Injecte le SW de manière non-bloquante
+      devOptions: {
+        enabled: false // Désactive le service worker en dev pour éviter le cache
+      },
+      includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: "AirB'n'Bark",
+        name: "AirbnBark",
         short_name: 'AirBnBark',
-        description: 'Pet-sitting made easy - Find the perfect home for your furry friend',
-        theme_color: '#4f46e5',
-        background_color: '#ffffff',
+        description: 'Le Airbnb des toutous - Trouve la niche parfaite pour tes vacances !',
+        theme_color: '#3B82F6',
+        background_color: '#3B82F6',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',

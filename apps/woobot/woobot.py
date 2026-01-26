@@ -1,6 +1,6 @@
 import random
 
-lang = 'french'
+lang = 'english'
 
 def woobot():
     word = choose_main_word()
@@ -29,29 +29,23 @@ def woobot():
             punctuations.remove(':')
 
 
-        # lang = get_language()
         match (punctuation):
             case '?':
                 if (lang) == 'french':
                     woobot_output += ' ' + punctuation
-                    print(woobot_output)
                     return woobot_output
                 else:
                     woobot_output += punctuation
-                    print(woobot_output)
                     return woobot_output
             case '!':
                 if (lang) == 'french':
                     woobot_output += ' ' + punctuation
-                    print(woobot_output)
                     return woobot_output
                 else:
                     woobot_output += punctuation
-                    print(woobot_output)
                     return woobot_output
             case '.':
                 woobot_output += punctuation
-                print(woobot_output)
                 return woobot_output
             case ':':
                 if (lang) == 'french':
@@ -66,12 +60,13 @@ def woobot():
 
 
 def choose_main_word():
-    # lang = get_language()
     match (lang):
         case 'french':
             return 'ouaf'
         case 'english':
             return 'woof'
+        case 'german':
+            return 'wuff'
         case 'icelandic':
             return 'voff'
         case _:

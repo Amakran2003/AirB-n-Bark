@@ -1,5 +1,1610 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* ============================================================
+   AIRBNBARK DESIGN SYSTEM
+   Fichier de styles réutilisables pour toute l'application
+   ============================================================ */
+
+/* ==================== SAFE AREA FIX iOS PWA ==================== */
+html,
+body {
+    background-color: #3b82f6; /* Bleu du splash - changé dynamiquement après */
+    min-height: 100%;
+    min-height: 100dvh;
+}
+
+/* ==================== VARIABLES CSS ==================== */
+:root {
+    /* Couleurs primaires (brand) */
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-primary-light: #dbeafe;
+    --color-primary-lighter: #eff6ff;
+    --color-secondary: #222222;
+    --color-secondary-dark: #313131;
+
+    /* Couleurs neutres */
+    --color-text-primary: #222222;
+    --color-text-secondary: #717171;
+    --color-text-tertiary: #b0b0b0;
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f7f7f7;
+    --color-bg-tertiary: #e5e5e5;
+    --color-border: #dddddd;
+    --color-border-light: #ebebeb;
+
+    /* Couleurs fonctionnelles */
+    --color-star: #ffd700;
+    --color-success: #16a34a;
+    --color-success-light: #dcfce7;
+    --color-success-lighter: #f0fdf4;
+    --color-success-dark: #15803d;
+    --color-error: #dc2626;
+    --color-error-light: #fee2e2;
+    --color-error-lighter: #fef2f2;
+    --color-error-dark: #b91c1c;
+    --color-warning: #f59e0b;
+    --color-warning-light: #fef3c7;
+    --color-warning-lighter: #fffbeb;
+    --color-warning-dark: #b45309;
+
+    /* Espacements */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 -2px 14px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== BASE ==================== */
+html {
+    height: 100%;
+}
 
 body {
-  @apply min-h-screen bg-white text-gray-800 antialiased;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+/* ==================== TYPOGRAPHIE ==================== */
+/* Titres */
+.text-h1 {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.text-h2 {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+}
+
+.text-h3 {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+}
+
+.text-h4 {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+}
+
+/* Corps de texte */
+.text-body {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+.text-body-sm {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+.text-body-md {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+/* Texte secondaire */
+.text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+    color: var(--color-text-tertiary);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-error {
+    color: var(--color-error);
+}
+
+.border-error {
+    border-color: var(--color-error);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+/* Couleurs brand */
+.text-brand {
+    color: var(--color-primary-dark); /* Meilleur contraste pour l'accessibilité */
+}
+
+.bg-brand {
+    background-color: var(--color-primary);
+}
+
+.border-brand {
+    border-color: var(--color-primary);
+}
+
+/* Backgrounds */
+.bg-primary {
+    background-color: var(--color-bg-primary);
+}
+
+.bg-secondary {
+    background-color: var(--color-bg-secondary);
+}
+
+.bg-tertiary {
+    background-color: var(--color-bg-tertiary);
+}
+
+/* Backgrounds page */
+.bg-page {
+    background-color: var(--color-bg-secondary);
+}
+
+/* Bordures */
+.border-light {
+    border-color: var(--color-border-light);
+}
+
+.border-default {
+    border-color: var(--color-border);
+}
+
+/* Backgrounds fonctionnels */
+.bg-success-light {
+    background-color: var(--color-success-light);
+}
+
+.bg-success-lighter {
+    background-color: var(--color-success-lighter);
+}
+
+.bg-error-light {
+    background-color: var(--color-error-light);
+}
+
+.bg-error {
+    background-color: var(--color-error);
+}
+
+.bg-error-dark {
+    background-color: color-mix(in srgb, var(--color-error), black 15%);
+}
+
+.bg-error-lighter {
+    background-color: var(--color-error-lighter);
+}
+
+.bg-warning-light {
+    background-color: var(--color-warning-light);
+}
+
+.bg-warning-lighter {
+    background-color: var(--color-warning-lighter);
+}
+
+.bg-brand-light {
+    background-color: var(--color-primary-light);
+}
+
+.bg-brand-lighter {
+    background-color: var(--color-primary-lighter);
+}
+
+/* Icônes */
+.icon {
+    color: var(--color-text-primary);
+}
+
+.icon-secondary {
+    color: var(--color-text-secondary);
+}
+
+/* Labels et captions */
+.text-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.text-caption {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+/* ==================== BOUTONS ==================== */
+/* Bouton primaire - Actions principales (Reserve, Submit, etc.) */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:active {
+    background-color: var(--color-primary-dark);
+}
+
+/* Bouton désactivé - Même style que primary mais grisé */
+.btn-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: #e0e0e0;
+    color: #9e9e9e;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: not-allowed;
+}
+
+/* Bouton secondaire - Actions secondaires (Show more, Cancel, etc.) */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 12px 22px;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+}
+
+.btn-secondary:active {
+    background-color: var(--color-bg-secondary);
+}
+
+/* Bouton icône - Pour les actions avec icône seule (like, share, back, etc.) */
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-bg-primary);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-icon:active {
+    background-color: var(--color-bg-secondary);
+}
+
+/* Bouton danger */
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: var(--color-error);
+    color: white;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-danger:active {
+    background-color: var(--color-error-dark);
+}
+
+/* Bouton success */
+.btn-success {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 14px 42px;
+    background-color: var(--color-success);
+    color: white;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-success:active {
+    background-color: var(--color-success-dark);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+/* ==================== INPUTS ==================== */
+.input,
+.input-field {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-primary) !important;
+    border: 1px solid var(--color-border-light) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    transition: border-color 0.2s !important;
+}
+
+.input:focus,
+.input-field:focus {
+    border-color: var(--color-primary) !important;
+}
+
+.input::placeholder,
+.input-field::placeholder {
+    color: var(--color-text-tertiary) !important;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.input-error {
+    border-color: var(--color-error);
+}
+
+.input-helper {
+    margin-top: var(--spacing-xs);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.input-error-text {
+    margin-top: var(--spacing-xs);
+    font-size: 12px;
+    color: var(--color-error);
+}
+
+/* ==================== CARDS ==================== */
+.review-card {
+    padding: var(--spacing-md) 0;
+}
+
+/* ==================== DIVIDERS ==================== */
+.divider {
+    border: none;
+    border-top: 1px solid var(--color-border-light);
+    margin: var(--spacing-lg) 0;
+}
+
+/* ==================== BADGES ==================== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.badge-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.badge-success {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.badge-error {
+    background-color: var(--color-error);
+    color: white;
+}
+
+/* Status badges */
+.status-pending {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
+.status-confirmed {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+
+.status-cancelled {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+}
+
+.status-rejected {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+}
+
+.status-completed {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.status-active {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+
+.status-inactive {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
+/* ==================== ALERTS ==================== */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid;
+}
+
+.alert-error {
+    background-color: var(--color-error-lighter);
+    border-color: var(--color-error-light);
+    color: var(--color-error-dark);
+}
+
+.alert-warning {
+    background-color: var(--color-warning-lighter);
+    border-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
+.alert-success {
+    background-color: var(--color-success-lighter);
+    border-color: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+
+.alert-info {
+    background-color: var(--color-primary-lighter);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary-dark);
+}
+
+/* ==================== RATING ==================== */
+.rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.rating-star {
+    color: var(--color-star);
+}
+
+/* ==================== PRIX ==================== */
+.price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-xs);
+}
+
+.price-amount {
+    font-size: 20px;
+    text-decoration: underline;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.price-period {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+/* ==================== LISTS ==================== */
+.list-item {
+    font-weight: 300;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.list-item-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-item-content {
+    flex: 1;
+}
+
+/* ==================== BOTTOM NAVBAR ==================== */
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: var(--spacing-sm) 0;
+    padding-bottom: calc(var(--spacing-xs) + env(safe-area-inset-bottom));
+    background-color: var(--color-bg-primary);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    gap: 2px;
+}
+
+.bottom-nav-item:active {
+    opacity: 0.6;
+}
+
+.bottom-nav-item-active {
+    color: var(--color-text-primary);
+}
+
+/* ==================== HOME PAGE ==================== */
+.header-home {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
+    background-color: transparent;
+}
+
+.view-listings-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 12px 20px;
+    background-color: var(--color-text-primary);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.view-listings-button:active {
+    opacity: 0.9;
+}
+
+/* ==================== SWIPE CARDS (STYLE TINDER) ==================== */
+
+/* Conteneur de la zone de swipe */
+.swipe-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    padding-top: 6vh;
+    padding-bottom: 8vh; /* Espace pour le hint + navbar */
+    overflow: hidden;
+}
+
+/* Carte swipable */
+.swipe-card {
+    position: absolute;
+    width: calc(100% - var(--spacing-xl));
+    max-width: 380px;
+    height: auto;
+    aspect-ratio: 9 / 14;
+    max-height: calc(100% - 20px);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.17);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+/* Ajustement pour petits écrans (iPhone SE, 375x667) */
+@media (max-height: 700px) {
+    .swipe-card {
+        aspect-ratio: 9 / 13;
+        max-height: calc(100% - 40px);
+    }
+}
+
+/* Image de fond de la carte */
+.swipe-card-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+/* Overlay gradient pour lisibilité du texte */
+.swipe-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.8) 50%,
+        rgba(0, 0, 0, 0.6) 75%,
+        transparent 100%
+    );
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+/* Contenu texte de la carte */
+.swipe-card-content {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-lg);
+    color: white;
+}
+
+/* Badge rating */
+.swipe-card-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Titre de l'annonce */
+.swipe-card-title {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: var(--spacing-xs);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Localisation */
+.swipe-card-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Footer avec prix et host */
+.swipe-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.swipe-card-price {
+    font-size: 18px;
+}
+
+.swipe-card-host img {
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== INDICATEURS DE SWIPE ==================== */
+.swipe-indicator {
+    position: absolute;
+    top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.swipe-indicator-like {
+    right: 50px;
+    color: green;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: rotate(15deg);
+}
+
+.swipe-indicator-nope {
+    left: 50px;
+    color: red;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: rotate(-15deg);
+}
+
+.swipe-indicator-up {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: blue;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Indicateur "Glisser pour voir" - dans la Home */
+.swipe-up-hint {
+    position: fixed;
+    bottom: calc(60px + env(safe-area-inset-bottom)); /* Au-dessus de la navbar + safe area */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    animation: bounce-up 2s infinite;
+}
+
+@keyframes bounce-up {
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+/* Transition d'ouverture vers la page détails */
+.swipe-container.swipe-transitioning {
+    opacity: 0;
+    transform: scale(1.1);
+    transition:
+        opacity 0.3s,
+        transform 0.3s;
+}
+
+/* ==================== BOUTONS D'ACTION ==================== */
+.swipe-card-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.swipe-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.swipe-btn:active {
+    transform: scale(0.95);
+}
+
+.swipe-btn-nope {
+    background: white;
+    color: #ef4444;
+}
+
+.swipe-btn-like {
+    background: white;
+    color: #22c55e;
+}
+
+.swipe-btn-undo {
+    background: white;
+    color: var(--color-warning);
+    width: 60px;
+    height: 60px;
+}
+
+/* ==================== ÉTAT VIDE ==================== */
+.swipe-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.swipe-empty-icon {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Badge favoris dans le header */
+.favorites-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Bouton primaire */
+/* .btn-primary {
+    padding: 14px 28px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background-color 0.2s;
+} */
+
+.btn-primary:active {
+    opacity: 0.9;
+}
+
+/* ==================== PAGE PAYMENT ==================== */
+/* Container principal */
+.payment-container {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background-color: var(--color-bg-secondary);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.payment-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    background-color: var(--color-bg-primary);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.payment-header-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.payment-back-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.payment-back-btn:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+/* Content scrollable */
+.payment-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.payment-content-inner {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Stripe Security Banner */
+.payment-security-banner {
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.payment-security-icon {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-security-icon svg {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.payment-security-text {
+    flex: 1;
+}
+
+.payment-security-title {
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.payment-security-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+}
+
+.payment-stripe-logo {
+    height: 24px;
+    opacity: 0.9;
+    filter: invert(1);
+}
+
+/* Recap reservation */
+.payment-recap {
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.payment-recap-inner {
+    display: flex;
+    gap: 12px;
+}
+
+.payment-recap-image {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.payment-recap-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.payment-recap-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.payment-recap-dates {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.payment-recap-dogs {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.payment-recap-price {
+    text-align: right;
+}
+
+.payment-recap-amount {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.payment-recap-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+/* Card section */
+.payment-card-section {
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.payment-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.payment-section-header svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-secondary);
+}
+
+.payment-section-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+
+/* Apple Pay / Google Pay buttons */
+.payment-wallet-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.payment-wallet-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.payment-wallet-btn-apple {
+    background-color: #000;
+    color: white;
+}
+
+.payment-wallet-btn-google {
+    background-color: var(--color-bg-primary);
+    border: 2px solid var(--color-border-light);
+    color: var(--color-text-secondary);
+}
+
+.payment-wallet-hint {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* Divider */
+.payment-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.payment-divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border-light);
+}
+
+.payment-divider-text {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+}
+
+/* Card brands */
+.payment-card-brands {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.payment-card-brands-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.payment-card-brands-label svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-secondary);
+}
+
+.payment-card-brands-label span {
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.payment-card-brands-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.payment-card-brand {
+    width: 32px;
+    height: 20px;
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-card-brand-amex {
+    background-color: #006FCF;
+}
+
+.payment-card-brand-amex span {
+    color: white;
+    font-size: 6px;
+    font-weight: 700;
+}
+
+/* Card input fields */
+.payment-card-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payment-card-field {
+    padding: 12px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-secondary);
+    transition: all 0.2s;
+}
+
+.payment-card-field-focused {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px #4f46e5;
+}
+
+.payment-card-field-complete {
+    border-color: var(--color-success);
+    background-color: var(--color-success-lighter);
+}
+
+.payment-card-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Error message */
+.payment-error {
+    margin-top: 12px;
+    padding: 10px;
+    background-color: var(--color-error-lighter);
+    border: 1px solid var(--color-error-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.payment-error svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-error);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.payment-error-text {
+    font-size: 12px;
+    color: var(--color-error-dark);
+}
+
+/* Test cards tooltip */
+.payment-test-cards {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.payment-test-cards-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    font-size: 12px;
+    color: #4f46e5;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.payment-test-cards-btn:hover {
+    color: #4338ca;
+}
+
+.payment-test-cards-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.payment-test-cards-btn span {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Tooltip backdrop */
+.payment-tooltip-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+}
+
+/* Tooltip content */
+.payment-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    z-index: 50;
+    width: 288px;
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--color-border-light);
+    padding: 12px;
+    animation: tooltip-enter 0.2s ease-out;
+}
+
+@keyframes tooltip-enter {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+.payment-tooltip-arrow {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-bg-primary);
+    border-right: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.payment-tooltip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.payment-tooltip-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.payment-tooltip-close {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.payment-tooltip-close:hover {
+    background-color: var(--color-bg-secondary);
+}
+
+.payment-tooltip-close svg {
+    width: 12px;
+    height: 12px;
+    color: var(--color-text-secondary);
+}
+
+.payment-tooltip-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.payment-test-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+}
+
+.payment-test-card-success {
+    background-color: var(--color-success-lighter);
+}
+
+.payment-test-card-success svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-success);
+}
+
+.payment-test-card-success .payment-test-card-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-success-dark);
+}
+
+.payment-test-card-success .payment-test-card-number {
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--color-success);
+}
+
+.payment-test-card-error {
+    background-color: var(--color-error-lighter);
+}
+
+.payment-test-card-error svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-error);
+}
+
+.payment-test-card-error .payment-test-card-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-error-dark);
+}
+
+.payment-test-card-error .payment-test-card-number {
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--color-error);
+}
+
+.payment-tooltip-hint {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Security footer */
+.payment-security-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.payment-security-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text-tertiary);
+}
+
+.payment-security-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+.payment-security-badge span {
+    font-size: 10px;
+}
+
+.payment-security-divider {
+    width: 1px;
+    height: 12px;
+    background-color: var(--color-border-light);
+}
+
+/* Footer avec bouton payer */
+.payment-footer {
+    flex-shrink: 0;
+    background-color: var(--color-bg-primary);
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-border-light);
+}
+
+.payment-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 14px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.payment-btn-active {
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+}
+
+.payment-btn-active:hover {
+    background: linear-gradient(to right, #4338ca, #6d28d9);
+}
+
+.payment-btn-active:active {
+    transform: scale(0.98);
+}
+
+.payment-btn-disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.payment-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.payment-btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.payment-terms {
+    text-align: center;
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    margin-top: 8px;
 }

@@ -1,0 +1,373 @@
+// ==================== PRISMA SCHEMA ====================
+// AirB-n-Bark - Base de données PostgreSQL
+// Microservice Listings + Auth + Bookings + Messages
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum ListingType {
+  niche      // Niche entière
+  nicholoc   // Chambre en coloc canine
+  nichortoir // Lit en dortoir
+}
+
+enum CancellationPolicy {
+  flexible  // Annulation gratuite 24h avant
+  moderate  // Annulation gratuite 5 jours avant
+  strict    // Pas de remboursement
+}
+
+enum BookingStatus {
+  pending    // En attente de confirmation host
+  confirmed  // Confirmée
+  cancelled  // Annulée par le guest
+  rejected   // Refusée par l'hôte
+  completed  // Terminée
+}
+
+enum UserRole {
+  guest
+  host
+  admin
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?   // Null si OAuth
+  name          String
+  avatar        String?
+  phone         String?
+  role          UserRole  @default(guest)
+  isHost        Boolean   @default(false)
+  isVerified    Boolean   @default(false)
+
+  // Host profile fields
+  isSuperHost     Boolean   @default(false)
+  hostingSince    DateTime?
+  responseRate    Int       @default(100) // Pourcentage 0-100
+  hostDescription String?
+
+  // Preferences
+  languageId      String?
+  language        Language? @relation(fields: [languageId], references: [id])
+
+  // OAuth
+  googleId      String?   @unique
+  appleId       String?   @unique
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  listings      Listing[]
+  bookingsAsGuest Booking[] @relation("GuestBookings")
+  bookingsAsHost  Booking[] @relation("HostBookings")
+  reviews       Review[]
+  sentMessages  Message[] @relation("SentMessages")
+  conversationsAsGuest Conversation[] @relation("GuestConversations")
+  conversationsAsHost  Conversation[] @relation("HostConversations")
+
+  @@index([email])
+  @@index([googleId])
+  @@index([appleId])
+}
+
+model Language {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  label     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model Listing {
+  id                  String             @id @default(uuid())
+  type                ListingType
+  title               String
+  subtitle            String
+  description         String
+
+  // Location
+  address             String
+  city                String
+  country             String             @default("France")
+  lat                 Float
+  lng                 Float
+
+  // Pricing
+  pricePerNight       Float
+  currency            String             @default("EUR")
+
+  // Capacity
+  maxDogs             Int                @default(1)
+  capacity            String             // "2 chiens max"
+
+  // Images
+  mainImage           String
+  images              String[]           // Array of image URLs
+
+  // Ratings
+  rating              Float              @default(0)
+  reviewsCount        Int                @default(0)
+
+  // Options
+  antiCatAvailable    Boolean            @default(false)
+  antiCatRiskScore    Int                @default(0)  // 0-100
+  antiCatExtraPrice   Float              @default(0)
+
+  // Policies
+  cancellationPolicy  CancellationPolicy @default(flexible)
+  hasFreeCancellation Boolean            @default(true)
+
+  // Instructions d'arrivée (JSON structuré)
+  instructions        Json?
+
+  // Status
+  isActive            Boolean            @default(true)
+  isPublished         Boolean            @default(false)
+
+  // Host
+  hostId              String
+  host                User               @relation(fields: [hostId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  // Relations
+  amenities           ListingAmenity[]
+  highlights          ListingHighlight[]
+  rooms               ListingRoom[]
+  rules               ListingRules?
+  availability        ListingAvailability[]
+  bookings            Booking[]
+  reviews             Review[]
+  conversations       Conversation[]
+
+  @@index([hostId])
+  @@index([city])
+  @@index([type])
+  @@index([pricePerNight])
+  @@index([rating])
+  @@index([isActive, isPublished])
+}
+
+model ListingAmenity {
+  id          String   @id @default(uuid())
+  name        String
+  icon        String   // flame, droplets, bone, etc.
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+model ListingHighlight {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  icon        String   // search, star, check, paw, shield
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+model ListingRoom {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  image       String
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+model ListingRules {
+  id              String   @id @default(uuid())
+  maxBarkHour     String   @default("22h00")
+  mustBeVaccinated Boolean @default(true)
+  mustBeNeutered  Boolean  @default(false)
+  allowsPuppies   Boolean  @default(true)
+  minAge          Int      @default(0)  // en mois
+  listingId       String   @unique
+  listing         Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model ListingAvailability {
+  id          String   @id @default(uuid())
+  startDate   DateTime
+  endDate     DateTime
+  isBlocked   Boolean  @default(false)  // true = non dispo
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@index([startDate, endDate])
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  bookingNumber   String        @unique  // BARK-XXXXXX
+
+  // Dates
+  startDate       DateTime
+  endDate         DateTime
+  nights          Int
+
+  // Details
+  guestsCount     Int           @default(1)  // nombre de chiens
+
+  // Pricing
+  pricePerNight   Float
+  totalPrice      Float
+  serviceFee      Float         @default(0)
+  antiCatFee      Float         @default(0)
+
+  // Status
+  status          BookingStatus @default(pending)
+
+  // References
+  listingId       String
+  listing         Listing       @relation(fields: [listingId], references: [id])
+  guestId         String
+  guest           User          @relation("GuestBookings", fields: [guestId], references: [id])
+  hostId          String
+  host            User          @relation("HostBookings", fields: [hostId], references: [id])
+
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+
+  // Relations
+  review          Review?
+  conversation    Conversation?
+
+  @@index([listingId])
+  @@index([guestId])
+  @@index([hostId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Float    // 1-5
+  content     String
+
+  // Author
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+
+  // Listing
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Booking (optional - for verified reviews)
+  bookingId   String?  @unique
+  booking     Booking? @relation(fields: [bookingId], references: [id])
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([listingId])
+  @@index([authorId])
+  @@index([rating])
+}
+
+model Conversation {
+  id          String    @id @default(uuid())
+
+  // Participants
+  guestId     String
+  guest       User      @relation("GuestConversations", fields: [guestId], references: [id])
+  hostId      String
+  host        User      @relation("HostConversations", fields: [hostId], references: [id])
+
+  // Context
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id])
+  bookingId   String?   @unique
+  booking     Booking?  @relation(fields: [bookingId], references: [id])
+
+  // Last message cache
+  lastMessage String?
+  lastMessageAt DateTime?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  messages    Message[]
+
+  @@unique([guestId, hostId, listingId])
+  @@index([guestId])
+  @@index([hostId])
+  @@index([listingId])
+}
+
+model Message {
+  id              String       @id @default(uuid())
+  content         String
+  isRead          Boolean      @default(false)
+
+  // Sender
+  senderId        String
+  sender          User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  // Conversation
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt       DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([isRead])
+}
+
+// ==================== ANALYTICS ====================
+
+model ListingView {
+  id          String   @id @default(uuid())
+  listingId   String
+  userId      String?  // Null if anonymous
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+  @@index([createdAt])
+}
+
+model ListingShare {
+  id          String   @id @default(uuid())
+  listingId   String
+  platform    String?  // twitter, facebook, copy, etc.
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+}
