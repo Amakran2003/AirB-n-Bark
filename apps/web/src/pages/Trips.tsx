@@ -101,23 +101,32 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                 {displayedBookings.length === 0 ? (
                     <EmptyState
                         icon={Calendar}
-                        title={activeTab === 'upcoming' ? 'Aucun voyage prévu' : 'Aucun voyage passé'}
-                        description={activeTab === 'upcoming'
-                            ? 'Swipe sur les annonces pour trouver ta prochaine niche de reve'
-                            : 'Tes anciens voyages s\'afficheront ici'}
+                        title={
+                            activeTab === 'upcoming' ? 'Aucun voyage prévu' : 'Aucun voyage passé'
+                        }
+                        description={
+                            activeTab === 'upcoming'
+                                ? 'Swipe sur les annonces pour trouver ta prochaine niche de reve'
+                                : "Tes anciens voyages s'afficheront ici"
+                        }
                     />
                 ) : (
                     <div className="p-4 space-y-4">
                         {displayedBookings.map((booking) => {
                             // Utiliser les données dénormalisées du booking, sinon fallback sur getListingById
-                            const listing = booking.listingTitle ? {
-                                id: booking.listingId,
-                                title: booking.listingTitle,
-                                subtitle: booking.listingLocation || '',
-                                image: booking.listingImage || '/placeholder-dog.svg',
-                                location: booking.listingLocation || '',
-                                price: booking.listingPrice || (booking.totalPrice / calculateNights(booking.startDate, booking.endDate)),
-                            } : getListingById(booking.listingId);
+                            const listing = booking.listingTitle
+                                ? {
+                                      id: booking.listingId,
+                                      title: booking.listingTitle,
+                                      subtitle: booking.listingLocation || '',
+                                      image: booking.listingImage || '/placeholder-dog.svg',
+                                      location: booking.listingLocation || '',
+                                      price:
+                                          booking.listingPrice ||
+                                          booking.totalPrice /
+                                              calculateNights(booking.startDate, booking.endDate),
+                                  }
+                                : getListingById(booking.listingId);
 
                             if (!listing) return null;
 
@@ -163,7 +172,10 @@ export const Trips = ({ onTabChange }: TripsProps) => {
                                             <div className="flex items-center gap-1 mt-2 text-caption text-secondary">
                                                 <Calendar className="w-4 h-4" />
                                                 <span>
-                                                    {formatDateRange(booking.startDate, booking.endDate)}
+                                                    {formatDateRange(
+                                                        booking.startDate,
+                                                        booking.endDate
+                                                    )}
                                                 </span>
                                             </div>
 
@@ -258,93 +270,108 @@ export const Trips = ({ onTabChange }: TripsProps) => {
             )}
 
             {/* Modal Confirmation Annulation */}
-            {showCancelModal && selectedBooking && (() => {
-                const hasFreeCancellation = selectedBooking.hasFreeCancellation;
-                const cancellationFee = hasFreeCancellation
-                    ? 0
-                    : Math.round(selectedBooking.totalPrice * CANCELLATION_FEE_PERCENT);
-                const refundAmount = selectedBooking.totalPrice - cancellationFee;
+            {showCancelModal &&
+                selectedBooking &&
+                (() => {
+                    const hasFreeCancellation = selectedBooking.hasFreeCancellation;
+                    const cancellationFee = hasFreeCancellation
+                        ? 0
+                        : Math.round(selectedBooking.totalPrice * CANCELLATION_FEE_PERCENT);
+                    const refundAmount = selectedBooking.totalPrice - cancellationFee;
 
-                return (
-                    <div className="fixed inset-0 z-200 bg-black/50 flex items-center justify-center p-6">
-                        <div className="w-full max-w-sm bg-white rounded-2xl p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                    hasFreeCancellation ? 'bg-success-light' : 'bg-error-light'
-                                }`}>
-                                    {hasFreeCancellation ? (
-                                        <Check className="w-6 h-6 text-success" />
-                                    ) : (
-                                        <AlertTriangle className="w-6 h-6 text-error" />
-                                    )}
+                    return (
+                        <div className="fixed inset-0 z-200 bg-black/50 flex items-center justify-center p-6">
+                            <div className="w-full max-w-sm bg-white rounded-2xl p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div
+                                        className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                            hasFreeCancellation
+                                                ? 'bg-success-light'
+                                                : 'bg-error-light'
+                                        }`}
+                                    >
+                                        {hasFreeCancellation ? (
+                                            <Check className="w-6 h-6 text-success" />
+                                        ) : (
+                                            <AlertTriangle className="w-6 h-6 text-error" />
+                                        )}
+                                    </div>
+                                    <h2 className="text-h2">Annuler ton séjour ?</h2>
                                 </div>
-                                <h2 className="text-h2">Annuler ton séjour ?</h2>
-                            </div>
 
-                            {hasFreeCancellation ? (
-                                <div className="mb-6">
-                                    <div className="flex items-center gap-2 p-3 bg-success-lighter border border-(--color-success-light) rounded-xl mb-3">
-                                        <Check className="w-5 h-5 text-success shrink-0" />
-                                        <p className="text-sm text-(--color-success-dark)">
-                                            Annulation gratuite ! Tu seras rembourse integralement
+                                {hasFreeCancellation ? (
+                                    <div className="mb-6">
+                                        <div className="flex items-center gap-2 p-3 bg-success-lighter border border-(--color-success-light) rounded-xl mb-3">
+                                            <Check className="w-5 h-5 text-success shrink-0" />
+                                            <p className="text-sm text-(--color-success-dark)">
+                                                Annulation gratuite ! Tu seras rembourse
+                                                integralement
+                                            </p>
+                                        </div>
+                                        <p className="text-body text-secondary">
+                                            Montant remboursé :{' '}
+                                            <span className="font-semibold text-success">
+                                                €{refundAmount}
+                                            </span>
                                         </p>
                                     </div>
-                                    <p className="text-body text-secondary">
-                                        Montant remboursé : <span className="font-semibold text-success">€{refundAmount}</span>
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="mb-6">
-                                    <div className="flex items-start gap-2 p-3 bg-warning-lighter border border-(--color-warning-light) rounded-xl mb-3">
-                                        <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm text-(--color-warning-dark) font-medium">
-                                                Aie, des frais s'appliquent
-                                            </p>
-                                            <p className="text-sm text-warning mt-1">
-                                                Cette niche n'offre pas l'annulation gratuite.
-                                                {Math.round(CANCELLATION_FEE_PERCENT * 100)}% de frais seront prélevés sur tes croquettes.
-                                            </p>
+                                ) : (
+                                    <div className="mb-6">
+                                        <div className="flex items-start gap-2 p-3 bg-warning-lighter border border-(--color-warning-light) rounded-xl mb-3">
+                                            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm text-(--color-warning-dark) font-medium">
+                                                    Aie, des frais s'appliquent
+                                                </p>
+                                                <p className="text-sm text-warning mt-1">
+                                                    Cette niche n'offre pas l'annulation gratuite.
+                                                    {Math.round(CANCELLATION_FEE_PERCENT * 100)}% de
+                                                    frais seront prélevés sur tes croquettes.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 text-body">
+                                            <div className="flex justify-between">
+                                                <span className="text-secondary">Montant payé</span>
+                                                <span>€{selectedBooking.totalPrice}</span>
+                                            </div>
+                                            <div className="flex justify-between text-error">
+                                                <span>Frais d'annulation</span>
+                                                <span>-€{cancellationFee}</span>
+                                            </div>
+                                            <div className="flex justify-between font-semibold pt-2 border-t border-(--color-border-light)">
+                                                <span>Montant remboursé</span>
+                                                <span className="text-success">
+                                                    €{refundAmount}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-2 text-body">
-                                        <div className="flex justify-between">
-                                            <span className="text-secondary">Montant payé</span>
-                                            <span>€{selectedBooking.totalPrice}</span>
-                                        </div>
-                                        <div className="flex justify-between text-error">
-                                            <span>Frais d'annulation</span>
-                                            <span>-€{cancellationFee}</span>
-                                        </div>
-                                        <div className="flex justify-between font-semibold pt-2 border-t border-(--color-border-light)">
-                                            <span>Montant remboursé</span>
-                                            <span className="text-success">€{refundAmount}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                )}
 
-                            <div className="flex gap-3">
-                                <button
-                                    className="flex-1 btn-secondary"
-                                    onClick={() => {
-                                        setShowCancelModal(false);
-                                        setSelectedBooking(null);
-                                    }}
-                                >
-                                    Retour
-                                </button>
-                                <button
-                                    className="flex-1 py-3 px-4 bg-(--color-error) text-white rounded-xl font-medium hover:bg-(--color-error-dark) transition-colors"
-                                    onClick={handleCancel}
-                                >
-                                    {hasFreeCancellation ? 'Annuler' : `Annuler (-€${cancellationFee})`}
-                                </button>
+                                <div className="flex gap-3">
+                                    <button
+                                        className="flex-1 btn-secondary"
+                                        onClick={() => {
+                                            setShowCancelModal(false);
+                                            setSelectedBooking(null);
+                                        }}
+                                    >
+                                        Retour
+                                    </button>
+                                    <button
+                                        className="flex-1 py-3 px-4 bg-(--color-error) text-white rounded-xl font-medium hover:bg-(--color-error-dark) transition-colors"
+                                        onClick={handleCancel}
+                                    >
+                                        {hasFreeCancellation
+                                            ? 'Annuler'
+                                            : `Annuler (-€${cancellationFee})`}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })()}
+                    );
+                })()}
         </div>
     );
 };

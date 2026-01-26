@@ -33,10 +33,7 @@ export const BottomNavbar = ({ activeTab = 'home', onTabChange }: BottomNavbarPr
             />
             <NavItem
                 icon={
-                    <Calendar
-                        className="w-6 h-6"
-                        strokeWidth={activeTab === 'trips' ? 2.5 : 1.5}
-                    />
+                    <Calendar className="w-6 h-6" strokeWidth={activeTab === 'trips' ? 2.5 : 1.5} />
                 }
                 label="Voyages"
                 isActive={activeTab === 'trips'}

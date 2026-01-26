@@ -53,12 +53,13 @@ export const Splash = ({ onComplete }: SplashProps) => {
             {/* Logo animé */}
             <div
                 className={`transition-all duration-700 ease-out ${
-                    phase === 'logo'
-                        ? 'scale-0 opacity-0'
-                        : 'scale-100 opacity-100'
+                    phase === 'logo' ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
                 }`}
                 style={{
-                    animation: phase !== 'logo' ? 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)' : undefined,
+                    animation:
+                        phase !== 'logo'
+                            ? 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                            : undefined,
                 }}
             >
                 <div className="w-24 h-24 flex items-center justify-center">

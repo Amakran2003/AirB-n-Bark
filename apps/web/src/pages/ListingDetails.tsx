@@ -24,6 +24,13 @@ import {
     AlertTriangle,
     MessageCircle,
     Award,
+    Waves,
+    Trees,
+    Sparkles,
+    Bed,
+    Wifi,
+    Video,
+    Heart,
 } from 'lucide-react';
 import type { ListingFullData } from '../data/listings';
 import { useSwipeBack } from '../hooks/useSwipeBack';
@@ -37,30 +44,46 @@ const IMAGE_HEIGHT_VH = 40;
  * ==================== COMPOSANTS D'ICÔNES ====================
  */
 const AmenityIcon = ({ type }: { type: string }) => {
+    const iconClass = "w-5 h-5 text-primary";
     const icons: Record<string, JSX.Element> = {
-        flame: <Flame className="w-5 h-5 text-black" />,
-        droplets: <Droplets className="w-5 h-5 text-black" />,
-        scroll: <ScrollText className="w-5 h-5 text-black" />,
-        home: <Home className="w-5 h-5 text-black" />,
-        cat: <Cat className="w-5 h-5 text-black" />,
-        bone: <Bone className="w-5 h-5 text-black" />,
-        shield: <Shield className="w-5 h-5 text-black" />,
-        leaf: <Leaf className="w-5 h-5 text-black" />,
-        moon: <Moon className="w-5 h-5 text-black" />,
-        sun: <Sun className="w-5 h-5 text-black" />,
+        flame: <Flame className={iconClass} />,
+        droplets: <Droplets className={iconClass} />,
+        scroll: <ScrollText className={iconClass} />,
+        home: <Home className={iconClass} />,
+        cat: <Cat className={iconClass} />,
+        bone: <Bone className={iconClass} />,
+        shield: <Shield className={iconClass} />,
+        leaf: <Leaf className={iconClass} />,
+        moon: <Moon className={iconClass} />,
+        sun: <Sun className={iconClass} />,
+        waves: <Waves className={iconClass} />,
+        trees: <Trees className={iconClass} />,
+        paw: <PawPrint className={iconClass} />,
+        bed: <Bed className={iconClass} />,
+        wifi: <Wifi className={iconClass} />,
+        video: <Video className={iconClass} />,
+        heart: <Heart className={iconClass} />,
     };
-    return icons[type] || null;
+    return icons[type] || <Sparkles className={iconClass} />;
 };
 
 const HighlightIcon = ({ type }: { type: string }) => {
+    const iconClass = "w-6 h-6 text-brand";
     const icons: Record<string, JSX.Element> = {
-        search: <Search className="w-8 h-8 text-black" strokeWidth={1.5} />,
-        star: <Star className="w-8 h-8 text-black" strokeWidth={1.5} />,
-        check: <Check className="w-8 h-8 text-black" strokeWidth={1.5} />,
-        paw: <PawPrint className="w-8 h-8 text-black" strokeWidth={1.5} />,
-        shield: <Shield className="w-8 h-8 text-black" strokeWidth={1.5} />,
+        search: <Search className={iconClass} strokeWidth={1.5} />,
+        star: <Star className={iconClass} strokeWidth={1.5} />,
+        check: <Check className={iconClass} strokeWidth={1.5} />,
+        paw: <PawPrint className={iconClass} strokeWidth={1.5} />,
+        shield: <Shield className={iconClass} strokeWidth={1.5} />,
+        waves: <Waves className={iconClass} strokeWidth={1.5} />,
+        trees: <Trees className={iconClass} strokeWidth={1.5} />,
+        award: <Award className={iconClass} strokeWidth={1.5} />,
+        flame: <Flame className={iconClass} strokeWidth={1.5} />,
+        sun: <Sun className={iconClass} strokeWidth={1.5} />,
+        leaf: <Leaf className={iconClass} strokeWidth={1.5} />,
+        home: <Home className={iconClass} strokeWidth={1.5} />,
     };
-    return icons[type] || null;
+    return icons[type] || <Sparkles className={iconClass} strokeWidth={1.5} />;
 };
 
 /**
@@ -89,8 +112,6 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
     const handleReserve = () => {
         if (onReserve) {
             onReserve();
-        } else {
-            console.log('Réservation pour:', listing.title);
         }
     };
 
@@ -172,7 +193,10 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
             {/* Footer réservation */}
             <div
                 className="fixed bottom-0 left-0 right-0 z-80 bg-white shadow-md px-6 pt-4 border-t border-(--color-border-light)"
-                style={{ ...containerStyle, paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
+                style={{
+                    ...containerStyle,
+                    paddingBottom: 'calc(20px + env(safe-area-inset-bottom))',
+                }}
             >
                 <div className="flex items-center justify-between">
                     <div>
@@ -364,7 +388,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                         onClick={() => setShowFullDescription(!showFullDescription)}
                         className="text-h4 underline mt-3"
                     >
-                        {showFullDescription ? 'Show less' : 'Show more'}
+                        {showFullDescription ? 'Voir moins' : 'Voir plus'}
                     </button>
 
                     <div className="divider" />
@@ -373,12 +397,14 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     {listing.highlights.length > 0 && (
                         <>
                             <h2 className="text-h2 mb-4">Points forts</h2>
-                            <div className="list">
+                            <div className="space-y-4">
                                 {listing.highlights.map((highlight, index) => (
-                                    <div key={index} className="flex items-start gap-4">
-                                        <HighlightIcon type={highlight.icon} />
-                                        <div>
-                                            <h3 className="text-h4 mb-1">{highlight.title}</h3>
+                                    <div key={index} className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center shrink-0">
+                                            <HighlightIcon type={highlight.icon} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-h4">{highlight.title}</h3>
                                             <p className="text-body-sm text-secondary">
                                                 {highlight.description}
                                             </p>
@@ -411,7 +437,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                     <div className="divider" />
 
                     {/* Équipements */}
-                    <h2 className="text-h2 mb-4">What this place offers</h2>
+                    <h2 className="text-h2 mb-4">Ce que propose cette niche</h2>
                     <div className="list">
                         {listing.amenities.map((amenity, index) => (
                             <div key={index} className="list-item">
@@ -554,7 +580,7 @@ export const ListingDetails = ({ listing, onBack, onReserve }: ListingDetailsPro
                         </div>
                     ))}
 
-                    <button className="btn-secondary w-full mt-4">Show all reviews</button>
+                    <button className="btn-secondary w-full mt-4">Voir tous les avis</button>
 
                     <div className="divider" />
 

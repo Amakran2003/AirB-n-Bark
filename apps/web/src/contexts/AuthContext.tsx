@@ -29,9 +29,9 @@ interface User {
     id: string;
     email: string;
     pseudo: string;
-    avatar?: string;         // URL de la photo de profil
-    role: 'guest' | 'host';  // guest = voyageur, host = hote
-    isHost: boolean;         // Si l'utilisateur est aussi hote
+    avatar?: string; // URL de la photo de profil
+    role: 'guest' | 'host'; // guest = voyageur, host = hote
+    isHost: boolean; // Si l'utilisateur est aussi hote
     language?: string;
 }
 
@@ -197,10 +197,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (USE_API) {
             // En production: redirection vers Google OAuth ou popup
             // puis récupérer le token et appeler api.auth.oauthGoogle(token)
-            console.log('OAuth Google - Backend requis');
             return false;
         }
-        console.log('OAuth Google - Mode simulation');
+        // Mode simulation
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false; // Retourne false tant que non configure
     }, []);
@@ -209,7 +208,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loginWithApple = useCallback(async (): Promise<boolean> => {
         // TODO: POST /api/auth/oauth/apple
         // En production: utiliser Sign in with Apple JS
-        console.log('OAuth Apple - A configurer');
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
     }, []);
@@ -217,7 +215,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // OAuth Facebook
     const loginWithFacebook = useCallback(async (): Promise<boolean> => {
         // TODO: POST /api/auth/oauth/facebook
-        console.log('OAuth Facebook - A configurer');
         await new Promise((resolve) => setTimeout(resolve, 500));
         return false;
     }, []);
@@ -234,11 +231,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setIsLoading(false);
 
             if (response.success) {
-                setUser((prev) => prev ? {
-                    ...prev,
-                    isHost: true,
-                    role: 'host',
-                } : null);
+                setUser((prev) =>
+                    prev
+                        ? {
+                              ...prev,
+                              isHost: true,
+                              role: 'host',
+                          }
+                        : null
+                );
                 return { success: true };
             } else {
                 return { success: false, error: response.error.message };
@@ -246,86 +247,120 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
 
         // Simulation locale
-        setUser((prev) => prev ? {
-            ...prev,
-            isHost: true,
-            role: 'host',
-        } : null);
+        setUser((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      isHost: true,
+                      role: 'host',
+                  }
+                : null
+        );
         return { success: true };
     }, [user]);
 
     // Basculer vers le mode voyageur
     const switchToGuest = useCallback(() => {
-        setUser((prev) => prev ? {
-            ...prev,
-            role: 'guest',
-        } : null);
+        setUser((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      role: 'guest',
+                  }
+                : null
+        );
     }, []);
 
     // Basculer vers le mode hote
     const switchToHost = useCallback(() => {
-        setUser((prev) => prev ? {
-            ...prev,
-            role: 'host',
-        } : null);
+        setUser((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      role: 'host',
+                  }
+                : null
+        );
     }, []);
 
     // Mettre à jour l'avatar
-    const updateAvatar = useCallback(async (avatarUrl: string): Promise<AuthResult> => {
-        if (!user) {
-            return { success: false, error: 'Non connecté' };
-        }
+    const updateAvatar = useCallback(
+        async (avatarUrl: string): Promise<AuthResult> => {
+            if (!user) {
+                return { success: false, error: 'Non connecté' };
+            }
 
-        if (USE_API) {
-            setIsLoading(true);
-            const response = await api.auth.updateAvatar(avatarUrl);
-            setIsLoading(false);
+            if (USE_API) {
+                setIsLoading(true);
+                const response = await api.auth.updateAvatar(avatarUrl);
+                setIsLoading(false);
 
-            if (response.success) {
-                setUser((prev) => prev ? {
-                    ...prev,
-                    avatar: response.data.avatar || avatarUrl,
-                } : null);
-                return { success: true };
-            } else {
+                if (response.success) {
+                    setUser((prev) =>
+                        prev
+                            ? {
+                                  ...prev,
+                                  avatar: response.data.avatar || avatarUrl,
+                              }
+                            : null
+                    );
+                    return { success: true };
+                } else {
+                    return { success: false, error: response.error.message };
+                }
+            }
+
+            // Simulation locale - juste mettre à jour le state
+            setUser((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          avatar: avatarUrl,
+                      }
+                    : null
+            );
+            return { success: true };
+        },
+        [user]
+    );
+
+    const updateLanguage = useCallback(
+        async (language: string): Promise<AuthResult> => {
+            if (!user) {
+                return { success: false, error: 'Non connecté' };
+            }
+
+            if (USE_API) {
+                setIsLoading(true);
+                const response = await api.auth.updateLanguage(language);
+                setIsLoading(false);
+
+                if (response.success) {
+                    setUser((prev) =>
+                        prev
+                            ? {
+                                  ...prev,
+                                  language: response.data.language ?? language,
+                              }
+                            : null
+                    );
+                    return { success: true };
+                }
                 return { success: false, error: response.error.message };
             }
-        }
 
-        // Simulation locale - juste mettre à jour le state
-        setUser((prev) => prev ? {
-            ...prev,
-            avatar: avatarUrl,
-        } : null);
-        return { success: true };
-    }, [user]);
-
-    const updateLanguage = useCallback(async (language: string): Promise<AuthResult> => {
-        if (!user) {
-            return { success: false, error: 'Non connecté' };
-        }
-
-        if (USE_API) {
-            setIsLoading(true);
-            const response = await api.auth.updateLanguage(language);
-            setIsLoading(false);
-
-            if (response.success) {
-                setUser((prev) => prev ? {
-                    ...prev,
-                    language: response.data.language ?? language,
-                } : null);
-                return { success: true };
-            }
-            return { success: false, error: response.error.message };
-        }
-
-        setUser((prev) => prev ? {
-            ...prev,
-            language,
-        } : null);
-        return { success: true };
-    }, [user]);
+            setUser((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          language,
+                      }
+                    : null
+            );
+            return { success: true };
+        },
+        [user]
+    );
 
     const logout = useCallback(async () => {
         if (USE_API) {

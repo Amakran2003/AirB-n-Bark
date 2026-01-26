@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
+import {
     ChevronRight,
     X,
     Plus,
@@ -23,30 +23,37 @@ import {
     PawPrint,
     Loader2,
     Calendar,
-    Bed
+    Bed,
+    Waves,
+    Trees,
+    Award,
+    Wifi,
+    Video,
+    Heart,
+    Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { DatePicker } from '../../components/DatePicker';
 import { createListing, mapFormDataToApiPayload } from '../../services/hostApi';
-import type { 
-    ListingType, 
+import type {
+    ListingType,
     ListingAmenity,
     ListingHighlight,
     ListingRoom,
     ListingLocation,
     ListingRules,
-    DateRange
+    DateRange,
 } from '../../data/listings';
 
 /**
  * ==================== HOST ADD LISTING ====================
  * Formulaire multi-étapes style Airbnb pour créer une annonce
- * 
+ *
  * Phases:
  * 1. Décris ta niche (type, espace, localisation, capacité)
  * 2. Fais ressortir ta niche (équipements, photos, titre, description)
  * 3. Finalise et publie (prix, règles, disponibilités, récap)
- * 
+ *
  * TODO API:
  * - POST /api/listings → créer une annonce
  * - POST /api/listings/:id/images → upload images
@@ -62,7 +69,7 @@ interface HostAddListingProps {
 }
 
 // Étapes du formulaire
-type Step = 
+type Step =
     | 'intro1'
     | 'type'
     | 'location'
@@ -100,7 +107,7 @@ const STEPS: Step[] = [
     'availability',
     'instructions',
     'anticat',
-    'review'
+    'review',
 ];
 
 // Types de pièces disponibles pour "Où tu vas roupiller"
@@ -116,9 +123,13 @@ const ROOM_TYPES = [
 
 // Types de niche
 const LISTING_TYPES: { id: ListingType; title: string; description: string }[] = [
-    { id: 'niche', title: 'Niche entière', description: 'Un espace complet rien que pour le toutou' },
+    {
+        id: 'niche',
+        title: 'Niche entière',
+        description: 'Un espace complet rien que pour le toutou',
+    },
     { id: 'nicholoc', title: 'Nicholoc', description: 'Une chambre dans une coloc canine' },
-    { id: 'nichortoir', title: 'Nichortoir', description: 'Un lit dans un dortoir de chiens' }
+    { id: 'nichortoir', title: 'Nichortoir', description: 'Un lit dans un dortoir de chiens' },
 ];
 
 // Équipements disponibles avec leurs icônes
@@ -132,20 +143,40 @@ const AVAILABLE_AMENITIES: { name: string; icon: ListingAmenity['icon'] }[] = [
     { name: 'Espace clôturé anti-évasion', icon: 'shield' },
     { name: 'Jardin naturel', icon: 'leaf' },
     { name: 'Veilleuse nuit', icon: 'moon' },
-    { name: 'Exposition plein soleil', icon: 'sun' }
+    { name: 'Exposition plein soleil', icon: 'sun' },
+    { name: 'Piscine canine', icon: 'waves' },
+    { name: 'Forêt ou parc proche', icon: 'trees' },
+    { name: 'Promenades incluses', icon: 'paw' },
+    { name: 'Lit ou couchage premium', icon: 'bed' },
+    { name: 'WiFi (pour le maître)', icon: 'wifi' },
+    { name: 'Caméra de surveillance', icon: 'video' },
+    { name: 'Vétérinaire à proximité', icon: 'heart' },
 ];
 
 // Points forts disponibles (sans 'Hôte expérimenté' - sera hardcodé selon l'expérience réelle)
-const AVAILABLE_HIGHLIGHTS: { title: string; description: string; icon: ListingHighlight['icon'] }[] = [
-    { title: 'Check-in au museau facile', description: 'Sniff QR rapide et fluide', icon: 'search' },
+const AVAILABLE_HIGHLIGHTS: {
+    title: string;
+    description: string;
+    icon: ListingHighlight['icon'];
+}[] = [
+    {
+        title: 'Check-in au museau facile',
+        description: 'Sniff QR rapide et fluide',
+        icon: 'search',
+    },
     { title: 'Tout équipé', description: 'Gamelles, jouets, couchage inclus', icon: 'check' },
     { title: 'Ami des chiens', description: 'Espace 100% canin', icon: 'paw' },
-    { title: 'Sécurité maximale', description: 'Clôtures et surveillance', icon: 'shield' }
+    { title: 'Sécurité maximale', description: 'Clôtures et surveillance', icon: 'shield' },
+    { title: 'Piscine chauffée', description: "Ouverte toute l'année", icon: 'waves' },
+    { title: 'Grand espace', description: 'Beaucoup de place pour courir', icon: 'trees' },
+    { title: 'Note parfaite', description: 'Tous les toutous adorent', icon: 'star' },
+    { title: 'Jardin ensoleillé', description: 'Parfait pour les siestes', icon: 'sun' },
+    { title: 'Nature préservée', description: 'Environnement calme et vert', icon: 'leaf' },
 ];
 
 // Icône mapping
 const AmenityIcon = ({ icon, className }: { icon: ListingAmenity['icon']; className?: string }) => {
-    const icons = {
+    const icons: Record<string, React.ComponentType<{ className?: string }>> = {
         flame: Flame,
         droplets: Droplets,
         scroll: ScrollText,
@@ -155,21 +186,41 @@ const AmenityIcon = ({ icon, className }: { icon: ListingAmenity['icon']; classN
         shield: Shield,
         leaf: Leaf,
         moon: Moon,
-        sun: Sun
+        sun: Sun,
+        waves: Waves,
+        trees: Trees,
+        paw: PawPrint,
+        bed: Bed,
+        wifi: Wifi,
+        video: Video,
+        heart: Heart,
     };
-    const IconComponent = icons[icon];
+    const IconComponent = icons[icon] || Sparkles;
     return <IconComponent className={className} />;
 };
 
-const HighlightIcon = ({ icon, className }: { icon: ListingHighlight['icon']; className?: string }) => {
-    const icons = {
+const HighlightIcon = ({
+    icon,
+    className,
+}: {
+    icon: ListingHighlight['icon'];
+    className?: string;
+}) => {
+    const icons: Record<string, React.ComponentType<{ className?: string }>> = {
         search: Search,
         star: Star,
         check: Check,
         paw: PawPrint,
-        shield: Shield
+        shield: Shield,
+        waves: Waves,
+        trees: Trees,
+        award: Award,
+        flame: Flame,
+        sun: Sun,
+        leaf: Leaf,
+        home: Home,
     };
-    const IconComponent = icons[icon];
+    const IconComponent = icons[icon] || Sparkles;
     return <IconComponent className={className} />;
 };
 
@@ -177,21 +228,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     const { user } = useAuth();
     const [currentStep, setCurrentStep] = useState<Step>('intro1');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Modale de confirmation pour quitter
     const [showExitConfirm, setShowExitConfirm] = useState(false);
-    
+
     // Recherche d'adresse
     const [addressQuery, setAddressQuery] = useState('');
     const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
     const [isSearchingAddress, setIsSearchingAddress] = useState(false);
     const addressTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-    
+
     // DatePicker pour les disponibilités
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [tempCheckIn, setTempCheckIn] = useState<string | null>(null);
     const [tempCheckOut, setTempCheckOut] = useState<string | null>(null);
-    
+
     // Ref pour l'input file (upload photos)
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -206,49 +257,49 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         price: 30,
         maxDogs: 1,
         availableDateRanges: [] as DateRange[],
-        
+
         // Anti-Chat
         antiCatAvailable: false,
         antiCatRiskScore: 50,
         antiCatExtraPrice: 5,
-        
+
         // Détails (ListingFullData)
         capacity: {
             dogs: 1,
             niches: 1,
             beds: 1,
-            bowls: 1
+            bowls: 1,
         },
         images: [] as string[],
         description: '',
-        
+
         // Location
         locationDetails: {
             lat: 0,
             lng: 0,
             address: '',
             city: '',
-            country: 'France'
+            country: 'France',
         } as ListingLocation,
-        
+
         // Rooms
         rooms: [] as ListingRoom[],
-        
+
         // Amenities
         amenities: [] as ListingAmenity[],
-        
+
         // Highlights
         highlights: [] as ListingHighlight[],
-        
+
         // Rules
         rules: {
             maxBarkHour: '22h00',
             mustBeVaccinated: true,
             mustBeNeutered: false,
             allowsPuppies: true,
-            minAge: 3
+            minAge: 3,
         } as ListingRules,
-        
+
         // Instructions d'arrivée (structurées)
         instructions: {
             checkInTime: '15h00',
@@ -259,9 +310,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             parkingInfo: '',
             specialNotes: '',
         },
-        
+
         // Cancellation
-        cancellationPolicy: 'flexible' as 'flexible' | 'moderate' | 'strict'
+        cancellationPolicy: 'flexible' as 'flexible' | 'moderate' | 'strict',
     });
 
     // Recherche d'adresse avec l'API Nominatim (OpenStreetMap - gratuit)
@@ -283,8 +334,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery)}&countrycodes=fr&limit=5&addressdetails=1`,
                     {
                         headers: {
-                            'Accept-Language': 'fr'
-                        }
+                            'Accept-Language': 'fr',
+                        },
                     }
                 );
                 const data = await response.json();
@@ -306,13 +357,14 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
     // Sélectionner une adresse
     const selectAddress = (suggestion: any) => {
-        const city = suggestion.address?.city || 
-                     suggestion.address?.town || 
-                     suggestion.address?.village || 
-                     suggestion.address?.municipality || 
-                     '';
-        
-        setFormData(prev => ({
+        const city =
+            suggestion.address?.city ||
+            suggestion.address?.town ||
+            suggestion.address?.village ||
+            suggestion.address?.municipality ||
+            '';
+
+        setFormData((prev) => ({
             ...prev,
             location: `${city}, France`,
             locationDetails: {
@@ -320,8 +372,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 lng: parseFloat(suggestion.lon),
                 address: suggestion.display_name.split(',').slice(0, 2).join(',').trim(),
                 city,
-                country: 'France'
-            }
+                country: 'France',
+            },
         }));
         setAddressQuery(suggestion.display_name);
         setAddressSuggestions([]);
@@ -330,13 +382,13 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     // Navigation
     const currentStepIndex = STEPS.indexOf(currentStep);
     const isIntroStep = currentStep.startsWith('intro');
-    
+
     const getPhaseProgress = () => {
         // Phase 1: intro1 -> capacity (steps 0-3)
         // Phase 2: intro2 -> description (steps 4-9)
         // Phase 3: intro3 -> review (steps 10-15)
         if (currentStepIndex <= 3) {
-            return { phase: 1, progress: ((currentStepIndex) / 3) * 100 };
+            return { phase: 1, progress: (currentStepIndex / 3) * 100 };
         } else if (currentStepIndex <= 9) {
             return { phase: 2, progress: ((currentStepIndex - 4) / 5) * 100 };
         } else {
@@ -403,10 +455,13 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
     // Toggle amenity
     const toggleAmenity = (amenity: { name: string; icon: ListingAmenity['icon'] }) => {
-        setFormData(prev => {
-            const exists = prev.amenities.find(a => a.name === amenity.name);
+        setFormData((prev) => {
+            const exists = prev.amenities.find((a) => a.name === amenity.name);
             if (exists) {
-                return { ...prev, amenities: prev.amenities.filter(a => a.name !== amenity.name) };
+                return {
+                    ...prev,
+                    amenities: prev.amenities.filter((a) => a.name !== amenity.name),
+                };
             } else {
                 return { ...prev, amenities: [...prev.amenities, amenity] };
             }
@@ -415,10 +470,13 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
     // Toggle highlight
     const toggleHighlight = (highlight: ListingHighlight) => {
-        setFormData(prev => {
-            const exists = prev.highlights.find(h => h.title === highlight.title);
+        setFormData((prev) => {
+            const exists = prev.highlights.find((h) => h.title === highlight.title);
             if (exists) {
-                return { ...prev, highlights: prev.highlights.filter(h => h.title !== highlight.title) };
+                return {
+                    ...prev,
+                    highlights: prev.highlights.filter((h) => h.title !== highlight.title),
+                };
             } else {
                 return { ...prev, highlights: [...prev.highlights, highlight] };
             }
@@ -435,33 +493,33 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         const files = e.target.files;
         if (!files) return;
 
-        Array.from(files).forEach(file => {
+        Array.from(files).forEach((file) => {
             if (!file.type.startsWith('image/')) return;
-            
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const base64 = event.target?.result as string;
-                setFormData(prev => ({
+                setFormData((prev) => ({
                     ...prev,
                     images: [...prev.images, base64],
-                    image: prev.images.length === 0 ? base64 : prev.image
+                    image: prev.images.length === 0 ? base64 : prev.image,
                 }));
             };
             reader.readAsDataURL(file);
         });
-        
+
         // Reset input pour pouvoir re-sélectionner le même fichier
         e.target.value = '';
     };
 
     // Supprimer une photo
     const removePhoto = (index: number) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const newImages = prev.images.filter((_, i) => i !== index);
             return {
                 ...prev,
                 images: newImages,
-                image: newImages[0] || ''
+                image: newImages[0] || '',
             };
         });
     };
@@ -475,9 +533,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     // Ajouter une plage de disponibilité depuis le DatePicker
     const addDateRangeFromPicker = () => {
         if (tempCheckIn && tempCheckOut) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
                 ...prev,
-                availableDateRanges: [...prev.availableDateRanges, { start: tempCheckIn, end: tempCheckOut }]
+                availableDateRanges: [
+                    ...prev.availableDateRanges,
+                    { start: tempCheckIn, end: tempCheckOut },
+                ],
             }));
             setTempCheckIn(null);
             setTempCheckOut(null);
@@ -487,9 +548,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
     // Supprimer une plage de disponibilité
     const removeDateRange = (index: number) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            availableDateRanges: prev.availableDateRanges.filter((_, i) => i !== index)
+            availableDateRanges: prev.availableDateRanges.filter((_, i) => i !== index),
         }));
     };
 
@@ -498,7 +559,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
         const typeLabels: Record<ListingType, string> = {
             niche: 'Niche entière',
             nicholoc: 'Chambre en coloc canine',
-            nichortoir: 'Lit en dortoir canin'
+            nichortoir: 'Lit en dortoir canin',
         };
         const typeLabel = formData.type ? typeLabels[formData.type] : '';
         return `${typeLabel} à ${formData.locationDetails.city}, ${formData.locationDetails.country}`;
@@ -507,17 +568,27 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     // Générer la capacité string
     const generateCapacityString = (): string => {
         const parts = [];
-        if (formData.capacity.dogs > 0) parts.push(`${formData.capacity.dogs} chien${formData.capacity.dogs > 1 ? 's' : ''}`);
-        if (formData.capacity.niches > 0) parts.push(`${formData.capacity.niches} niche${formData.capacity.niches > 1 ? 's' : ''}`);
-        if (formData.capacity.beds > 0) parts.push(`${formData.capacity.beds} couchage${formData.capacity.beds > 1 ? 's' : ''}`);
-        if (formData.capacity.bowls > 0) parts.push(`${formData.capacity.bowls} coin${formData.capacity.bowls > 1 ? 's' : ''} gamelle`);
+        if (formData.capacity.dogs > 0)
+            parts.push(`${formData.capacity.dogs} chien${formData.capacity.dogs > 1 ? 's' : ''}`);
+        if (formData.capacity.niches > 0)
+            parts.push(
+                `${formData.capacity.niches} niche${formData.capacity.niches > 1 ? 's' : ''}`
+            );
+        if (formData.capacity.beds > 0)
+            parts.push(
+                `${formData.capacity.beds} couchage${formData.capacity.beds > 1 ? 's' : ''}`
+            );
+        if (formData.capacity.bowls > 0)
+            parts.push(
+                `${formData.capacity.bowls} coin${formData.capacity.bowls > 1 ? 's' : ''} gamelle`
+            );
         return parts.join(' · ');
     };
 
     // Sauvegarder l'annonce
     const handleSubmit = async () => {
         if (!user) return;
-        
+
         setIsSubmitting(true);
 
         try {
@@ -554,7 +625,11 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             onSuccess();
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
-            alert(error instanceof Error ? error.message : 'Une erreur est survenue. Veuillez réessayer.');
+            alert(
+                error instanceof Error
+                    ? error.message
+                    : 'Une erreur est survenue. Veuillez réessayer.'
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -566,18 +641,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             intro1: {
                 step: 'Étape 1',
                 title: 'Décris ta niche',
-                description: 'Dans cette étape, nous allons te demander quel type de niche tu proposes et où elle se trouve.'
+                description:
+                    'Dans cette étape, nous allons te demander quel type de niche tu proposes et où elle se trouve.',
             },
             intro2: {
                 step: 'Étape 2',
                 title: 'Fais ressortir ta niche',
-                description: 'Ajoute des photos, un titre accrocheur et une description pour attirer les toutous.'
+                description:
+                    'Ajoute des photos, un titre accrocheur et une description pour attirer les toutous.',
             },
             intro3: {
                 step: 'Étape 3',
                 title: 'Finalise et publie',
-                description: 'Définis ton prix, tes règles et vérifie que tout est bon avant de publier.'
-            }
+                description:
+                    'Définis ton prix, tes règles et vérifie que tout est bon avant de publier.',
+            },
         };
 
         const intro = intros[currentStep as keyof typeof intros];
@@ -605,13 +683,19 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             case 'type':
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
-                        <h1 className="text-2xl font-bold mb-2">Quel type de niche proposes-tu ?</h1>
-                        <p className="text-secondary mb-6">Choisis le type qui correspond le mieux à ton espace.</p>
+                        <h1 className="text-2xl font-bold mb-2">
+                            Quel type de niche proposes-tu ?
+                        </h1>
+                        <p className="text-secondary mb-6">
+                            Choisis le type qui correspond le mieux à ton espace.
+                        </p>
                         <div className="space-y-3">
-                            {LISTING_TYPES.map(type => (
+                            {LISTING_TYPES.map((type) => (
                                 <button
                                     key={type.id}
-                                    onClick={() => setFormData(prev => ({ ...prev, type: type.id }))}
+                                    onClick={() =>
+                                        setFormData((prev) => ({ ...prev, type: type.id }))
+                                    }
                                     className={`w-full p-4 rounded-2xl border-2 text-left transition-all ${
                                         formData.type === type.id
                                             ? 'border-brand bg-primary-light'
@@ -619,7 +703,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     }`}
                                 >
                                     <p className="font-semibold text-lg">{type.title}</p>
-                                    <p className="text-secondary text-sm mt-1">{type.description}</p>
+                                    <p className="text-secondary text-sm mt-1">
+                                        {type.description}
+                                    </p>
                                 </button>
                             ))}
                         </div>
@@ -630,8 +716,10 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Où se trouve ta niche ?</h1>
-                        <p className="text-secondary mb-6">Recherche ton adresse pour que les toutous puissent te trouver.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Recherche ton adresse pour que les toutous puissent te trouver.
+                        </p>
+
                         <div className="relative">
                             <div className="relative">
                                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary" />
@@ -656,7 +744,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             className="w-full px-4 py-3 text-left hover:bg-secondary flex items-start gap-3 border-b border-(--color-border-light) last:border-0"
                                         >
                                             <MapPin className="w-5 h-5 text-tertiary mt-0.5 shrink-0" />
-                                            <span className="text-sm">{suggestion.display_name}</span>
+                                            <span className="text-sm">
+                                                {suggestion.display_name}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
@@ -669,9 +759,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     <Check className="w-5 h-5" />
                                     <span className="font-medium">Adresse sélectionnée</span>
                                 </div>
-                                <p className="text-sm text-success">{formData.locationDetails.address}</p>
+                                <p className="text-sm text-success">
+                                    {formData.locationDetails.address}
+                                </p>
                                 <p className="text-sm text-success mt-1">
-                                    {formData.locationDetails.city}, {formData.locationDetails.country}
+                                    {formData.locationDetails.city},{' '}
+                                    {formData.locationDetails.country}
                                 </p>
                             </div>
                         )}
@@ -682,45 +775,86 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Quelle est la capacité ?</h1>
-                        <p className="text-secondary mb-6">Indique combien de toutous peuvent séjourner.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Indique combien de toutous peuvent séjourner.
+                        </p>
+
                         <div className="space-y-6">
                             {[
-                                { key: 'dogs', label: 'Chiens', sublabel: 'Nombre maximum de chiens' },
-                                { key: 'niches', label: 'Niches', sublabel: 'Espaces de couchage séparés' },
-                                { key: 'beds', label: 'Couchages', sublabel: 'Paniers, coussins, etc.' },
-                                { key: 'bowls', label: 'Coins gamelle', sublabel: 'Points d\'eau et nourriture' }
-                            ].map(item => (
-                                <div key={item.key} className="flex items-center justify-between py-4 border-b border-(--color-border-light)">
+                                {
+                                    key: 'dogs',
+                                    label: 'Chiens',
+                                    sublabel: 'Nombre maximum de chiens',
+                                },
+                                {
+                                    key: 'niches',
+                                    label: 'Niches',
+                                    sublabel: 'Espaces de couchage séparés',
+                                },
+                                {
+                                    key: 'beds',
+                                    label: 'Couchages',
+                                    sublabel: 'Paniers, coussins, etc.',
+                                },
+                                {
+                                    key: 'bowls',
+                                    label: 'Coins gamelle',
+                                    sublabel: "Points d'eau et nourriture",
+                                },
+                            ].map((item) => (
+                                <div
+                                    key={item.key}
+                                    className="flex items-center justify-between py-4 border-b border-(--color-border-light)"
+                                >
                                     <div>
                                         <p className="font-medium">{item.label}</p>
                                         <p className="text-sm text-secondary">{item.sublabel}</p>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <button
-                                            onClick={() => setFormData(prev => ({
-                                                ...prev,
-                                                capacity: {
-                                                    ...prev.capacity,
-                                                    [item.key]: Math.max(0, prev.capacity[item.key as keyof typeof prev.capacity] - 1)
-                                                }
-                                            }))}
+                                            onClick={() =>
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    capacity: {
+                                                        ...prev.capacity,
+                                                        [item.key]: Math.max(
+                                                            0,
+                                                            prev.capacity[
+                                                                item.key as keyof typeof prev.capacity
+                                                            ] - 1
+                                                        ),
+                                                    },
+                                                }))
+                                            }
                                             className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary disabled:opacity-50"
-                                            disabled={formData.capacity[item.key as keyof typeof formData.capacity] <= 0}
+                                            disabled={
+                                                formData.capacity[
+                                                    item.key as keyof typeof formData.capacity
+                                                ] <= 0
+                                            }
                                         >
                                             <Minus className="w-4 h-4" />
                                         </button>
                                         <span className="w-8 text-center font-semibold text-lg">
-                                            {formData.capacity[item.key as keyof typeof formData.capacity]}
+                                            {
+                                                formData.capacity[
+                                                    item.key as keyof typeof formData.capacity
+                                                ]
+                                            }
                                         </span>
                                         <button
-                                            onClick={() => setFormData(prev => ({
-                                                ...prev,
-                                                capacity: {
-                                                    ...prev.capacity,
-                                                    [item.key]: prev.capacity[item.key as keyof typeof prev.capacity] + 1
-                                                }
-                                            }))}
+                                            onClick={() =>
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    capacity: {
+                                                        ...prev.capacity,
+                                                        [item.key]:
+                                                            prev.capacity[
+                                                                item.key as keyof typeof prev.capacity
+                                                            ] + 1,
+                                                    },
+                                                }))
+                                            }
                                             className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                                         >
                                             <Plus className="w-4 h-4" />
@@ -736,11 +870,15 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Quels équipements proposes-tu ?</h1>
-                        <p className="text-secondary mb-6">Sélectionne tout ce qui est disponible pour les toutous.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Sélectionne tout ce qui est disponible pour les toutous.
+                        </p>
+
                         <div className="grid grid-cols-2 gap-3">
-                            {AVAILABLE_AMENITIES.map(amenity => {
-                                const isSelected = formData.amenities.some(a => a.name === amenity.name);
+                            {AVAILABLE_AMENITIES.map((amenity) => {
+                                const isSelected = formData.amenities.some(
+                                    (a) => a.name === amenity.name
+                                );
                                 return (
                                     <button
                                         key={amenity.name}
@@ -751,7 +889,10 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                 : 'border-secondary hover:border-tertiary'
                                         }`}
                                     >
-                                        <AmenityIcon icon={amenity.icon} className={`w-6 h-6 mb-2 ${isSelected ? 'text-brand' : 'text-secondary'}`} />
+                                        <AmenityIcon
+                                            icon={amenity.icon}
+                                            className={`w-6 h-6 mb-2 ${isSelected ? 'text-brand' : 'text-secondary'}`}
+                                        />
                                         <p className="text-sm font-medium">{amenity.name}</p>
                                     </button>
                                 );
@@ -764,8 +905,11 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Ajoute des photos</h1>
-                        <p className="text-secondary mb-6">Les toutous adorent voir où ils vont séjourner ! Ajoute au moins 1 photo.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Les toutous adorent voir où ils vont séjourner ! Ajoute au moins 1
+                            photo.
+                        </p>
+
                         {/* Input file caché */}
                         <input
                             ref={fileInputRef}
@@ -775,11 +919,18 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                        
+
                         <div className="grid grid-cols-2 gap-3">
                             {formData.images.map((img, index) => (
-                                <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-tertiary">
-                                    <img src={img} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                                <div
+                                    key={index}
+                                    className="relative aspect-square rounded-2xl overflow-hidden bg-tertiary"
+                                >
+                                    <img
+                                        src={img}
+                                        alt={`Photo ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
                                     <button
                                         onClick={() => removePhoto(index)}
                                         className="absolute top-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"
@@ -793,7 +944,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     )}
                                 </div>
                             ))}
-                            
+
                             <button
                                 onClick={openFilePicker}
                                 className="aspect-square rounded-2xl border-2 border-dashed border-tertiary flex flex-col items-center justify-center gap-2 hover:border-secondary transition-colors"
@@ -802,7 +953,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <span className="text-sm text-secondary">Ajouter</span>
                             </button>
                         </div>
-                        
+
                         <p className="text-xs text-secondary mt-4 text-center">
                             Les annonces avec 5+ photos reçoivent plus de réservations
                         </p>
@@ -814,28 +965,40 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Où tu vas roupiller 🛏️</h1>
                         <p className="text-secondary mb-6">
-                            Associe tes photos aux différents espaces pour que les toutous sachent où ils dormiront.
+                            Associe tes photos aux différents espaces pour que les toutous sachent
+                            où ils dormiront.
                         </p>
-                        
+
                         {/* Liste des rooms créées */}
                         {formData.rooms.length > 0 && (
                             <div className="mb-6">
                                 <p className="text-sm font-medium mb-3">Espaces créés :</p>
                                 <div className="space-y-3">
                                     {formData.rooms.map((room, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-3 bg-secondary rounded-xl">
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-3 p-3 bg-secondary rounded-xl"
+                                        >
                                             <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                                                <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
+                                                <img
+                                                    src={room.image}
+                                                    alt={room.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium">{room.name}</p>
-                                                <p className="text-sm text-secondary truncate">{room.description}</p>
+                                                <p className="text-sm text-secondary truncate">
+                                                    {room.description}
+                                                </p>
                                             </div>
                                             <button
                                                 onClick={() => {
-                                                    setFormData(prev => ({
+                                                    setFormData((prev) => ({
                                                         ...prev,
-                                                        rooms: prev.rooms.filter((_, i) => i !== index)
+                                                        rooms: prev.rooms.filter(
+                                                            (_, i) => i !== index
+                                                        ),
                                                     }));
                                                 }}
                                                 className="p-2 text-error hover:bg-error-light rounded-full"
@@ -847,33 +1010,44 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Ajouter un nouvel espace */}
                         <div className="border-2 border-dashed border-secondary rounded-2xl p-4">
                             <p className="text-sm font-medium mb-3 flex items-center gap-2">
                                 <Bed className="w-4 h-4" />
                                 Ajouter un espace
                             </p>
-                            
+
                             {/* Sélectionner une photo */}
                             <div className="mb-4">
-                                <p className="text-xs text-secondary mb-2">1. Choisis une photo :</p>
+                                <p className="text-xs text-secondary mb-2">
+                                    1. Choisis une photo :
+                                </p>
                                 <div className="flex gap-2 overflow-x-auto pb-2">
                                     {formData.images.map((img, index) => {
-                                        const isUsed = formData.rooms.some(r => r.image === img);
+                                        const isUsed = formData.rooms.some((r) => r.image === img);
                                         return (
                                             <button
                                                 key={index}
-                                                onClick={() => setFormData(prev => ({ ...prev, _tempRoomImage: img }))}
+                                                onClick={() =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        _tempRoomImage: img,
+                                                    }))
+                                                }
                                                 className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                                                     (formData as any)._tempRoomImage === img
                                                         ? 'border-brand ring-2 ring-primary-light'
                                                         : isUsed
-                                                            ? 'border-success'
-                                                            : 'border-secondary'
+                                                          ? 'border-success'
+                                                          : 'border-secondary'
                                                 }`}
                                             >
-                                                <img src={img} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                                                <img
+                                                    src={img}
+                                                    alt={`Photo ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
                                                 {isUsed && (
                                                     <div className="absolute inset-0 bg-success/30 flex items-center justify-center pointer-events-none">
                                                         <Check className="w-4 h-4 text-success" />
@@ -884,15 +1058,20 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     })}
                                 </div>
                             </div>
-                            
+
                             {/* Type de pièce */}
                             <div className="mb-4">
                                 <p className="text-xs text-secondary mb-2">2. Type d'espace :</p>
                                 <div className="flex flex-wrap gap-2">
-                                    {ROOM_TYPES.map(type => (
+                                    {ROOM_TYPES.map((type) => (
                                         <button
                                             key={type.id}
-                                            onClick={() => setFormData(prev => ({ ...prev, _tempRoomType: type.name }))}
+                                            onClick={() =>
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    _tempRoomType: type.name,
+                                                }))
+                                            }
                                             className={`px-3 py-2 rounded-full text-sm flex items-center gap-1 transition-all ${
                                                 (formData as any)._tempRoomType === type.name
                                                     ? 'bg-brand text-white'
@@ -905,48 +1084,63 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     ))}
                                 </div>
                             </div>
-                            
+
                             {/* Description */}
                             <div className="mb-4">
-                                <p className="text-xs text-secondary mb-2">3. Description (optionnelle) :</p>
+                                <p className="text-xs text-secondary mb-2">
+                                    3. Description (optionnelle) :
+                                </p>
                                 <input
                                     type="text"
                                     placeholder="Ex: 1 panier premium, couverture chauffante"
                                     value={(formData as any)._tempRoomDesc || ''}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, _tempRoomDesc: e.target.value }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            _tempRoomDesc: e.target.value,
+                                        }))
+                                    }
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none text-sm"
                                 />
                             </div>
-                            
+
                             {/* Bouton ajouter */}
                             <button
                                 onClick={() => {
                                     const tempImage = (formData as any)._tempRoomImage;
                                     const tempType = (formData as any)._tempRoomType;
                                     const tempDesc = (formData as any)._tempRoomDesc || '';
-                                    
+
                                     if (tempImage && tempType) {
-                                        setFormData(prev => ({
+                                        setFormData((prev) => ({
                                             ...prev,
-                                            rooms: [...prev.rooms, {
-                                                name: tempType,
-                                                description: tempDesc || `Espace ${tempType.toLowerCase()}`,
-                                                image: tempImage
-                                            }],
+                                            rooms: [
+                                                ...prev.rooms,
+                                                {
+                                                    name: tempType,
+                                                    description:
+                                                        tempDesc ||
+                                                        `Espace ${tempType.toLowerCase()}`,
+                                                    image: tempImage,
+                                                },
+                                            ],
                                             _tempRoomImage: undefined,
                                             _tempRoomType: undefined,
-                                            _tempRoomDesc: undefined
+                                            _tempRoomDesc: undefined,
                                         }));
                                     }
                                 }}
-                                disabled={!(formData as any)._tempRoomImage || !(formData as any)._tempRoomType}
+                                disabled={
+                                    !(formData as any)._tempRoomImage ||
+                                    !(formData as any)._tempRoomType
+                                }
                                 className="w-full py-3 bg-brand text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-4 h-4" />
                                 Ajouter cet espace
                             </button>
                         </div>
-                        
+
                         <p className="text-xs text-secondary mt-4 text-center">
                             Les toutous adorent savoir où ils vont dormir !
                         </p>
@@ -957,17 +1151,26 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Donne un titre à ta niche</h1>
-                        <p className="text-secondary mb-6">Un titre court et accrocheur qui donne envie aux toutous.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Un titre court et accrocheur qui donne envie aux toutous.
+                        </p>
+
                         <textarea
                             value={formData.title}
-                            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value.slice(0, 50) }))}
+                            onChange={(e) =>
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    title: e.target.value.slice(0, 50),
+                                }))
+                            }
                             placeholder="Ex: Niche de luxe à 10min du Parc · Plaid chauffant"
                             className="w-full p-4 border-2 border-secondary rounded-2xl focus:border-brand focus:outline-none text-lg resize-none"
                             rows={3}
                         />
-                        <p className="text-right text-sm text-secondary mt-2">{formData.title.length}/50</p>
-                        
+                        <p className="text-right text-sm text-secondary mt-2">
+                            {formData.title.length}/50
+                        </p>
+
                         <div className="mt-6 p-4 bg-secondary rounded-2xl">
                             <p className="text-sm font-medium mb-2">Exemples de bons titres :</p>
                             <ul className="text-sm text-secondary space-y-1">
@@ -983,11 +1186,15 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Points forts de ta niche</h1>
-                        <p className="text-secondary mb-6">Qu'est-ce qui rend ton espace spécial ?</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Qu'est-ce qui rend ton espace spécial ?
+                        </p>
+
                         <div className="space-y-3">
-                            {AVAILABLE_HIGHLIGHTS.map(highlight => {
-                                const isSelected = formData.highlights.some(h => h.title === highlight.title);
+                            {AVAILABLE_HIGHLIGHTS.map((highlight) => {
+                                const isSelected = formData.highlights.some(
+                                    (h) => h.title === highlight.title
+                                );
                                 return (
                                     <button
                                         key={highlight.title}
@@ -998,14 +1205,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                                 : 'border-secondary hover:border-tertiary'
                                         }`}
                                     >
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                                            isSelected ? 'bg-brand' : 'bg-tertiary'
-                                        }`}>
-                                            <HighlightIcon icon={highlight.icon} className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-secondary'}`} />
+                                        <div
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                                isSelected ? 'bg-brand' : 'bg-tertiary'
+                                            }`}
+                                        >
+                                            <HighlightIcon
+                                                icon={highlight.icon}
+                                                className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-secondary'}`}
+                                            />
                                         </div>
                                         <div>
                                             <p className="font-semibold">{highlight.title}</p>
-                                            <p className="text-sm text-secondary">{highlight.description}</p>
+                                            <p className="text-sm text-secondary">
+                                                {highlight.description}
+                                            </p>
                                         </div>
                                     </button>
                                 );
@@ -1018,16 +1232,22 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Décris ta niche</h1>
-                        <p className="text-secondary mb-6">Raconte aux toutous ce qui les attend. Minimum 50 caractères.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Raconte aux toutous ce qui les attend. Minimum 50 caractères.
+                        </p>
+
                         <textarea
                             value={formData.description}
-                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) =>
+                                setFormData((prev) => ({ ...prev, description: e.target.value }))
+                            }
                             placeholder="Cette niche cosy est située dans un quartier calme, à 10 minutes du parc le plus proche..."
                             className="w-full p-4 border-2 border-secondary rounded-2xl focus:border-brand focus:outline-none resize-none"
                             rows={8}
                         />
-                        <p className={`text-right text-sm mt-2 ${formData.description.length < 50 ? 'text-warning' : 'text-success'}`}>
+                        <p
+                            className={`text-right text-sm mt-2 ${formData.description.length < 50 ? 'text-warning' : 'text-success'}`}
+                        >
                             {formData.description.length}/50 minimum
                         </p>
                     </div>
@@ -1037,11 +1257,18 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Fixe ton prix</h1>
-                        <p className="text-secondary mb-6">Prix par nuit. Tu pourras le modifier à tout moment.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Prix par nuit. Tu pourras le modifier à tout moment.
+                        </p>
+
                         <div className="flex items-center justify-center gap-4 my-8">
                             <button
-                                onClick={() => setFormData(prev => ({ ...prev, price: Math.max(5, prev.price - 5) }))}
+                                onClick={() =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        price: Math.max(5, prev.price - 5),
+                                    }))
+                                }
                                 className="w-12 h-12 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                             >
                                 <Minus className="w-5 h-5" />
@@ -1051,7 +1278,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <p className="text-secondary mt-1">par nuit</p>
                             </div>
                             <button
-                                onClick={() => setFormData(prev => ({ ...prev, price: prev.price + 5 }))}
+                                onClick={() =>
+                                    setFormData((prev) => ({ ...prev, price: prev.price + 5 }))
+                                }
                                 className="w-12 h-12 rounded-full border-2 border-tertiary flex items-center justify-center hover:border-secondary"
                             >
                                 <Plus className="w-5 h-5" />
@@ -1063,16 +1292,31 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <p className="font-medium mb-2">Politique d'annulation</p>
                                 <div className="space-y-2">
                                     {[
-                                        { id: 'flexible', label: 'Flexible', desc: 'Remboursement intégral jusqu\'à 24h avant' },
-                                        { id: 'moderate', label: 'Modérée', desc: 'Remboursement 50% jusqu\'à 5 jours avant' },
-                                        { id: 'strict', label: 'Stricte', desc: 'Remboursement 50% jusqu\'à 7 jours avant' }
-                                    ].map(policy => (
+                                        {
+                                            id: 'flexible',
+                                            label: 'Flexible',
+                                            desc: "Remboursement intégral jusqu'à 24h avant",
+                                        },
+                                        {
+                                            id: 'moderate',
+                                            label: 'Modérée',
+                                            desc: "Remboursement 50% jusqu'à 5 jours avant",
+                                        },
+                                        {
+                                            id: 'strict',
+                                            label: 'Stricte',
+                                            desc: "Remboursement 50% jusqu'à 7 jours avant",
+                                        },
+                                    ].map((policy) => (
                                         <button
                                             key={policy.id}
-                                            onClick={() => setFormData(prev => ({ 
-                                                ...prev, 
-                                                cancellationPolicy: policy.id as typeof prev.cancellationPolicy 
-                                            }))}
+                                            onClick={() =>
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    cancellationPolicy:
+                                                        policy.id as typeof prev.cancellationPolicy,
+                                                }))
+                                            }
                                             className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                                                 formData.cancellationPolicy === policy.id
                                                     ? 'border-brand bg-primary-light'
@@ -1093,17 +1337,23 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Règles de ta niche</h1>
-                        <p className="text-secondary mb-6">Définis les règles pour les toutous qui séjournent chez toi.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Définis les règles pour les toutous qui séjournent chez toi.
+                        </p>
+
                         <div className="space-y-6">
                             <div>
-                                <label className="block font-medium mb-2">Heure max pour aboyer</label>
+                                <label className="block font-medium mb-2">
+                                    Heure max pour aboyer
+                                </label>
                                 <select
                                     value={formData.rules.maxBarkHour}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        rules: { ...prev.rules, maxBarkHour: e.target.value }
-                                    }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            rules: { ...prev.rules, maxBarkHour: e.target.value },
+                                        }))
+                                    }
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                 >
                                     <option value="20h00">20h00</option>
@@ -1118,10 +1368,15 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 <input
                                     type="number"
                                     value={formData.rules.minAge}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        rules: { ...prev.rules, minAge: parseInt(e.target.value) || 0 }
-                                    }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            rules: {
+                                                ...prev.rules,
+                                                minAge: parseInt(e.target.value) || 0,
+                                            },
+                                        }))
+                                    }
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     min={0}
                                 />
@@ -1130,29 +1385,41 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             {[
                                 { key: 'mustBeVaccinated', label: 'Vaccination obligatoire' },
                                 { key: 'mustBeNeutered', label: 'Stérilisation obligatoire' },
-                                { key: 'allowsPuppies', label: 'Chiots acceptés' }
-                            ].map(rule => (
-                                <div key={rule.key} className="flex items-center justify-between py-3 border-b border-(--color-border-light)">
+                                { key: 'allowsPuppies', label: 'Chiots acceptés' },
+                            ].map((rule) => (
+                                <div
+                                    key={rule.key}
+                                    className="flex items-center justify-between py-3 border-b border-(--color-border-light)"
+                                >
                                     <span className="font-medium">{rule.label}</span>
                                     <button
-                                        onClick={() => setFormData(prev => ({
-                                            ...prev,
-                                            rules: { 
-                                                ...prev.rules, 
-                                                [rule.key]: !prev.rules[rule.key as keyof typeof prev.rules] 
-                                            }
-                                        }))}
+                                        onClick={() =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                rules: {
+                                                    ...prev.rules,
+                                                    [rule.key]:
+                                                        !prev.rules[
+                                                            rule.key as keyof typeof prev.rules
+                                                        ],
+                                                },
+                                            }))
+                                        }
                                         className={`w-12 h-7 rounded-full transition-colors ${
                                             formData.rules[rule.key as keyof typeof formData.rules]
                                                 ? 'bg-brand'
                                                 : 'bg-tertiary'
                                         }`}
                                     >
-                                        <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                                            formData.rules[rule.key as keyof typeof formData.rules]
-                                                ? 'translate-x-6'
-                                                : 'translate-x-1'
-                                        }`} />
+                                        <div
+                                            className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                                                formData.rules[
+                                                    rule.key as keyof typeof formData.rules
+                                                ]
+                                                    ? 'translate-x-6'
+                                                    : 'translate-x-1'
+                                            }`}
+                                        />
                                     </button>
                                 </div>
                             ))}
@@ -1164,15 +1431,19 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Disponibilités</h1>
-                        <p className="text-secondary mb-6">Ajoute les périodes où ta niche est disponible.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Ajoute les périodes où ta niche est disponible.
+                        </p>
+
                         {/* Bouton pour ouvrir le DatePicker */}
                         <button
                             onClick={() => setIsDatePickerOpen(true)}
                             className="w-full p-4 border-2 border-dashed border-tertiary rounded-2xl flex items-center justify-center gap-3 hover:border-secondary transition-colors mb-6"
                         >
                             <Calendar className="w-6 h-6 text-tertiary" />
-                            <span className="text-secondary font-medium">Sélectionner une période</span>
+                            <span className="text-secondary font-medium">
+                                Sélectionner une période
+                            </span>
                         </button>
 
                         {/* Afficher la sélection temporaire */}
@@ -1180,9 +1451,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             <div className="mb-6 p-4 bg-primary-light border border-primary-light rounded-2xl">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm text-brand font-medium">Période sélectionnée</p>
+                                        <p className="text-sm text-brand font-medium">
+                                            Période sélectionnée
+                                        </p>
                                         <p className="text-brand">
-                                            {new Date(tempCheckIn).toLocaleDateString('fr-FR')} → {new Date(tempCheckOut).toLocaleDateString('fr-FR')}
+                                            {new Date(tempCheckIn).toLocaleDateString('fr-FR')} →{' '}
+                                            {new Date(tempCheckOut).toLocaleDateString('fr-FR')}
                                         </p>
                                     </div>
                                     <button
@@ -1197,11 +1471,17 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
                         {formData.availableDateRanges.length > 0 && (
                             <div className="space-y-2">
-                                <p className="font-medium mb-2">Périodes ajoutées ({formData.availableDateRanges.length})</p>
+                                <p className="font-medium mb-2">
+                                    Périodes ajoutées ({formData.availableDateRanges.length})
+                                </p>
                                 {formData.availableDateRanges.map((range, index) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-success-light border border-success-light rounded-xl">
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between p-3 bg-success-light border border-success-light rounded-xl"
+                                    >
                                         <span className="text-sm">
-                                            {new Date(range.start).toLocaleDateString('fr-FR')} → {new Date(range.end).toLocaleDateString('fr-FR')}
+                                            {new Date(range.start).toLocaleDateString('fr-FR')} →{' '}
+                                            {new Date(range.end).toLocaleDateString('fr-FR')}
                                         </span>
                                         <button
                                             onClick={() => removeDateRange(index)}
@@ -1218,7 +1498,9 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             <div className="text-center py-8 text-secondary">
                                 <Calendar className="w-12 h-12 mx-auto mb-3 text-tertiary" />
                                 <p>Aucune période ajoutée</p>
-                                <p className="text-sm">Clique sur le bouton ci-dessus pour ajouter des disponibilités</p>
+                                <p className="text-sm">
+                                    Clique sur le bouton ci-dessus pour ajouter des disponibilités
+                                </p>
                             </div>
                         )}
                     </div>
@@ -1229,24 +1511,41 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Instructions d'arrivée</h1>
                         <p className="text-secondary mb-6">
-                            Ces infos seront envoyées aux toutous après confirmation de leur réservation. Wouf !
+                            Ces infos seront envoyées aux toutous après confirmation de leur
+                            réservation. Wouf !
                         </p>
-                        
+
                         <div className="space-y-5">
                             {/* Horaires */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Arrivée</label>
+                                    <label className="block text-sm font-medium mb-2">
+                                        Arrivée
+                                    </label>
                                     <select
                                         value={formData.instructions.checkInTime}
-                                        onChange={(e) => setFormData(prev => ({
-                                            ...prev,
-                                            instructions: { ...prev.instructions, checkInTime: e.target.value }
-                                        }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                instructions: {
+                                                    ...prev.instructions,
+                                                    checkInTime: e.target.value,
+                                                },
+                                            }))
+                                        }
                                         className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     >
-                                        {['14h00', '15h00', '16h00', '17h00', '18h00', 'Flexible'].map(t => (
-                                            <option key={t} value={t}>{t}</option>
+                                        {[
+                                            '14h00',
+                                            '15h00',
+                                            '16h00',
+                                            '17h00',
+                                            '18h00',
+                                            'Flexible',
+                                        ].map((t) => (
+                                            <option key={t} value={t}>
+                                                {t}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -1254,14 +1553,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     <label className="block text-sm font-medium mb-2">Départ</label>
                                     <select
                                         value={formData.instructions.checkOutTime}
-                                        onChange={(e) => setFormData(prev => ({
-                                            ...prev,
-                                            instructions: { ...prev.instructions, checkOutTime: e.target.value }
-                                        }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                instructions: {
+                                                    ...prev.instructions,
+                                                    checkOutTime: e.target.value,
+                                                },
+                                            }))
+                                        }
                                         className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     >
-                                        {['10h00', '11h00', '12h00', 'Flexible'].map(t => (
-                                            <option key={t} value={t}>{t}</option>
+                                        {['10h00', '11h00', '12h00', 'Flexible'].map((t) => (
+                                            <option key={t} value={t}>
+                                                {t}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -1269,14 +1575,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
                             {/* Code d'accès */}
                             <div>
-                                <label className="block text-sm font-medium mb-2">🔑 Code d'accès / Digicode</label>
+                                <label className="block text-sm font-medium mb-2">
+                                    🔑 Code d'accès / Digicode
+                                </label>
                                 <input
                                     type="text"
                                     value={formData.instructions.accessCode}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        instructions: { ...prev.instructions, accessCode: e.target.value }
-                                    }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            instructions: {
+                                                ...prev.instructions,
+                                                accessCode: e.target.value,
+                                            },
+                                        }))
+                                    }
                                     placeholder="Ex: 1234# ou A123B"
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     maxLength={50}
@@ -1286,28 +1599,42 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                             {/* WiFi */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">📶 Nom WiFi</label>
+                                    <label className="block text-sm font-medium mb-2">
+                                        📶 Nom WiFi
+                                    </label>
                                     <input
                                         type="text"
                                         value={formData.instructions.wifiName}
-                                        onChange={(e) => setFormData(prev => ({
-                                            ...prev,
-                                            instructions: { ...prev.instructions, wifiName: e.target.value }
-                                        }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                instructions: {
+                                                    ...prev.instructions,
+                                                    wifiName: e.target.value,
+                                                },
+                                            }))
+                                        }
                                         placeholder="NicheWifi"
                                         className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                         maxLength={50}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Mot de passe</label>
+                                    <label className="block text-sm font-medium mb-2">
+                                        Mot de passe
+                                    </label>
                                     <input
                                         type="text"
                                         value={formData.instructions.wifiPassword}
-                                        onChange={(e) => setFormData(prev => ({
-                                            ...prev,
-                                            instructions: { ...prev.instructions, wifiPassword: e.target.value }
-                                        }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                instructions: {
+                                                    ...prev.instructions,
+                                                    wifiPassword: e.target.value,
+                                                },
+                                            }))
+                                        }
                                         placeholder="••••••••"
                                         className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                         maxLength={50}
@@ -1317,14 +1644,21 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
                             {/* Parking */}
                             <div>
-                                <label className="block text-sm font-medium mb-2">🅿️ Parking / Stationnement</label>
+                                <label className="block text-sm font-medium mb-2">
+                                    🅿️ Parking / Stationnement
+                                </label>
                                 <input
                                     type="text"
                                     value={formData.instructions.parkingInfo}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        instructions: { ...prev.instructions, parkingInfo: e.target.value }
-                                    }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            instructions: {
+                                                ...prev.instructions,
+                                                parkingInfo: e.target.value,
+                                            },
+                                        }))
+                                    }
                                     placeholder="Ex: Place réservée devant le portail"
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none"
                                     maxLength={200}
@@ -1333,13 +1667,20 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
 
                             {/* Notes spéciales */}
                             <div>
-                                <label className="block text-sm font-medium mb-2">📝 Notes pour les toutous</label>
+                                <label className="block text-sm font-medium mb-2">
+                                    📝 Notes pour les toutous
+                                </label>
                                 <textarea
                                     value={formData.instructions.specialNotes}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        instructions: { ...prev.instructions, specialNotes: e.target.value }
-                                    }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            instructions: {
+                                                ...prev.instructions,
+                                                specialNotes: e.target.value,
+                                            },
+                                        }))
+                                    }
                                     placeholder="Ex: La gamelle d'eau fraîche t'attend ! Les friandises sont dans le placard de gauche 🦴"
                                     className="w-full p-3 border-2 border-secondary rounded-xl focus:border-brand focus:outline-none resize-none h-24"
                                     maxLength={500}
@@ -1353,26 +1694,36 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Option Anti-Chat</h1>
-                        <p className="text-secondary mb-6">Certains toutous préfèrent une zone 100% sans félin !</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Certains toutous préfèrent une zone 100% sans félin !
+                        </p>
+
                         <div className="space-y-6">
                             <div className="flex items-center justify-between py-4 border-b border-(--color-border-light)">
                                 <div>
                                     <p className="font-medium">Option Anti-Chat disponible</p>
-                                    <p className="text-sm text-secondary">Propose cette option aux toutous</p>
+                                    <p className="text-sm text-secondary">
+                                        Propose cette option aux toutous
+                                    </p>
                                 </div>
                                 <button
-                                    onClick={() => setFormData(prev => ({
-                                        ...prev,
-                                        antiCatAvailable: !prev.antiCatAvailable
-                                    }))}
+                                    onClick={() =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            antiCatAvailable: !prev.antiCatAvailable,
+                                        }))
+                                    }
                                     className={`w-12 h-7 rounded-full transition-colors ${
                                         formData.antiCatAvailable ? 'bg-brand' : 'bg-tertiary'
                                     }`}
                                 >
-                                    <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                                        formData.antiCatAvailable ? 'translate-x-6' : 'translate-x-1'
-                                    }`} />
+                                    <div
+                                        className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                                            formData.antiCatAvailable
+                                                ? 'translate-x-6'
+                                                : 'translate-x-1'
+                                        }`}
+                                    />
                                 </button>
                             </div>
 
@@ -1390,10 +1741,12 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                             min="0"
                                             max="100"
                                             value={formData.antiCatRiskScore}
-                                            onChange={(e) => setFormData(prev => ({
-                                                ...prev,
-                                                antiCatRiskScore: parseInt(e.target.value)
-                                            }))}
+                                            onChange={(e) =>
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    antiCatRiskScore: parseInt(e.target.value),
+                                                }))
+                                            }
                                             className="w-full"
                                         />
                                         <div className="flex justify-between text-xs text-secondary mt-1">
@@ -1403,23 +1756,35 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                     </div>
 
                                     <div>
-                                        <label className="block font-medium mb-2">Prix supplémentaire</label>
+                                        <label className="block font-medium mb-2">
+                                            Prix supplémentaire
+                                        </label>
                                         <div className="flex items-center gap-4">
                                             <button
-                                                onClick={() => setFormData(prev => ({
-                                                    ...prev,
-                                                    antiCatExtraPrice: Math.max(0, prev.antiCatExtraPrice - 1)
-                                                }))}
+                                                onClick={() =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        antiCatExtraPrice: Math.max(
+                                                            0,
+                                                            prev.antiCatExtraPrice - 1
+                                                        ),
+                                                    }))
+                                                }
                                                 className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center"
                                             >
                                                 <Minus className="w-4 h-4" />
                                             </button>
-                                            <span className="text-2xl font-bold">{formData.antiCatExtraPrice}€</span>
+                                            <span className="text-2xl font-bold">
+                                                {formData.antiCatExtraPrice}€
+                                            </span>
                                             <button
-                                                onClick={() => setFormData(prev => ({
-                                                    ...prev,
-                                                    antiCatExtraPrice: prev.antiCatExtraPrice + 1
-                                                }))}
+                                                onClick={() =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        antiCatExtraPrice:
+                                                            prev.antiCatExtraPrice + 1,
+                                                    }))
+                                                }
                                                 className="w-10 h-10 rounded-full border-2 border-tertiary flex items-center justify-center"
                                             >
                                                 <Plus className="w-4 h-4" />
@@ -1436,25 +1801,32 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                 return (
                     <div className="flex-1 overflow-y-auto p-6">
                         <h1 className="text-2xl font-bold mb-2">Récapitulatif</h1>
-                        <p className="text-secondary mb-6">Vérifie que tout est correct avant de publier.</p>
-                        
+                        <p className="text-secondary mb-6">
+                            Vérifie que tout est correct avant de publier.
+                        </p>
+
                         <div className="space-y-4">
                             {/* Aperçu carte */}
                             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-(--color-border-light)">
                                 <div className="aspect-video bg-tertiary relative">
-                                    <img 
-                                        src={formData.images[0] || '/placeholder-dog.svg'} 
-                                        alt="Aperçu" 
+                                    <img
+                                        src={formData.images[0] || '/placeholder-dog.svg'}
+                                        alt="Aperçu"
                                         className="w-full h-full object-cover"
                                     />
                                     <div className="absolute top-3 left-3 px-2 py-1 bg-white rounded-lg text-xs font-medium">
-                                        {LISTING_TYPES.find(t => t.id === formData.type)?.title}
+                                        {LISTING_TYPES.find((t) => t.id === formData.type)?.title}
                                     </div>
                                 </div>
                                 <div className="p-4">
-                                    <h3 className="font-semibold">{formData.title || 'Titre de l\'annonce'}</h3>
+                                    <h3 className="font-semibold">
+                                        {formData.title || "Titre de l'annonce"}
+                                    </h3>
                                     <p className="text-sm text-secondary">{generateSubtitle()}</p>
-                                    <p className="font-bold mt-2">{formData.price}€ <span className="font-normal text-secondary">/ nuit</span></p>
+                                    <p className="font-bold mt-2">
+                                        {formData.price}€{' '}
+                                        <span className="font-normal text-secondary">/ nuit</span>
+                                    </p>
                                 </div>
                             </div>
 
@@ -1466,30 +1838,43 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Équipements</span>
-                                    <span className="font-medium">{formData.amenities.length} sélectionnés</span>
+                                    <span className="font-medium">
+                                        {formData.amenities.length} sélectionnés
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Photos</span>
-                                    <span className="font-medium">{formData.images.length} ajoutées</span>
+                                    <span className="font-medium">
+                                        {formData.images.length} ajoutées
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Disponibilités</span>
-                                    <span className="font-medium">{formData.availableDateRanges.length} périodes</span>
+                                    <span className="font-medium">
+                                        {formData.availableDateRanges.length} périodes
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Anti-Chat</span>
                                     <span className="font-medium">
-                                        {formData.antiCatAvailable ? `Oui (+${formData.antiCatExtraPrice}€)` : 'Non'}
+                                        {formData.antiCatAvailable
+                                            ? `Oui (+${formData.antiCatExtraPrice}€)`
+                                            : 'Non'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Annulation</span>
-                                    <span className="font-medium capitalize">{formData.cancellationPolicy}</span>
+                                    <span className="font-medium capitalize">
+                                        {formData.cancellationPolicy}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-secondary">Instructions</span>
                                     <span className="font-medium">
-                                        {formData.instructions.accessCode || formData.instructions.specialNotes ? '✓ Ajoutées' : 'Aucune'}
+                                        {formData.instructions.accessCode ||
+                                        formData.instructions.specialNotes
+                                            ? '✓ Ajoutées'
+                                            : 'Aucune'}
                                     </span>
                                 </div>
                             </div>
@@ -1507,24 +1892,26 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
     return (
         <div className="fixed inset-0 bg-white flex flex-col">
             {/* Header */}
-            <div 
+            <div
                 className="shrink-0 px-4 py-3 border-b border-secondary flex items-center gap-4"
                 style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))' }}
             >
-                <button 
+                <button
                     onClick={() => setShowExitConfirm(true)}
                     className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-tertiary"
                 >
                     <X className="w-6 h-6" />
                 </button>
-                
+
                 {!isIntroStep && (
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-secondary">Étape {phase}/3</span>
+                            <span className="text-xs font-medium text-secondary">
+                                Étape {phase}/3
+                            </span>
                         </div>
                         <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                            <div 
+                            <div
                                 className="h-full bg-brand transition-all duration-300"
                                 style={{ width: `${progress}%` }}
                             />
@@ -1537,21 +1924,18 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
             {renderContent()}
 
             {/* Footer */}
-            <div 
+            <div
                 className="shrink-0 px-6 py-4 border-t border-secondary flex items-center justify-between bg-white"
                 style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
             >
                 {!isIntroStep && currentStepIndex > 0 ? (
-                    <button 
-                        onClick={goBack}
-                        className="px-6 py-3 font-semibold underline"
-                    >
+                    <button onClick={goBack} className="px-6 py-3 font-semibold underline">
                         Retour
                     </button>
                 ) : (
                     <div />
                 )}
-                
+
                 {currentStep === 'review' ? (
                     <button
                         onClick={handleSubmit}
@@ -1564,7 +1948,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                                 Publication...
                             </>
                         ) : (
-                            'Publier l\'annonce'
+                            "Publier l'annonce"
                         )}
                     </button>
                 ) : (
@@ -1573,7 +1957,7 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                         disabled={!canProceed()}
                         className="px-8 py-3 bg-(--color-text-primary) text-white font-semibold rounded-xl disabled:opacity-50 disabled:bg-tertiary flex items-center gap-2"
                     >
-                        {isIntroStep ? 'C\'est parti !' : 'Suivant'}
+                        {isIntroStep ? "C'est parti !" : 'Suivant'}
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 )}
@@ -1594,7 +1978,8 @@ export const HostAddListing = ({ onBack, onSuccess }: HostAddListingProps) => {
                     <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
                         <h3 className="text-lg font-semibold mb-2">Quitter la création ?</h3>
                         <p className="text-secondary text-sm mb-6">
-                            Es-tu sûr de vouloir quitter ? Toutes les informations saisies seront perdues.
+                            Es-tu sûr de vouloir quitter ? Toutes les informations saisies seront
+                            perdues.
                         </p>
                         <div className="flex gap-3">
                             <button

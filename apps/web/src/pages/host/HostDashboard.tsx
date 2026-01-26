@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { 
-    Home, 
-    Calendar, 
-    Plus, 
-    ChevronRight, 
+import {
+    Home,
+    Calendar,
+    Plus,
+    ChevronRight,
     AlertTriangle,
     TrendingUp,
     Star,
-    Loader2
+    Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMyListings } from '../../services/hostApi';
@@ -46,7 +46,7 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
                 setIsLoading(true);
                 const result = await getMyListings();
                 if (result.success && result.data) {
-                    setStats(prev => ({
+                    setStats((prev) => ({
                         ...prev,
                         totalListings: result.data!.length,
                     }));
@@ -63,7 +63,7 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
     return (
         <div className="fixed inset-0 bg-page flex flex-col">
             {/* Header */}
-            <div 
+            <div
                 className="shrink-0 px-4 py-4 bg-white border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
@@ -76,7 +76,7 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
             </div>
 
             {/* Content */}
-            <div 
+            <div
                 className="flex-1 overflow-y-auto p-4 space-y-4"
                 style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
             >
@@ -90,8 +90,8 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
                                     Verification en attente
                                 </p>
                                 <p className="text-sm text-warning mt-1">
-                                    Pour publier des annonces, verifie ton identite. 
-                                    Tu peux quand meme preparer tes annonces en attendant.
+                                    Pour publier des annonces, verifie ton identite. Tu peux quand
+                                    meme preparer tes annonces en attendant.
                                 </p>
                                 <button className="mt-2 text-sm font-medium text-warning underline">
                                     Verifier mon identite
@@ -128,8 +128,8 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
                     <div className="p-4 border-b border-(--color-border-light)">
                         <h2 className="text-body-md font-semibold">Actions rapides</h2>
                     </div>
-                    
-                    <button 
+
+                    <button
                         onClick={onAddListing}
                         className="w-full flex items-center gap-4 p-4 hover:bg-secondary transition-colors border-b border-(--color-border-light)"
                     >
@@ -138,12 +138,14 @@ export const HostDashboard = ({ onAddListing, onViewListings }: HostDashboardPro
                         </div>
                         <div className="flex-1 text-left">
                             <p className="text-body-md font-medium">Ajouter une annonce</p>
-                            <p className="text-caption text-secondary">Propose une nouvelle niche</p>
+                            <p className="text-caption text-secondary">
+                                Propose une nouvelle niche
+                            </p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-secondary" />
                     </button>
 
-                    <button 
+                    <button
                         onClick={onViewListings}
                         className="w-full flex items-center gap-4 p-4 hover:bg-secondary transition-colors border-b border-(--color-border-light)"
                     >

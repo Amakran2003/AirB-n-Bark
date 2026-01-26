@@ -6,8 +6,9 @@
    ============================================================ */
 
 /* ==================== SAFE AREA FIX iOS PWA ==================== */
-html, body {
-    background-color: #3B82F6; /* Bleu du splash - changé dynamiquement après */
+html,
+body {
+    background-color: #3b82f6; /* Bleu du splash - changé dynamiquement après */
     min-height: 100%;
     min-height: 100dvh;
 }
@@ -15,10 +16,10 @@ html, body {
 /* ==================== VARIABLES CSS ==================== */
 :root {
     /* Couleurs primaires (brand) */
-    --color-primary: #3B82F6;
-    --color-primary-dark: #2563EB;
-    --color-primary-light: #DBEAFE;
-    --color-primary-lighter: #EFF6FF;
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-primary-light: #dbeafe;
+    --color-primary-lighter: #eff6ff;
     --color-secondary: #222222;
     --color-secondary-dark: #313131;
 
@@ -35,17 +36,17 @@ html, body {
     /* Couleurs fonctionnelles */
     --color-star: #ffd700;
     --color-success: #16a34a;
-    --color-success-light: #DCFCE7;
-    --color-success-lighter: #F0FDF4;
-    --color-success-dark: #15803D;
+    --color-success-light: #dcfce7;
+    --color-success-lighter: #f0fdf4;
+    --color-success-dark: #15803d;
     --color-error: #dc2626;
-    --color-error-light: #FEE2E2;
-    --color-error-lighter: #FEF2F2;
-    --color-error-dark: #B91C1C;
+    --color-error-light: #fee2e2;
+    --color-error-lighter: #fef2f2;
+    --color-error-dark: #b91c1c;
     --color-warning: #f59e0b;
-    --color-warning-light: #FEF3C7;
-    --color-warning-lighter: #FFFBEB;
-    --color-warning-dark: #B45309;
+    --color-warning-light: #fef3c7;
+    --color-warning-lighter: #fffbeb;
+    --color-warning-dark: #b45309;
 
     /* Espacements */
     --spacing-xs: 4px;
@@ -294,8 +295,8 @@ body {
     justify-content: center;
     gap: var(--spacing-sm);
     padding: 14px 42px;
-    background-color: #E0E0E0;
-    color: #9E9E9E;
+    background-color: #e0e0e0;
+    color: #9e9e9e;
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.3px;

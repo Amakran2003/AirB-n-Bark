@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
+import {
+    createContext,
+    useContext,
+    useState,
+    ReactNode,
+    useMemo,
+    useEffect,
+    useCallback,
+} from 'react';
 import type { ListingType, ListingCardData } from '../data/listings';
 import { getListings } from '../data/listings';
 import type { ListingCard, ListingsFilters } from '../types/api.types';
@@ -274,14 +282,12 @@ export const buildFilterQueryParams = (filters: FilterState): URLSearchParams =>
  */
 export const fetchFilteredListings = async (filters: FilterState) => {
     const params = buildFilterQueryParams(filters);
-    const url = `/api/listings?${params.toString()}`;
-
     // TODO: Remplacer par l'appel API réel
-    console.log('API Call:', url);
-
-    // Pour le moment, retourner les données mockées
+    // const url = `/api/listings?${params.toString()}`;
     // const response = await fetch(url);
     // return response.json();
 
+    // Pour le moment, retourner null (données mockées utilisées)
+    void params; // Évite l'erreur TS unused
     return null;
 };

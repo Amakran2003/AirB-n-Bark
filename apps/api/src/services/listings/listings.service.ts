@@ -411,8 +411,19 @@ export async function getListingReviews(listingId: string, page = 1, limit = 10)
 
     const totalPages = Math.ceil(total / limit);
 
+    // Transformer les reviews pour correspondre au format frontend
+    const formattedReviews = reviews.map((r) => ({
+        id: r.id,
+        authorName: r.author?.name || 'Anonyme',
+        authorAvatar: r.author?.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+        rating: r.rating,
+        date: r.createdAt?.toISOString?.()?.split('T')[0] || '',
+        content: r.content,
+        platformDate: r.createdAt?.toISOString?.()?.split('T')[0] || '',
+    }));
+
     return {
-        data: reviews,
+        data: formattedReviews,
         pagination: {
             page,
             limit,

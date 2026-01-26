@@ -2,7 +2,7 @@
  * ==================== TYPES API PARTAGÉS ====================
  * Types TypeScript pour l'API AirB-n-Bark
  * À utiliser côté frontend ET backend pour garantir la cohérence
- * 
+ *
  * Convention:
  * - Les types sont séparés des mock data
  * - Compatible avec les réponses API REST
@@ -87,7 +87,7 @@ export interface ListingReview {
 
 export interface DateRange {
     start: string; // ISO format: "2026-01-20"
-    end: string;   // ISO format: "2026-03-15"
+    end: string; // ISO format: "2026-03-15"
 }
 
 export interface AntiCatOption {
@@ -302,10 +302,12 @@ export interface PaginationParams {
 }
 
 // Type helper pour les réponses API
-export type ApiResponse<T> = {
-    data: T;
-    success: true;
-} | {
-    error: ApiError;
-    success: false;
-};
+export type ApiResponse<T> =
+    | {
+          data: T;
+          success: true;
+      }
+    | {
+          error: ApiError;
+          success: false;
+      };

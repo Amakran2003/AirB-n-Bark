@@ -60,7 +60,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Gestion du swipe gauche (passer)
      */
     const handleSwipeLeft = useCallback(() => {
-        console.log('Passé:', filteredListings[currentIndex]?.title);
         setCurrentIndex((prev) => prev + 1);
     }, [currentIndex, filteredListings]);
 
@@ -71,7 +70,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
     const handleSwipeRight = useCallback(() => {
         const listing = filteredListings[currentIndex];
         if (listing) {
-            console.log('Réservation:', listing.title);
             setBookingListing(listing);
         }
     }, [currentIndex, filteredListings]);
@@ -81,8 +79,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      */
     const handleUndo = useCallback(() => {
         if (currentIndex > 0) {
-            const prevListing = filteredListings[currentIndex - 1];
-            console.log('Retour:', prevListing?.title);
             setCurrentIndex((prev) => prev - 1);
         }
     }, [currentIndex, filteredListings]);
@@ -91,7 +87,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Gestion du swipe haut / clic (ouvrir détails)
      */
     const handleSwipeUp = useCallback((listing: ListingCardData) => {
-        console.log('Ouvrir détails:', listing.title);
         setIsDetailTransitioning(true);
         // Petit délai pour l'animation
         setTimeout(() => {
@@ -113,7 +108,6 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
      * Confirmer la réservation (après auth)
      */
     const handleConfirmBooking = useCallback(() => {
-        console.log('Réservation confirmée:', bookingListing?.title);
         setBookingListing(null);
         setCurrentIndex((prev) => prev + 1);
     }, [bookingListing]);
@@ -223,7 +217,11 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                     </button>
 
                     {/* Icône Bot - sans bordure, taille augmentée */}
-                    <button className="btn-icon" onClick={() => setIsChatBotOpen(true)} aria-label="Ouvrir l'assistant">
+                    <button
+                        className="btn-icon"
+                        onClick={() => setIsChatBotOpen(true)}
+                        aria-label="Ouvrir l'assistant"
+                    >
                         <Bot className="w-8 h-8 text-black" strokeWidth={1.5} />
                     </button>
                 </header>
@@ -248,7 +246,11 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
                                 onSwipeUp={() => handleSwipeUp(listing)}
                                 onUndo={handleUndo}
                                 canUndo={currentIndex > 0}
-                                tutorialStep={index === remainingCards.slice(0, 2).length - 1 ? tutorialStep : null}
+                                tutorialStep={
+                                    index === remainingCards.slice(0, 2).length - 1
+                                        ? tutorialStep
+                                        : null
+                                }
                             />
                         ))
                 ) : (
@@ -268,9 +270,7 @@ export const Home = ({ tutorialStep, onTabChange }: HomeProps) => {
 
             {/* ==================== BOTTOM NAVBAR ==================== */}
             {/* Cacher la navbar pendant la transition */}
-            {!isDetailTransitioning && (
-                <BottomNavbar activeTab="home" onTabChange={onTabChange} />
-            )}
+            {!isDetailTransitioning && <BottomNavbar activeTab="home" onTabChange={onTabChange} />}
 
             {/* ==================== CHATBOT ==================== */}
             <ChatBot isOpen={isChatBotOpen} onClose={() => setIsChatBotOpen(false)} />

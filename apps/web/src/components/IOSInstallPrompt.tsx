@@ -32,10 +32,7 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
             }`}
         >
             {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/50"
-                onClick={handleClose}
-            />
+            <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
             {/* Modal */}
             <div
@@ -53,9 +50,7 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
                 </button>
 
                 {/* Title */}
-                <h2 className="text-xl font-bold text-center mb-6 pr-8">
-                    Installer AirbnBark
-                </h2>
+                <h2 className="text-xl font-bold text-center mb-6 pr-8">Installer AirbnBark</h2>
 
                 {/* Instructions */}
                 <div className="space-y-4">
@@ -66,7 +61,9 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
                         </div>
                         <div>
                             <p className="font-medium text-primary">1. Appuie sur Partager</p>
-                            <p className="text-sm text-secondary">Avec ta patte, en bas de Safari</p>
+                            <p className="text-sm text-secondary">
+                                Avec ta patte, en bas de Safari
+                            </p>
                         </div>
                     </div>
 
@@ -77,7 +74,9 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
                         </div>
                         <div>
                             <p className="font-medium text-primary">2. Sur l'écran d'accueil</p>
-                            <p className="text-sm text-secondary">Fais défiler et appuie, c'est pas sorcier !</p>
+                            <p className="text-sm text-secondary">
+                                Fais défiler et appuie, c'est pas sorcier !
+                            </p>
                         </div>
                     </div>
 
@@ -88,16 +87,15 @@ export const IOSInstallPrompt = ({ isOpen, onClose }: IOSInstallPromptProps) => 
                         </div>
                         <div>
                             <p className="font-medium text-primary">3. Appuie sur Ajouter</p>
-                            <p className="text-sm text-secondary">Et voilà, t'es un pro du téléphone 🐾</p>
+                            <p className="text-sm text-secondary">
+                                Et voilà, t'es un pro du téléphone 🐾
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Button */}
-                <button
-                    className="btn-primary btn-full"
-                    onClick={handleClose}
-                >
+                <button className="btn-primary btn-full" onClick={handleClose}>
                     J'ai compris
                 </button>
             </div>

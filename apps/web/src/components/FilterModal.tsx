@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Calendar, Home, Cat, Star, Dog, Minus, Plus, MapPin, Search, Loader2 } from 'lucide-react';
+import {
+    X,
+    Calendar,
+    Home,
+    Cat,
+    Star,
+    Dog,
+    Minus,
+    Plus,
+    MapPin,
+    Search,
+    Loader2,
+} from 'lucide-react';
 import { useFilters, FilterState } from '../contexts/FilterContext';
 import { DatePicker } from './DatePicker';
 import type { ListingType } from '../data/listings';
@@ -30,9 +42,21 @@ interface AddressSuggestion {
 
 // Types de logement disponibles
 const LISTING_TYPES: { value: ListingType; label: string; description: string }[] = [
-    { value: 'niche', label: 'Niche entière', description: 'Un palace rien que pour toi, boule de poils' },
-    { value: 'nicholoc', label: 'Nicholoc', description: 'Une chambre en coloc avec d\'autres toutous cool' },
-    { value: 'nichortoir', label: 'Nichortoir', description: 'Un lit dans un dortoir... ambiance meute !' },
+    {
+        value: 'niche',
+        label: 'Niche entière',
+        description: 'Un palace rien que pour toi, boule de poils',
+    },
+    {
+        value: 'nicholoc',
+        label: 'Nicholoc',
+        description: "Une chambre en coloc avec d'autres toutous cool",
+    },
+    {
+        value: 'nichortoir',
+        label: 'Nichortoir',
+        description: 'Un lit dans un dortoir... ambiance meute !',
+    },
 ];
 
 // Fourchettes de prix prédéfinies
@@ -117,8 +141,8 @@ export const FilterModal = () => {
                     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(citySearch)}&countrycodes=fr&limit=5&addressdetails=1&featuretype=city`,
                     {
                         headers: {
-                            'Accept-Language': 'fr'
-                        }
+                            'Accept-Language': 'fr',
+                        },
                     }
                 );
                 const data = await response.json();
@@ -140,11 +164,12 @@ export const FilterModal = () => {
 
     // Sélectionner une ville depuis les suggestions
     const selectCity = (suggestion: AddressSuggestion) => {
-        const cityName = suggestion.address?.city ||
-                         suggestion.address?.town ||
-                         suggestion.address?.village ||
-                         suggestion.address?.municipality ||
-                         suggestion.display_name.split(',')[0].trim();
+        const cityName =
+            suggestion.address?.city ||
+            suggestion.address?.town ||
+            suggestion.address?.village ||
+            suggestion.address?.municipality ||
+            suggestion.display_name.split(',')[0].trim();
 
         setLocalFilters({ ...localFilters, city: cityName });
         setCitySearch('');
@@ -319,7 +344,9 @@ export const FilterModal = () => {
                         {localFilters.city && !citySearch && (
                             <div className="flex items-center gap-2 mb-4 p-3 bg-primary-light rounded-xl">
                                 <MapPin className="w-4 h-4 text-brand" />
-                                <span className="text-body-md font-medium text-brand">{localFilters.city}</span>
+                                <span className="text-body-md font-medium text-brand">
+                                    {localFilters.city}
+                                </span>
                                 <button
                                     onClick={() => {
                                         setLocalFilters({ ...localFilters, city: null });
@@ -336,23 +363,30 @@ export const FilterModal = () => {
                         {citySuggestions.length > 0 && (
                             <div className="mb-4 rounded-xl border border-(--color-border-light) overflow-hidden">
                                 {citySuggestions.map((suggestion, index) => {
-                                    const cityName = suggestion.address?.city ||
-                                                     suggestion.address?.town ||
-                                                     suggestion.address?.village ||
-                                                     suggestion.address?.municipality ||
-                                                     suggestion.display_name.split(',')[0].trim();
+                                    const cityName =
+                                        suggestion.address?.city ||
+                                        suggestion.address?.town ||
+                                        suggestion.address?.village ||
+                                        suggestion.address?.municipality ||
+                                        suggestion.display_name.split(',')[0].trim();
                                     return (
                                         <button
                                             key={suggestion.place_id}
                                             onClick={() => selectCity(suggestion)}
                                             className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-secondary transition-colors ${
-                                                index < citySuggestions.length - 1 ? 'border-b border-(--color-border-light)' : ''
+                                                index < citySuggestions.length - 1
+                                                    ? 'border-b border-(--color-border-light)'
+                                                    : ''
                                             }`}
                                         >
                                             <MapPin className="w-5 h-5 text-tertiary shrink-0" />
                                             <div className="min-w-0">
-                                                <p className="text-body-md font-medium truncate">{cityName}</p>
-                                                <p className="text-caption text-secondary truncate">{suggestion.display_name}</p>
+                                                <p className="text-body-md font-medium truncate">
+                                                    {cityName}
+                                                </p>
+                                                <p className="text-caption text-secondary truncate">
+                                                    {suggestion.display_name}
+                                                </p>
                                             </div>
                                         </button>
                                     );
@@ -363,9 +397,11 @@ export const FilterModal = () => {
                         {/* Villes populaires (affichées seulement si pas de recherche) */}
                         {!citySearch && (
                             <>
-                                <p className="text-caption text-secondary mb-2">Villes populaires</p>
+                                <p className="text-caption text-secondary mb-2">
+                                    Villes populaires
+                                </p>
                                 <div className="flex flex-wrap gap-2">
-                                    {POPULAR_CITIES.slice(0, 8).map(city => (
+                                    {POPULAR_CITIES.slice(0, 8).map((city) => (
                                         <button
                                             key={city}
                                             onClick={() => {
@@ -396,7 +432,8 @@ export const FilterModal = () => {
                                 <div>
                                     <p className="text-body-md">Nombre de chiens</p>
                                     <p className="text-caption text-secondary">
-                                        {localFilters.dogsCount} {localFilters.dogsCount > 1 ? 'toutous' : 'toutou'}
+                                        {localFilters.dogsCount}{' '}
+                                        {localFilters.dogsCount > 1 ? 'toutous' : 'toutou'}
                                     </p>
                                 </div>
                             </div>
@@ -407,19 +444,31 @@ export const FilterModal = () => {
                                             ? 'border-tertiary text-tertiary'
                                             : 'border-(--color-text-primary) text-primary'
                                     }`}
-                                    onClick={() => setLocalFilters({ ...localFilters, dogsCount: Math.max(1, localFilters.dogsCount - 1) })}
+                                    onClick={() =>
+                                        setLocalFilters({
+                                            ...localFilters,
+                                            dogsCount: Math.max(1, localFilters.dogsCount - 1),
+                                        })
+                                    }
                                     disabled={localFilters.dogsCount <= 1}
                                 >
                                     <Minus className="w-4 h-4" />
                                 </button>
-                                <span className="w-6 text-center text-body-md font-medium">{localFilters.dogsCount}</span>
+                                <span className="w-6 text-center text-body-md font-medium">
+                                    {localFilters.dogsCount}
+                                </span>
                                 <button
                                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                         localFilters.dogsCount >= 10
                                             ? 'border-tertiary text-tertiary'
                                             : 'border-(--color-text-primary) text-primary'
                                     }`}
-                                    onClick={() => setLocalFilters({ ...localFilters, dogsCount: Math.min(10, localFilters.dogsCount + 1) })}
+                                    onClick={() =>
+                                        setLocalFilters({
+                                            ...localFilters,
+                                            dogsCount: Math.min(10, localFilters.dogsCount + 1),
+                                        })
+                                    }
                                     disabled={localFilters.dogsCount >= 10}
                                 >
                                     <Plus className="w-4 h-4" />
@@ -530,7 +579,9 @@ export const FilterModal = () => {
                             </div>
                             <div
                                 className={`w-12 h-7 rounded-full transition-colors ${
-                                    localFilters.antiCatOnly ? 'bg-(--color-text-primary)' : 'bg-tertiary'
+                                    localFilters.antiCatOnly
+                                        ? 'bg-(--color-text-primary)'
+                                        : 'bg-tertiary'
                                 }`}
                             >
                                 <div

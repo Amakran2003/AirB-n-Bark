@@ -33,24 +33,19 @@ def woobot():
             case '?':
                 if (lang) == 'french':
                     woobot_output += ' ' + punctuation
-                    print(woobot_output)
                     return woobot_output
                 else:
                     woobot_output += punctuation
-                    print(woobot_output)
                     return woobot_output
             case '!':
                 if (lang) == 'french':
                     woobot_output += ' ' + punctuation
-                    print(woobot_output)
                     return woobot_output
                 else:
                     woobot_output += punctuation
-                    print(woobot_output)
                     return woobot_output
             case '.':
                 woobot_output += punctuation
-                print(woobot_output)
                 return woobot_output
             case ':':
                 if (lang) == 'french':

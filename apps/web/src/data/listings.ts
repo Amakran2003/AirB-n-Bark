@@ -61,14 +61,33 @@ export interface ListingAmenity {
         | 'shield'
         | 'leaf'
         | 'moon'
-        | 'sun';
+        | 'sun'
+        | 'trees'
+        | 'waves'
+        | 'paw'
+        | 'bed'
+        | 'wifi'
+        | 'video'
+        | 'heart';
 }
 
 // Point fort de l'annonce
 export interface ListingHighlight {
     title: string;
     description: string;
-    icon: 'search' | 'star' | 'check' | 'paw' | 'shield';
+    icon:
+        | 'search'
+        | 'star'
+        | 'check'
+        | 'paw'
+        | 'shield'
+        | 'waves'
+        | 'trees'
+        | 'award'
+        | 'flame'
+        | 'sun'
+        | 'leaf'
+        | 'home';
 }
 
 // Avis d'un utilisateur (woufview)
@@ -184,9 +203,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: false, riskScore: 45, extraPrice: 0 },
         maxDogs: 1,
-        availableDateRanges: [
-            { start: '2026-01-25', end: '2026-04-15' },
-        ],
+        availableDateRanges: [{ start: '2026-01-25', end: '2026-04-15' }],
     },
     {
         id: '3',
@@ -201,9 +218,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 80, extraPrice: 8 },
         maxDogs: 1,
-        availableDateRanges: [
-            { start: '2026-01-20', end: '2026-12-31' },
-        ],
+        availableDateRanges: [{ start: '2026-01-20', end: '2026-12-31' }],
     },
     {
         id: '4',
@@ -236,9 +251,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: false, riskScore: 20, extraPrice: 0 },
         maxDogs: 2,
-        availableDateRanges: [
-            { start: '2026-05-01', end: '2026-09-30' },
-        ],
+        availableDateRanges: [{ start: '2026-05-01', end: '2026-09-30' }],
     },
     {
         id: '6',
@@ -271,9 +284,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 10, extraPrice: 5 },
         maxDogs: 3,
-        availableDateRanges: [
-            { start: '2026-02-15', end: '2026-07-15' },
-        ],
+        availableDateRanges: [{ start: '2026-02-15', end: '2026-07-15' }],
     },
     {
         id: '8',
@@ -288,9 +299,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: false, riskScore: 60, extraPrice: 0 },
         maxDogs: 1,
-        availableDateRanges: [
-            { start: '2026-01-20', end: '2026-12-31' },
-        ],
+        availableDateRanges: [{ start: '2026-01-20', end: '2026-12-31' }],
     },
     {
         id: '9',
@@ -305,9 +314,7 @@ export const MOCK_LISTINGS: ListingCardData[] = [
         hostAvatar: PLACEHOLDER_AVATAR,
         antiCat: { available: true, riskScore: 5, extraPrice: 4 },
         maxDogs: 2,
-        availableDateRanges: [
-            { start: '2026-03-01', end: '2026-11-30' },
-        ],
+        availableDateRanges: [{ start: '2026-03-01', end: '2026-11-30' }],
     },
     {
         id: '10',
@@ -384,7 +391,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
             },
             {
                 title: 'Melissa est une nouvelle hôte',
-                description: "Nouvelle sur AirbnBark mais déjà 4 woufviews 5 étoiles !",
+                description: 'Nouvelle sur AirbnBark mais déjà 4 woufviews 5 étoiles !',
                 icon: 'star',
             },
         ],
@@ -397,7 +404,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 jours',
                 content:
                     "Woof woof wooof ! Le plaid chauffant était incroyable. J'ai reniflé chaque coin, approuvé à 100%. Le sniff QR au check-in était rapide. Je recommande !",
-                platformDate: "Il y a 4 mois sur AirbnBark",
+                platformDate: 'Il y a 4 mois sur AirbnBark',
             },
             {
                 id: 'rev2',
@@ -407,7 +414,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Enfin une niche où on respecte mon espace ! Pas de chat en vue grâce à l'option Anti-Chat. Le parc est vraiment à 10 min, j'ai chronométré (en trottinant).",
-                platformDate: "Il y a 3 mois sur AirbnBark",
+                platformDate: 'Il y a 3 mois sur AirbnBark',
             },
         ],
         pricing: {
@@ -485,7 +492,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 3 jours',
                 content:
                     "J'ai rencontré mon nouveau best friend ici ! Un Labrador super sympa. Pierre nous a emmenés au parc ensemble. Top coloc !",
-                platformDate: "Il y a 2 mois sur AirbnBark",
+                platformDate: 'Il y a 2 mois sur AirbnBark',
             },
         ],
         pricing: {
@@ -557,7 +564,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Correct pour le prix ! J'ai fait des potes, mais j'ai aperçu un chat par la fenêtre... Prenez l'option Anti-Chat, sérieux.",
-                platformDate: "Il y a 1 mois sur AirbnBark",
+                platformDate: 'Il y a 1 mois sur AirbnBark',
             },
         ],
         pricing: {
@@ -640,7 +647,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 5 jours',
                 content:
                     "LE JARDIN !!! J'ai couru pendant 3h non-stop. Et la bouffe maison de Marie, un régal. Je reviens avec toute ma meute.",
-                platformDate: "Il y a 2 semaines sur AirbnBark",
+                platformDate: 'Il y a 2 semaines sur AirbnBark',
             },
             {
                 id: 'rev2',
@@ -650,7 +657,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 semaines',
                 content:
                     "J'ai même pu creuser des trous sans me faire gronder ! Marie est la meilleure. Et zéro chat à l'horizon, nickel.",
-                platformDate: "Il y a 1 mois sur AirbnBark",
+                platformDate: 'Il y a 1 mois sur AirbnBark',
             },
         ],
         pricing: {
@@ -722,7 +729,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "J'AI CHASSÉ DES VAGUES !!! Meilleure expérience de ma vie de chien. La douche après c'est pas ouf mais bon...",
-                platformDate: "Il y a 3 semaines sur AirbnBark",
+                platformDate: 'Il y a 3 semaines sur AirbnBark',
             },
         ],
         pricing: {
@@ -799,7 +806,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 4 jours',
                 content:
                     "LA NEIGE !!! J'ai couru, sauté, roulé... Et Emma marche super vite, j'adore. Pas un seul chat, le paradis.",
-                platformDate: "Il y a 2 semaines sur AirbnBark",
+                platformDate: 'Il y a 2 semaines sur AirbnBark',
             },
         ],
         pricing: {
@@ -882,7 +889,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 2 jours',
                 content:
                     'Je me suis sentie comme une vraie princesse. Le rooftop, le room service... Et la patrouille anti-chat, quelle classe !',
-                platformDate: "Il y a 1 semaine sur AirbnBark",
+                platformDate: 'Il y a 1 semaine sur AirbnBark',
             },
         ],
         pricing: {
@@ -959,7 +966,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 5 jours',
                 content:
                     "Beaucoup de bruit, beaucoup de fun ! J'ai rencontré 7 nouveaux potes. Par contre le chat de Claire est passé, j'ai pas aimé.",
-                platformDate: "Il y a 3 semaines sur AirbnBark",
+                platformDate: 'Il y a 3 semaines sur AirbnBark',
             },
         ],
         pricing: {
@@ -1037,7 +1044,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 1 semaine',
                 content:
                     "Les croquettes bio étaient délicieuses ! Et le lac... J'ai nagé pendant des heures. Thomas est super attentionné.",
-                platformDate: "Il y a 1 mois sur AirbnBark",
+                platformDate: 'Il y a 1 mois sur AirbnBark',
             },
         ],
         pricing: {
@@ -1109,7 +1116,7 @@ export const MOCK_LISTINGS_FULL: Record<string, ListingFullData> = {
                 date: 'Il y a 3 jours',
                 content:
                     "Avec mes petites pattes, le parc à 2 min c'est parfait ! Julie est super ponctuelle pour les sorties. J'ai pris l'option Anti-Chat, au cas où.",
-                platformDate: "Il y a 2 semaines sur AirbnBark",
+                platformDate: 'Il y a 2 semaines sur AirbnBark',
             },
         ],
         pricing: {
@@ -1171,7 +1178,7 @@ export const getListingById = (id: string): ListingFullData | null => {
     }
     // Sinon chercher dans le localStorage (annonces créées par hôtes)
     const hostListings = getHostListings();
-    return hostListings.find(l => l.id === id) || null;
+    return hostListings.find((l) => l.id === id) || null;
 };
 
 // Récupérer les favoris (pour plus tard)

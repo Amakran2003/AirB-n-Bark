@@ -21,3 +21,8 @@
     header @html Cache-Control "no-cache, must-revalidate"
   }
 }
+
+# Prisma Studio (dev only)
+:5555 {
+  reverse_proxy api:5555
+}

@@ -87,10 +87,32 @@ async function main() {
 
     const guest1 = await prisma.user.create({
         data: {
-            email: 'guest@example.com',
+            email: 'rex@wouf.dog',
             password: hashedPassword,
-            name: 'Sophie Bernard',
-            avatar: 'https://picsum.photos/id/169/200',
+            name: 'Rex le Berger',
+            avatar: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop&crop=face',
+            isHost: false,
+            languageId: englishLanguage?.id,
+        },
+    });
+
+    const guest2 = await prisma.user.create({
+        data: {
+            email: 'bella@wouf.dog',
+            password: hashedPassword,
+            name: 'Bella la Golden',
+            avatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=200&h=200&fit=crop&crop=face',
+            isHost: false,
+            languageId: englishLanguage?.id,
+        },
+    });
+
+    const guest3 = await prisma.user.create({
+        data: {
+            email: 'max@wouf.dog',
+            password: hashedPassword,
+            name: 'Max le Husky',
+            avatar: 'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=200&h=200&fit=crop&crop=face',
             isHost: false,
             languageId: englishLanguage?.id,
         },
@@ -142,18 +164,18 @@ Je suis présente à la maison et je propose des promenades 3 fois par jour mini
             amenities: {
                 create: [
                     { name: 'Jardin', icon: 'leaf' },
-                    { name: 'Climatisation', icon: 'snowflake' },
+                    { name: 'Climatisation', icon: 'flame' },
                     { name: 'Gamelles premium', icon: 'bone' },
-                    { name: 'Jouets', icon: 'gamepad' },
+                    { name: 'Jouets', icon: 'bone' },
                     { name: 'Promenades', icon: 'paw' },
                     { name: 'Webcam', icon: 'video' },
                 ],
             },
             highlights: {
                 create: [
-                    { title: 'Super hôte', description: 'Marie a une excellente réputation', icon: 'star' },
-                    { title: 'Annulation gratuite', description: 'Jusqu\'à 24h avant', icon: 'check' },
                     { title: 'Jardin clôturé', description: '500m² sécurisé', icon: 'shield' },
+                    { title: 'Annulation gratuite', description: 'Jusqu\'\u00e0 24h avant', icon: 'check' },
+                    { title: 'Espace vert', description: 'Jardin arboré', icon: 'trees' },
                 ],
             },
             rooms: {
@@ -225,13 +247,13 @@ Tu auras ton propre espace avec :
                     { name: 'Balcon', icon: 'sun' },
                     { name: 'Chauffage', icon: 'flame' },
                     { name: 'WiFi', icon: 'wifi' },
-                    { name: 'Proche parc', icon: 'tree' },
+                    { name: 'Proche parc', icon: 'trees' },
                 ],
             },
             highlights: {
                 create: [
-                    { title: 'Proche Parc Tête d\'Or', description: 'À 5 min à pied', icon: 'tree' },
-                    { title: 'Télétravail', description: 'Présence constante', icon: 'laptop' },
+                    { title: 'Proche Parc Tête d\'Or', description: 'À 5 min à pied', icon: 'trees' },
+                    { title: 'Télétravail', description: 'Présence constante', icon: 'home' },
                 ],
             },
             availability: {
@@ -285,20 +307,20 @@ Sur un terrain de 2 hectares, nous te proposons :
             isPublished: true,
             amenities: {
                 create: [
-                    { name: 'Piscine', icon: 'droplets' },
-                    { name: 'Agility', icon: 'activity' },
+                    { name: 'Piscine', icon: 'waves' },
+                    { name: 'Agility', icon: 'paw' },
                     { name: 'Chambres individuelles', icon: 'bed' },
                     { name: 'Repas bio', icon: 'leaf' },
                     { name: 'Vétérinaire', icon: 'heart' },
                     { name: 'Caméras 24/7', icon: 'video' },
-                    { name: 'Forêt', icon: 'tree' },
+                    { name: 'Forêt', icon: 'trees' },
                 ],
             },
             highlights: {
                 create: [
-                    { title: 'Piscine chauffée', description: 'Ouverte toute l\'année', icon: 'droplets' },
+                    { title: 'Piscine chauffée', description: 'Ouverte toute l\'année', icon: 'waves' },
                     { title: '5 étoiles', description: 'Note parfaite', icon: 'star' },
-                    { title: '2 hectares', description: 'Espace immense', icon: 'map' },
+                    { title: '2 hectares', description: 'Espace immense', icon: 'trees' },
                 ],
             },
             rooms: {
@@ -338,19 +360,31 @@ Sur un terrain de 2 hectares, nous te proposons :
                 listingId: listing1.id,
                 authorId: guest1.id,
                 rating: 5,
-                content: 'Expérience incroyable ! Mon chien Max a adoré son séjour. Marie est aux petits soins et envoie des photos régulièrement. Je recommande à 100% !',
+                content: 'Wouf wouf ! 🐾 Le jardin est génial pour courir après les écureuils ! Marie m\'a donné plein de croquettes premium. Je reviens dès que mon humain repart en vacances !',
             },
             {
                 listingId: listing1.id,
-                authorId: guest1.id,
+                authorId: guest2.id,
                 rating: 5,
-                content: 'Deuxième séjour pour Rex et toujours aussi parfait. Le jardin est un vrai paradis pour les chiens.',
+                content: 'J\'ai adoré mon séjour ! Le coussin était super moelleux et j\'ai pu faire la sieste au soleil toute la journée. 5 pattes sur 5 ! 🐕',
+            },
+            {
+                listingId: listing3.id,
+                authorId: guest3.id,
+                rating: 5,
+                content: 'LA PISCINE !!! J\'ai nagé pendant des heures ! Et le parcours d\'agility est top pour garder la forme. Mes poils n\'ont jamais été aussi brillants ! 💦',
             },
             {
                 listingId: listing3.id,
                 authorId: guest1.id,
                 rating: 5,
-                content: 'La meilleure pension que j\'ai trouvée ! Mon golden retriever ne voulait plus partir. La piscine est un gros plus.',
+                content: '2 hectares pour courir... le paradis sur terre ! J\'ai même fait copain avec un labrador. On se retrouve l\'été prochain ! 🌳',
+            },
+            {
+                listingId: listing3.id,
+                authorId: guest2.id,
+                rating: 4,
+                content: 'Super pension ! Les repas bio sont délicieux. Juste un peu loin de mon parc préféré, mais ça valait le détour. Toutou approuvé ! 🦴',
             },
         ],
     });
@@ -418,7 +452,9 @@ Sur un terrain de 2 hectares, nous te proposons :
 🔑 Test accounts:
    - Host: marie@example.com / password123
    - Host: jean@example.com / password123
-   - Guest: guest@example.com / password123
+   - 🐕 Rex: rex@wouf.dog / password123
+   - 🐕 Bella: bella@wouf.dog / password123
+   - 🐕 Max: max@wouf.dog / password123
     `);
 }
 

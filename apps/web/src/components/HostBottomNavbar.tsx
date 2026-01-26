@@ -16,16 +16,18 @@ interface HostBottomNavbarProps {
     unreadMessages?: number;
 }
 
-export const HostBottomNavbar = ({ 
-    activeTab = 'dashboard', 
+export const HostBottomNavbar = ({
+    activeTab = 'dashboard',
     onTabChange,
     pendingBookings = 0,
-    unreadMessages = 0
+    unreadMessages = 0,
 }: HostBottomNavbarProps) => {
     return (
         <nav className="bottom-navbar">
             <NavItem
-                icon={<Home className="w-6 h-6" strokeWidth={activeTab === 'dashboard' ? 2.5 : 1.5} />}
+                icon={
+                    <Home className="w-6 h-6" strokeWidth={activeTab === 'dashboard' ? 2.5 : 1.5} />
+                }
                 label="Accueil"
                 isActive={activeTab === 'dashboard'}
                 onClick={() => onTabChange?.('dashboard')}

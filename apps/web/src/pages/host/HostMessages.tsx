@@ -8,7 +8,7 @@ import { formatMessageTime } from '../../utils/dateFormatters';
  * ==================== HOST MESSAGES ====================
  * Page de messages pour les hotes
  * Utilise ChatModal (même composant que Messages guest - DRY)
- * 
+ *
  * TODO API:
  * - GET /api/host/conversations → liste des conversations
  * - GET /api/host/conversations/:id/messages → messages d'une conversation
@@ -57,14 +57,14 @@ const mockConversations: Conversation[] = [
             {
                 id: '1',
                 senderId: 'guest',
-                content: 'Woof ! Ta niche a l\'air geniale !',
+                content: "Woof ! Ta niche a l'air geniale !",
                 timestamp: new Date(Date.now() - 1000 * 60 * 30),
                 isRead: true,
             },
             {
                 id: '2',
                 senderId: 'host',
-                content: 'Merci ! Tu vas adorer, y\'a plein d\'espace pour courir !',
+                content: "Merci ! Tu vas adorer, y'a plein d'espace pour courir !",
                 timestamp: new Date(Date.now() - 1000 * 60 * 25),
                 isRead: true,
             },
@@ -91,7 +91,7 @@ const mockConversations: Conversation[] = [
             {
                 id: '1',
                 senderId: 'guest',
-                content: 'Bonjour ! Y\'a le wifi dans la niche ?',
+                content: "Bonjour ! Y'a le wifi dans la niche ?",
                 timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3),
                 isRead: true,
             },
@@ -116,8 +116,8 @@ const mockConversations: Conversation[] = [
 export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
     const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
-        initialConversationId 
-            ? mockConversations.find(c => c.id === initialConversationId) || null 
+        initialConversationId
+            ? mockConversations.find((c) => c.id === initialConversationId) || null
             : null
     );
     const [isModalOpen, setIsModalOpen] = useState(!!initialConversationId);
@@ -127,8 +127,8 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
         setSelectedConversation(conversation);
         setIsModalOpen(true);
         // Marquer comme lu
-        setConversations(prev =>
-            prev.map(c => c.id === conversation.id ? { ...c, unreadCount: 0 } : c)
+        setConversations((prev) =>
+            prev.map((c) => (c.id === conversation.id ? { ...c, unreadCount: 0 } : c))
         );
     };
 
@@ -139,88 +139,92 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
     };
 
     // Envoyer un message
-    const handleSendMessage = useCallback(async (content: string) => {
-        if (!selectedConversation) return;
+    const handleSendMessage = useCallback(
+        async (content: string) => {
+            if (!selectedConversation) return;
 
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            senderId: 'host',
-            content,
-            timestamp: new Date(),
-            isRead: true,
-        };
-
-        // Mettre à jour la conversation sélectionnée
-        setSelectedConversation(prev => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                messages: [...prev.messages, newMessage],
-                lastMessage: content,
-                lastMessageTime: new Date(),
-            };
-        });
-
-        // Mettre à jour la liste des conversations
-        setConversations(prev =>
-            prev.map(c =>
-                c.id === selectedConversation.id
-                    ? {
-                          ...c,
-                          messages: [...c.messages, newMessage],
-                          lastMessage: content,
-                          lastMessageTime: new Date(),
-                      }
-                    : c
-            )
-        );
-
-        // TODO: Appel API réel
-        // await fetch(`/api/host/conversations/${selectedConversation.id}/messages`, { ... });
-
-        // Simuler réponse du guest
-        setTimeout(() => {
-            const guestResponse: Message = {
-                id: (Date.now() + 1).toString(),
-                senderId: 'guest',
-                content: getGuestAutoResponse(content),
+            const newMessage: Message = {
+                id: Date.now().toString(),
+                senderId: 'host',
+                content,
                 timestamp: new Date(),
-                isRead: false,
+                isRead: true,
             };
 
-            setSelectedConversation(prev => {
+            // Mettre à jour la conversation sélectionnée
+            setSelectedConversation((prev) => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    messages: [...prev.messages, guestResponse],
-                    lastMessage: guestResponse.content,
+                    messages: [...prev.messages, newMessage],
+                    lastMessage: content,
                     lastMessageTime: new Date(),
                 };
             });
 
-            setConversations(prev =>
-                prev.map(c =>
+            // Mettre à jour la liste des conversations
+            setConversations((prev) =>
+                prev.map((c) =>
                     c.id === selectedConversation.id
                         ? {
                               ...c,
-                              messages: [...c.messages, guestResponse],
-                              lastMessage: guestResponse.content,
+                              messages: [...c.messages, newMessage],
+                              lastMessage: content,
                               lastMessageTime: new Date(),
                           }
                         : c
                 )
             );
-        }, 1500);
-    }, [selectedConversation]);
+
+            // TODO: Appel API réel
+            // await fetch(`/api/host/conversations/${selectedConversation.id}/messages`, { ... });
+
+            // Simuler réponse du guest
+            setTimeout(() => {
+                const guestResponse: Message = {
+                    id: (Date.now() + 1).toString(),
+                    senderId: 'guest',
+                    content: getGuestAutoResponse(content),
+                    timestamp: new Date(),
+                    isRead: false,
+                };
+
+                setSelectedConversation((prev) => {
+                    if (!prev) return null;
+                    return {
+                        ...prev,
+                        messages: [...prev.messages, guestResponse],
+                        lastMessage: guestResponse.content,
+                        lastMessageTime: new Date(),
+                    };
+                });
+
+                setConversations((prev) =>
+                    prev.map((c) =>
+                        c.id === selectedConversation.id
+                            ? {
+                                  ...c,
+                                  messages: [...c.messages, guestResponse],
+                                  lastMessage: guestResponse.content,
+                                  lastMessageTime: new Date(),
+                              }
+                            : c
+                    )
+                );
+            }, 1500);
+        },
+        [selectedConversation]
+    );
 
     // Convertir les messages pour ChatModal (senderId: host/guest → user/other)
-    const modalMessages: ChatMessage[] = selectedConversation?.messages.map(msg => ({
-        id: msg.id,
-        senderId: msg.senderId === 'host' ? 'user' : 'other',
-        content: msg.content,
-        timestamp: msg.timestamp,
-        isRead: msg.isRead,
-    })) || [];
+    const modalMessages: ChatMessage[] =
+        selectedConversation?.messages.map((msg) => ({
+            id: msg.id,
+            senderId: msg.senderId === 'host' ? 'user' : 'other',
+            content: msg.content,
+            timestamp: msg.timestamp,
+            isRead: msg.isRead,
+        })) || [];
 
     // Header personnalisé avec avatar guest
     const headerContent = selectedConversation ? (
@@ -248,7 +252,9 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
             alt={selectedConversation.guestName}
             className="w-8 h-8 rounded-full object-cover"
         />
-    ) : <div className="w-8 h-8 rounded-full bg-secondary" />;
+    ) : (
+        <div className="w-8 h-8 rounded-full bg-secondary" />
+    );
 
     // Avatar host (moi)
     const hostAvatar = (
@@ -282,7 +288,7 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                         />
                     ) : (
                         <div className="divide-y divide-(--color-border-light)">
-                            {conversations.map(conversation => (
+                            {conversations.map((conversation) => (
                                 <button
                                     key={conversation.id}
                                     onClick={() => openConversation(conversation)}
@@ -305,7 +311,9 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                                     {/* Infos conversation */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2">
-                                            <p className={`font-medium truncate ${conversation.unreadCount > 0 ? 'text-primary' : ''}`}>
+                                            <p
+                                                className={`font-medium truncate ${conversation.unreadCount > 0 ? 'text-primary' : ''}`}
+                                            >
                                                 {conversation.guestName}
                                             </p>
                                             <span className="text-caption text-secondary shrink-0">
@@ -315,9 +323,13 @@ export const HostMessages = ({ initialConversationId }: HostMessagesProps) => {
                                         <p className="text-caption text-brand truncate">
                                             🐕 {conversation.dogName} • {conversation.dates}
                                         </p>
-                                        <p className={`text-body-sm truncate ${
-                                            conversation.unreadCount > 0 ? 'text-primary font-medium' : 'text-secondary'
-                                        }`}>
+                                        <p
+                                            className={`text-body-sm truncate ${
+                                                conversation.unreadCount > 0
+                                                    ? 'text-primary font-medium'
+                                                    : 'text-secondary'
+                                            }`}
+                                        >
                                             {conversation.lastMessage}
                                         </p>
                                     </div>
@@ -364,8 +376,8 @@ function getGuestAutoResponse(message: string): string {
     }
 
     if (lowerMessage.includes('bienvenue') || lowerMessage.includes('plaisir')) {
-        return 'Trop hate d\'arriver ! Wouf wouf ! 🐶';
+        return "Trop hate d'arriver ! Wouf wouf ! 🐶";
     }
 
-    return 'Merci pour ta reponse ! J\'ai hate d\'etre dans ta niche ! 🦴';
+    return "Merci pour ta reponse ! J'ai hate d'etre dans ta niche ! 🦴";
 }

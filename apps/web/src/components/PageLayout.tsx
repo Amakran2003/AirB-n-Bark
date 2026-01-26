@@ -8,7 +8,7 @@ import { HostBottomNavbar, HostTab } from './HostBottomNavbar';
  * - Header avec safe-area
  * - Contenu scrollable
  * - BottomNavbar optionnelle
- * 
+ *
  * Usage:
  * <PageLayout
  *   title="Messages"
@@ -81,7 +81,7 @@ export const PageLayout = ({
     footer,
 }: PageLayoutProps) => {
     return (
-        <div 
+        <div
             className={`fixed inset-0 flex flex-col ${className}`}
             style={{ backgroundColor, ...style }}
         >
@@ -92,7 +92,7 @@ export const PageLayout = ({
                     style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))' }}
                 >
                     {headerLeft ?? <div className="w-10" />}
-                    
+
                     {headerContent ? (
                         headerContent
                     ) : title ? (
@@ -100,7 +100,7 @@ export const PageLayout = ({
                     ) : (
                         <div />
                     )}
-                    
+
                     {headerRight ?? <div className="w-10" />}
                 </div>
             )}
@@ -108,12 +108,12 @@ export const PageLayout = ({
             {/* Content */}
             <div
                 className="flex-1 overflow-y-auto"
-                style={{ 
-                    paddingBottom: showNavbar 
-                        ? 'calc(80px + env(safe-area-inset-bottom))' 
-                        : footer 
-                            ? '0' 
-                            : 'env(safe-area-inset-bottom)'
+                style={{
+                    paddingBottom: showNavbar
+                        ? 'calc(80px + env(safe-area-inset-bottom))'
+                        : footer
+                          ? '0'
+                          : 'env(safe-area-inset-bottom)',
                 }}
             >
                 {children}
@@ -121,12 +121,12 @@ export const PageLayout = ({
 
             {/* Footer */}
             {footer && (
-                <div 
+                <div
                     className="shrink-0 bg-white border-t border-(--color-border-light)"
-                    style={{ 
-                        paddingBottom: showNavbar 
+                    style={{
+                        paddingBottom: showNavbar
                             ? 'calc(80px + env(safe-area-inset-bottom))'
-                            : 'env(safe-area-inset-bottom)'
+                            : 'env(safe-area-inset-bottom)',
                     }}
                 >
                     {footer}
@@ -138,8 +138,8 @@ export const PageLayout = ({
                 <BottomNavbar activeTab={activeTab} onTabChange={onTabChange} />
             )}
             {showNavbar && navbarType === 'host' && (
-                <HostBottomNavbar 
-                    activeTab={activeHostTab} 
+                <HostBottomNavbar
+                    activeTab={activeHostTab}
                     onTabChange={onHostTabChange}
                     pendingBookings={pendingBookings}
                     unreadMessages={unreadMessages}

@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Check, MessageCircle, Key, Calendar, Dog, MapPin, Home, Copy, CheckCircle } from 'lucide-react';
+import {
+    Check,
+    MessageCircle,
+    Key,
+    Calendar,
+    Dog,
+    MapPin,
+    Home,
+    Copy,
+    CheckCircle,
+} from 'lucide-react';
 import type { ListingCardData } from '../data/listings';
 import { MOCK_LISTINGS_FULL } from '../data/listings';
 import { api } from '../services/api';
@@ -56,7 +66,9 @@ export const BookingConfirmation = ({
     const [showConfetti, setShowConfetti] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
-    const [listingInstructions, setListingInstructions] = useState<ListingInstructions | null>(null);
+    const [listingInstructions, setListingInstructions] = useState<ListingInstructions | null>(
+        null
+    );
 
     // Récupérer les données complètes de l'annonce
     const fullListing = MOCK_LISTINGS_FULL[listing.id];
@@ -116,7 +128,6 @@ export const BookingConfirmation = ({
             setTimeout(() => setCopied(false), 2000);
         } catch {
             // Fallback pour les navigateurs sans clipboard API
-            console.log('Numéro de réservation:', bookingNumber);
         }
     };
 
@@ -125,10 +136,13 @@ export const BookingConfirmation = ({
         checkInTime: listingInstructions?.checkInTime || '15h00',
         checkOutTime: listingInstructions?.checkOutTime || '11h00',
         accessCode: listingInstructions?.accessCode || '1234#',
-        parkingInfo: listingInstructions?.parkingInfo || 'Espace pour garer ta laisse devant la niche 🅿️',
+        parkingInfo:
+            listingInstructions?.parkingInfo || 'Espace pour garer ta laisse devant la niche 🅿️',
         wifiName: listingInstructions?.wifiName || 'NicheWifi',
         wifiPassword: listingInstructions?.wifiPassword || 'woofwoof2024',
-        specialNotes: listingInstructions?.specialNotes || 'Ta gamelle d\'eau fraîche t\'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴',
+        specialNotes:
+            listingInstructions?.specialNotes ||
+            "Ta gamelle d'eau fraîche t'attend ! Les friandises sont dans le placard de gauche, régale-toi 🦴",
         hasCustomInstructions: !!listingInstructions,
     };
 
@@ -144,7 +158,13 @@ export const BookingConfirmation = ({
                             style={{
                                 left: `${Math.random() * 100}%`,
                                 animationDelay: `${Math.random() * 2}s`,
-                                backgroundColor: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181'][i % 5],
+                                backgroundColor: [
+                                    '#FF6B6B',
+                                    '#4ECDC4',
+                                    '#FFE66D',
+                                    '#95E1D3',
+                                    '#F38181',
+                                ][i % 5],
                             }}
                         />
                     ))}
@@ -281,8 +301,12 @@ export const BookingConfirmation = ({
                                     className="w-12 h-12 rounded-full object-cover"
                                 />
                                 <div>
-                                    <p className="text-body-md font-medium">{fullListing.host.name}</p>
-                                    <p className="text-caption text-secondary">Ton hôte (super sympa 🐾)</p>
+                                    <p className="text-body-md font-medium">
+                                        {fullListing.host.name}
+                                    </p>
+                                    <p className="text-caption text-secondary">
+                                        Ton hôte (super sympa 🐾)
+                                    </p>
                                 </div>
                             </div>
                             <button className="w-full btn-secondary flex items-center justify-center gap-2 py-3">
@@ -304,7 +328,9 @@ export const BookingConfirmation = ({
                                         <Key className="w-5 h-5 text-warning" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-body-md font-medium">Instructions d'accès</p>
+                                        <p className="text-body-md font-medium">
+                                            Instructions d'accès
+                                        </p>
                                         <p className="text-caption text-secondary">
                                             Arrivée à {accessInstructions.checkInTime}
                                         </p>
@@ -318,7 +344,12 @@ export const BookingConfirmation = ({
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
                                 >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
                                 </svg>
                             </button>
 
@@ -327,12 +358,15 @@ export const BookingConfirmation = ({
                                     <div>
                                         <p className="text-caption text-secondary mb-1">Horaires</p>
                                         <p className="text-body-sm">
-                                            Arrivée : {accessInstructions.checkInTime} • Départ : {accessInstructions.checkOutTime}
+                                            Arrivée : {accessInstructions.checkInTime} • Départ :{' '}
+                                            {accessInstructions.checkOutTime}
                                         </p>
                                     </div>
 
                                     <div>
-                                        <p className="text-caption text-secondary mb-1">Code d'accès</p>
+                                        <p className="text-caption text-secondary mb-1">
+                                            Code d'accès
+                                        </p>
                                         <p className="text-body-sm font-mono bg-tertiary px-3 py-2 rounded-lg">
                                             {accessInstructions.accessCode}
                                         </p>
@@ -341,19 +375,30 @@ export const BookingConfirmation = ({
                                     <div>
                                         <p className="text-caption text-secondary mb-1">WiFi</p>
                                         <p className="text-body-sm">
-                                            <span className="text-secondary">Réseau :</span> {accessInstructions.wifiName}<br />
-                                            <span className="text-secondary">Mot de passe :</span> {accessInstructions.wifiPassword}
+                                            <span className="text-secondary">Réseau :</span>{' '}
+                                            {accessInstructions.wifiName}
+                                            <br />
+                                            <span className="text-secondary">
+                                                Mot de passe :
+                                            </span>{' '}
+                                            {accessInstructions.wifiPassword}
                                         </p>
                                     </div>
 
                                     <div>
                                         <p className="text-caption text-secondary mb-1">Parking</p>
-                                        <p className="text-body-sm">{accessInstructions.parkingInfo}</p>
+                                        <p className="text-body-sm">
+                                            {accessInstructions.parkingInfo}
+                                        </p>
                                     </div>
 
                                     <div>
-                                        <p className="text-caption text-secondary mb-1">Note de l'hôte</p>
-                                        <p className="text-body-sm italic">{accessInstructions.specialNotes}</p>
+                                        <p className="text-caption text-secondary mb-1">
+                                            Note de l'hôte
+                                        </p>
+                                        <p className="text-body-sm italic">
+                                            {accessInstructions.specialNotes}
+                                        </p>
                                     </div>
                                 </div>
                             )}

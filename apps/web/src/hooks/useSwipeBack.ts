@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
  * ==================== HOOK USE SWIPE BACK ====================
  * Hook réutilisable pour le swipe retour (glissement vers la droite)
  * Utilisé sur les pages: ListingDetails, Messages, Payment, BookingRecap
- * 
+ *
  * @param onBack - Callback appelé quand le swipe est confirmé
  * @param threshold - Distance minimale pour confirmer le swipe (défaut: 100px)
  * @param enabled - Activer/désactiver le swipe (défaut: true)
@@ -54,7 +54,7 @@ export const useSwipeBack = (
         const handleTouchStart = (e: TouchEvent) => {
             // Ne pas démarrer le swipe si on est trop loin du bord gauche
             if (e.touches[0].clientX > 50) return;
-            
+
             touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
             isSwipingRef.current = false;
         };

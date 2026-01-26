@@ -25,7 +25,13 @@ interface ProfileProps {
     onSwitchToGuest?: () => void;
 }
 
-export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHostMode = false, onSwitchToGuest }: ProfileProps) => {
+export const Profile = ({
+    onTabChange,
+    onBecomeHost,
+    onGoToHostDashboard,
+    isHostMode = false,
+    onSwitchToGuest,
+}: ProfileProps) => {
     const { user, becomeHost, logout, openAuthModal, updateAvatar, updateLanguage } = useAuth();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const LANGUAGE_STORAGE_KEY = 'preferredLanguage';
@@ -113,7 +119,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
             // Sauvegarder via l'API
             const result = await updateAvatar(base64Url);
             if (!result.success) {
-                console.error('Erreur lors de la sauvegarde de l\'avatar:', result.error);
+                console.error("Erreur lors de la sauvegarde de l'avatar:", result.error);
             }
         };
         reader.readAsDataURL(file);
@@ -174,7 +180,8 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
     }, [languages, selectedLanguageCode]);
 
     const displayName = user?.pseudo ?? 'Mon Toutou';
-    const selectedLanguageLabel = languages.find((lang) => lang.code === selectedLanguageCode)?.label ?? selectedLanguageCode;
+    const selectedLanguageLabel =
+        languages.find((lang) => lang.code === selectedLanguageCode)?.label ?? selectedLanguageCode;
 
     return (
         <div className="fixed inset-0 bg-page flex flex-col">
@@ -299,7 +306,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                     ) : (
                         <div className="space-y-3">
                             <div>
-                                <label className="text-sm text-secondary">Mot de passe actuel</label>
+                                <label className="text-sm text-secondary">
+                                    Mot de passe actuel
+                                </label>
                                 <input
                                     type="password"
                                     value={currentPassword}
@@ -309,7 +318,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 />
                             </div>
                             <div>
-                                <label className="text-sm text-secondary">Nouveau mot de passe</label>
+                                <label className="text-sm text-secondary">
+                                    Nouveau mot de passe
+                                </label>
                                 <input
                                     type="password"
                                     value={tempPassword}
@@ -318,9 +329,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                     placeholder="Minimum 6 caractères"
                                 />
                             </div>
-                            {passwordError && (
-                                <p className="text-sm text-error">{passwordError}</p>
-                            )}
+                            {passwordError && <p className="text-sm text-error">{passwordError}</p>}
                             <div className="flex justify-end gap-2">
                                 <button
                                     onClick={handleCancelPassword}
@@ -330,7 +339,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                 </button>
                                 <button
                                     onClick={handleSavePassword}
-                                    disabled={tempPassword.length < 6 || currentPassword.length === 0}
+                                    disabled={
+                                        tempPassword.length < 6 || currentPassword.length === 0
+                                    }
                                     className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg disabled:opacity-50"
                                 >
                                     Enregistrer
@@ -363,7 +374,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                     key={language.code}
                                     onClick={() => selectLanguage(language.code)}
                                     className={`w-full flex items-center justify-between py-3 px-2 rounded-lg ${
-                                        selectedLanguageCode === language.code ? 'bg-brand-lighter' : ''
+                                        selectedLanguageCode === language.code
+                                            ? 'bg-brand-lighter'
+                                            : ''
                                     }`}
                                 >
                                     <span className="text-body">{language.label}</span>
@@ -374,9 +387,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             ))}
                         </div>
                     )}
-                    {languageError && (
-                        <p className="mt-3 text-sm text-warning">{languageError}</p>
-                    )}
+                    {languageError && <p className="mt-3 text-sm text-warning">{languageError}</p>}
                 </div>
 
                 {/* Section Devenir Hote - toujours affiché si pas hôte */}
@@ -400,7 +411,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             </div>
                             <div className="flex-1 text-left">
                                 <p className="text-body-md font-semibold">Devenir un hote</p>
-                                <p className="text-sm text-secondary">Propose ta niche aux toutous voyageurs</p>
+                                <p className="text-sm text-secondary">
+                                    Propose ta niche aux toutous voyageurs
+                                </p>
                             </div>
                             <ChevronRight className="w-5 h-5 text-secondary" />
                         </button>
@@ -420,8 +433,12 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                     <Dog className="w-6 h-6 text-brand" />
                                 </div>
                                 <div className="flex-1 text-left">
-                                    <p className="text-body-md font-semibold text-(--color-primary-dark)">Mode voyageur</p>
-                                    <p className="text-sm text-brand">Retourne renifler des niches !</p>
+                                    <p className="text-body-md font-semibold text-(--color-primary-dark)">
+                                        Mode voyageur
+                                    </p>
+                                    <p className="text-sm text-brand">
+                                        Retourne renifler des niches !
+                                    </p>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-brand" />
                             </button>
@@ -435,7 +452,9 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                                     <Check className="w-6 h-6 text-success" />
                                 </div>
                                 <div className="flex-1 text-left">
-                                    <p className="text-body-md font-semibold text-(--color-success-dark)">Tu es hote</p>
+                                    <p className="text-body-md font-semibold text-(--color-success-dark)">
+                                        Tu es hote
+                                    </p>
                                     <p className="text-sm text-success">Accede a ton espace hote</p>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-success" />
@@ -455,10 +474,7 @@ export const Profile = ({ onTabChange, onBecomeHost, onGoToHostDashboard, isHost
                             Se deconnecter
                         </button>
                     ) : (
-                        <button
-                            onClick={openAuthModal}
-                            className="btn-primary btn-full"
-                        >
+                        <button onClick={openAuthModal} className="btn-primary btn-full">
                             Se connecter
                         </button>
                     )}

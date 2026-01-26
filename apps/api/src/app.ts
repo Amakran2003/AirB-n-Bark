@@ -57,6 +57,9 @@ app.use(cors({
     exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit'],
 }));
 
+// Trust proxy (pour correct fonctionnement derrière un reverse proxy comme Caddy)
+app.set('trust proxy', 1);
+
 // Rate limiting global
 app.use(globalRateLimiter);
 

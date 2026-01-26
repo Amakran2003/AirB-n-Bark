@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
+import {
     Calendar,
     CheckCircle,
     XCircle,
@@ -9,14 +9,14 @@ import {
     Loader2,
     RefreshCw,
     Home,
-    Ban
+    Ban,
 } from 'lucide-react';
-import { 
-    getHostBookings, 
-    confirmBooking as apiConfirmBooking, 
+import {
+    getHostBookings,
+    confirmBooking as apiConfirmBooking,
     rejectBooking as apiRejectBooking,
     cancelBookingAsHost as apiCancelBooking,
-    type HostBooking 
+    type HostBooking,
 } from '../../services/hostApi';
 
 /**
@@ -59,19 +59,19 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
     const loadBookings = useCallback(async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const result = await getHostBookings();
-            console.log('🔍 Host bookings API response:', result);
-            
+
             if (result.success && result.bookings) {
-                console.log('📦 Bookings received:', result.bookings);
                 // Mapper les données de l'API vers le format du composant
                 const mappedBookings: Booking[] = result.bookings.map((b: HostBooking) => ({
                     id: b.id,
                     bookingNumber: b.bookingNumber,
                     guestName: b.guestName || 'Guest',
-                    guestAvatar: b.guestAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+                    guestAvatar:
+                        b.guestAvatar ||
+                        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
                     guestId: b.guestId,
                     dogsCount: b.dogsCount || 1,
                     listingId: b.listingId,
@@ -82,7 +82,6 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                     status: b.status,
                     createdAt: b.createdAt,
                 }));
-                console.log('📋 Mapped bookings:', mappedBookings);
                 setBookings(mappedBookings);
             } else {
                 setError(result.error || 'Erreur de chargement');
@@ -106,58 +105,58 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
         { id: 'cancelled', label: 'Annulees', icon: XCircle },
     ];
 
-    const filteredBookings = bookings.filter(b => b.status === activeTab);
+    const filteredBookings = bookings.filter((b) => b.status === activeTab);
 
     const handleAccept = async (bookingId: string) => {
         setActionLoading(bookingId);
-        
+
         const result = await apiConfirmBooking(bookingId);
-        
+
         if (result.success) {
             // Mise à jour optimiste
-            setBookings(prev => 
-                prev.map(b => b.id === bookingId ? { ...b, status: 'confirmed' as const } : b)
+            setBookings((prev) =>
+                prev.map((b) => (b.id === bookingId ? { ...b, status: 'confirmed' as const } : b))
             );
         } else {
             alert(result.error || 'Erreur lors de la confirmation');
         }
-        
+
         setActionLoading(null);
     };
 
     const handleDecline = async (bookingId: string) => {
         if (!confirm('Refuser cette réservation ?')) return;
-        
+
         setActionLoading(bookingId);
-        
-        const result = await apiRejectBooking(bookingId, 'Refusé par l\'hôte');
-        
+
+        const result = await apiRejectBooking(bookingId, "Refusé par l'hôte");
+
         if (result.success) {
-            setBookings(prev => 
-                prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' as const } : b)
+            setBookings((prev) =>
+                prev.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' as const } : b))
             );
         } else {
             alert(result.error || 'Erreur lors du refus');
         }
-        
+
         setActionLoading(null);
     };
 
     const handleCancel = async (bookingId: string) => {
         if (!confirm('Annuler cette réservation confirmée ? Le voyageur sera remboursé.')) return;
-        
+
         setActionLoading(bookingId);
-        
-        const result = await apiCancelBooking(bookingId, 'Annulé par l\'hôte');
-        
+
+        const result = await apiCancelBooking(bookingId, "Annulé par l'hôte");
+
         if (result.success) {
-            setBookings(prev => 
-                prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' as const } : b)
+            setBookings((prev) =>
+                prev.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' as const } : b))
             );
         } else {
-            alert(result.error || 'Erreur lors de l\'annulation');
+            alert(result.error || "Erreur lors de l'annulation");
         }
-        
+
         setActionLoading(null);
     };
 
@@ -176,28 +175,30 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
     return (
         <div className="fixed inset-0 bg-page flex flex-col">
             {/* Header */}
-            <div 
+            <div
                 className="shrink-0 px-4 py-4 bg-white border-b border-(--color-border-light)"
                 style={{ paddingTop: 'calc(16px + env(safe-area-inset-top))' }}
             >
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-h2">Réservations</h1>
-                    <button 
+                    <button
                         onClick={loadBookings}
                         disabled={loading}
                         className="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary hover:bg-secondary transition-colors"
                     >
-                        <RefreshCw className={`w-5 h-5 text-secondary ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw
+                            className={`w-5 h-5 text-secondary ${loading ? 'animate-spin' : ''}`}
+                        />
                     </button>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-                    {tabs.map(tab => {
-                        const count = bookings.filter(b => b.status === tab.id).length;
+                    {tabs.map((tab) => {
+                        const count = bookings.filter((b) => b.status === tab.id).length;
                         const Icon = tab.icon;
                         return (
-                            <button 
+                            <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -209,11 +210,13 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                                 <Icon className="w-4 h-4" />
                                 {tab.label}
                                 {count > 0 && (
-                                    <span className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${
-                                        activeTab === tab.id
-                                            ? 'bg-white/20 text-white'
-                                            : 'bg-secondary'
-                                    }`}>
+                                    <span
+                                        className={`w-5 h-5 rounded-full text-xs flex items-center justify-center ${
+                                            activeTab === tab.id
+                                                ? 'bg-white/20 text-white'
+                                                : 'bg-secondary'
+                                        }`}
+                                    >
                                         {count}
                                     </span>
                                 )}
@@ -224,7 +227,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
             </div>
 
             {/* Content */}
-            <div 
+            <div
                 className="flex-1 overflow-y-auto p-4"
                 style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
             >
@@ -239,7 +242,7 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                         </div>
                         <h2 className="text-h3 mb-2">Erreur</h2>
                         <p className="text-body text-secondary mb-4">{error}</p>
-                        <button 
+                        <button
                             onClick={loadBookings}
                             className="px-4 py-2 bg-brand text-white rounded-lg font-medium"
                         >
@@ -259,122 +262,135 @@ export const HostBookings = ({ onMessage }: HostBookingsProps) => {
                         </h2>
                         <p className="text-body text-secondary">
                             {activeTab === 'pending' && 'Les nouvelles demandes apparaitront ici'}
-                            {activeTab === 'confirmed' && 'Les reservations confirmees apparaitront ici'}
-                            {activeTab === 'completed' && 'Les reservations passees apparaitront ici'}
-                            {activeTab === 'cancelled' && 'Les reservations annulees apparaitront ici'}
+                            {activeTab === 'confirmed' &&
+                                'Les reservations confirmees apparaitront ici'}
+                            {activeTab === 'completed' &&
+                                'Les reservations passees apparaitront ici'}
+                            {activeTab === 'cancelled' &&
+                                'Les reservations annulees apparaitront ici'}
                         </p>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {filteredBookings.map(booking => {
+                        {filteredBookings.map((booking) => {
                             const nights = calculateNights(booking.startDate, booking.endDate);
                             return (
-                            <div 
-                                key={booking.id}
-                                className="bg-white rounded-2xl shadow-sm overflow-hidden"
-                            >
-                                {/* Annonce en header avec image */}
-                                <div className="p-4 bg-gradient-to-r from-primary-lighter to-white border-b border-(--color-border-light)">
-                                    <div className="flex items-center gap-2 text-brand mb-1">
-                                        <Home className="w-4 h-4" />
-                                        <span className="text-caption font-medium">Votre annonce</span>
-                                    </div>
-                                    <p className="text-body-md font-semibold">{booking.listingTitle}</p>
-                                </div>
-
-                                {/* Guest info */}
-                                <div className="flex items-center gap-3 p-4 border-b border-(--color-border-light)">
-                                    <img 
-                                        src={booking.guestAvatar} 
-                                        alt={booking.guestName}
-                                        className="w-12 h-12 rounded-full object-cover"
-                                    />
-                                    <div className="flex-1">
-                                        <p className="font-medium">{booking.guestName}</p>
-                                        <p className="text-caption text-secondary">
-                                            Demande du {formatDate(booking.createdAt)}
+                                <div
+                                    key={booking.id}
+                                    className="bg-white rounded-2xl shadow-sm overflow-hidden"
+                                >
+                                    {/* Annonce en header avec image */}
+                                    <div className="p-4 bg-gradient-to-r from-primary-lighter to-white border-b border-(--color-border-light)">
+                                        <div className="flex items-center gap-2 text-brand mb-1">
+                                            <Home className="w-4 h-4" />
+                                            <span className="text-caption font-medium">
+                                                Votre annonce
+                                            </span>
+                                        </div>
+                                        <p className="text-body-md font-semibold">
+                                            {booking.listingTitle}
                                         </p>
                                     </div>
-                                    <button 
-                                        onClick={() => onMessage(booking.id)}
-                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary"
-                                    >
-                                        <MessageCircle className="w-5 h-5 text-secondary" />
-                                    </button>
-                                </div>
 
-                                {/* Booking details - plus compact */}
-                                <div className="p-4 space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="w-4 h-4 text-secondary" />
-                                            <span className="text-body">
-                                                {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
+                                    {/* Guest info */}
+                                    <div className="flex items-center gap-3 p-4 border-b border-(--color-border-light)">
+                                        <img
+                                            src={booking.guestAvatar}
+                                            alt={booking.guestName}
+                                            className="w-12 h-12 rounded-full object-cover"
+                                        />
+                                        <div className="flex-1">
+                                            <p className="font-medium">{booking.guestName}</p>
+                                            <p className="text-caption text-secondary">
+                                                Demande du {formatDate(booking.createdAt)}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => onMessage(booking.id)}
+                                            className="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary"
+                                        >
+                                            <MessageCircle className="w-5 h-5 text-secondary" />
+                                        </button>
+                                    </div>
+
+                                    {/* Booking details - plus compact */}
+                                    <div className="p-4 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="w-4 h-4 text-secondary" />
+                                                <span className="text-body">
+                                                    {formatDate(booking.startDate)} →{' '}
+                                                    {formatDate(booking.endDate)}
+                                                </span>
+                                            </div>
+                                            <span className="text-caption text-secondary">
+                                                {nights} nuit{nights > 1 ? 's' : ''}
                                             </span>
                                         </div>
-                                        <span className="text-caption text-secondary">{nights} nuit{nights > 1 ? 's' : ''}</span>
-                                    </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Dog className="w-4 h-4 text-secondary" />
-                                            <span className="text-body">
-                                                {booking.dogsCount || 1} toutou{(booking.dogsCount || 1) > 1 ? 's' : ''}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Dog className="w-4 h-4 text-secondary" />
+                                                <span className="text-body">
+                                                    {booking.dogsCount || 1} toutou
+                                                    {(booking.dogsCount || 1) > 1 ? 's' : ''}
+                                                </span>
+                                            </div>
+                                            <span className="text-body-md font-bold text-success">
+                                                {booking.totalPrice}€
                                             </span>
                                         </div>
-                                        <span className="text-body-md font-bold text-success">{booking.totalPrice}€</span>
                                     </div>
+
+                                    {/* Actions - Demandes en attente */}
+                                    {booking.status === 'pending' && (
+                                        <div className="flex gap-3 p-4 pt-0">
+                                            <button
+                                                onClick={() => handleDecline(booking.id)}
+                                                disabled={actionLoading === booking.id}
+                                                className="flex-1 py-3 border border-(--color-border-light) rounded-xl font-medium text-secondary disabled:opacity-50"
+                                            >
+                                                {actionLoading === booking.id ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                                ) : (
+                                                    'Refuser'
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => handleAccept(booking.id)}
+                                                disabled={actionLoading === booking.id}
+                                                className="flex-1 py-3 bg-success text-white rounded-xl font-medium disabled:opacity-50"
+                                            >
+                                                {actionLoading === booking.id ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                                ) : (
+                                                    'Accepter'
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Actions - Réservations confirmées */}
+                                    {booking.status === 'confirmed' && (
+                                        <div className="p-4 pt-0">
+                                            <button
+                                                onClick={() => handleCancel(booking.id)}
+                                                disabled={actionLoading === booking.id}
+                                                className="w-full py-3 border border-error-light bg-error-lighter rounded-xl font-medium text-error disabled:opacity-50 flex items-center justify-center gap-2"
+                                            >
+                                                {actionLoading === booking.id ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <Ban className="w-4 h-4" />
+                                                        Annuler la réservation
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-
-                                {/* Actions - Demandes en attente */}
-                                {booking.status === 'pending' && (
-                                    <div className="flex gap-3 p-4 pt-0">
-                                        <button 
-                                            onClick={() => handleDecline(booking.id)}
-                                            disabled={actionLoading === booking.id}
-                                            className="flex-1 py-3 border border-(--color-border-light) rounded-xl font-medium text-secondary disabled:opacity-50"
-                                        >
-                                            {actionLoading === booking.id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                                            ) : (
-                                                'Refuser'
-                                            )}
-                                        </button>
-                                        <button 
-                                            onClick={() => handleAccept(booking.id)}
-                                            disabled={actionLoading === booking.id}
-                                            className="flex-1 py-3 bg-success text-white rounded-xl font-medium disabled:opacity-50"
-                                        >
-                                            {actionLoading === booking.id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                                            ) : (
-                                                'Accepter'
-                                            )}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {/* Actions - Réservations confirmées */}
-                                {booking.status === 'confirmed' && (
-                                    <div className="p-4 pt-0">
-                                        <button 
-                                            onClick={() => handleCancel(booking.id)}
-                                            disabled={actionLoading === booking.id}
-                                            className="w-full py-3 border border-error-light bg-error-lighter rounded-xl font-medium text-error disabled:opacity-50 flex items-center justify-center gap-2"
-                                        >
-                                            {actionLoading === booking.id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Ban className="w-4 h-4" />
-                                                    Annuler la réservation
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        );
+                            );
                         })}
                     </div>
                 )}
