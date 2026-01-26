@@ -15,6 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✅ GHCR exige du lowercase dans le nom du repo d'image
+      - name: Lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -32,8 +36,8 @@ jobs:
           context: ./apps/api
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-api:latest
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-api:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-api:latest
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-api:${{ github.sha }}
 
       # ===== WEB =====
       - name: Build & push WEB
@@ -47,8 +51,8 @@ jobs:
             VITE_WOOBOT_URL=${{ vars.VITE_WOOBOT_URL }}
             VITE_STRIPE_PUBLISHABLE_KEY=${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-web:latest
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-web:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-web:latest
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-web:${{ github.sha }}
 
       # ===== WOOBOT =====
       - name: Build & push WOOBOT
@@ -57,8 +61,8 @@ jobs:
           context: ./apps/woobot
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-woobot:latest
-            ghcr.io/${{ github.repository_owner }}/airb-n-bark-woobot:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-woobot:latest
+            ghcr.io/${{ env.OWNER_LC }}/airb-n-bark-woobot:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -75,13 +79,13 @@ jobs:
             set -e
             cd ${{ secrets.SERVER_PATH }}
 
-            # (Optionnel) voir versions
+            # Versions (debug)
             docker --version
             docker compose version
 
             # Pull + restart
             docker compose -f docker-compose.prod.yml --env-file .env.prod pull
-            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
 
             # (Optionnel) clean images dangling
             docker image prune -f
